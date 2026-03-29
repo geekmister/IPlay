@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AI全能去水印工具箱 - 本地处理不上传</title>
+<title>图像AI趣玩 - 本地处理不上传</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.16.3/dist/ort.min.js"></script>
@@ -31,7 +31,7 @@ tailwind.config = {
 <nav class="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-sm px-4 py-3">
   <div class="max-w-6xl mx-auto flex justify-between items-center">
     <div class="text-lg md:text-xl font-bold text-primary flex items-center">
-      <i class="fa fa-magic mr-2"></i>AI全能去水印
+      <i class="fa fa-magic mr-2"></i>图像AI趣玩
     </div>
     <button id="toggleTheme" class="btn btn-secondary text-sm">
       <i class="fa fa-moon-o mr-1"></i>切换模式
@@ -42,9 +42,9 @@ tailwind.config = {
 <main class="max-w-6xl mx-auto px-4 py-10">
   <!-- 标题 -->
   <div class="text-center mb-10">
-    <h1 class="text-[clamp(1.7rem,4vw,2.8rem)] font-bold mb-3">AI 无痕去水印工具箱</h1>
+    <h1 class="text-[clamp(1.7rem,4vw,2.8rem)] font-bold mb-3">图像 AI 趣玩工具箱</h1>
     <p class="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-      图片AI去水印 / 视频去水印 / 压缩裁剪 / 全程本地运行 · 隐私安全 · 无需上传
+      图片 AI去水印 / 压缩裁剪 / 全程本地运行 · 隐私安全 · 无需上传
     </p>
   </div>
 
@@ -52,7 +52,6 @@ tailwind.config = {
   <div class="flex gap-3 justify-center mb-8 flex-wrap">
     <button tab="image" class="tab-btn btn btn-primary">图片AI去水印</button>
     <button tab="face" class="tab-btn btn btn-secondary">AI换脸</button>
-    <button tab="video" class="tab-btn btn btn-secondary">视频去水印</button>
     <button tab="tools" class="tab-btn btn btn-secondary">图片编辑</button>
     <button tab="vip" class="tab-btn btn btn-secondary">会员升级</button>
   </div>
@@ -88,23 +87,7 @@ tailwind.config = {
     </div>
   </div>
 
-  <!-- 视频去水印 -->
-  <div id="tab_video" class="tab-pane card hidden">
-    <div id="upload_video_area" class="upload-box">
-      <i class="fa fa-file-video-o text-3xl text-gray-400 mb-2"></i>
-      <p>上传需要去水印的视频</p>
-      <input type="file" id="file_video" accept="video/*" class="hidden"/>
-    </div>
-
-    <div class="mt-6 flex justify-center gap-3">
-      <button id="btn_video_process" class="btn btn-primary" disabled>
-        <i class="fa fa-magic mr-1"></i>模糊去水印
-      </button>
-      <button id="btn_video_down" class="btn btn-secondary hidden">
-        <i class="fa fa-download mr-1"></i>保存视频
-      </button>
-    </div>
-  </div>
+  <!-- 视频去水印功能已移除 -->
 
   <!-- AI换脸 -->
   <div id="tab_face" class="tab-pane card hidden">
@@ -271,7 +254,7 @@ const imgStatus = document.getElementById('img_status');
 const imgProgress = document.getElementById('img_progress');
 const ctx = imgCanvas.getContext('2d');
 const fileEdit = document.getElementById('file_edit');
-const fileVideo = document.getElementById('file_video');
+// const fileVideo = document.getElementById('file_video'); // 视频去水印已移除
 const uploadFaceSourceArea = document.getElementById('upload_face_source_area');
 const uploadFaceTargetArea = document.getElementById('upload_face_target_area');
 const fileFaceSource = document.getElementById('file_face_source');
@@ -942,13 +925,7 @@ btnImgDown.onclick = () => {
 // 👆👆👆 修复结束，其他功能完全不动
 // ==============================================
 
-// 视频去水印（不动）
-document.getElementById('upload_video_area').onclick = () => {
-  document.getElementById('file_video').click()
-}
-document.getElementById('file_video').onchange = () => {
-  document.getElementById('btn_video_process').disabled = false
-}
+// 视频去水印相关逻辑已移除
 document.getElementById('btn_video_process').onclick = () => {
   document.getElementById('btn_video_process').innerHTML = '<i class="fa fa-spinner fa-spin"></i>处理中...'
   setTimeout(() => {
