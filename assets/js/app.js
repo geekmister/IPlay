@@ -3,51 +3,356 @@ document.getElementById('toggleTheme').onclick = () => {
   document.documentElement.classList.toggle('dark')
 }
 
+const LANG_STORAGE_KEY = 'iplay_lang'
+let currentLang = (localStorage.getItem(LANG_STORAGE_KEY) || '').toLowerCase()
+if (!['zh', 'en'].includes(currentLang)) {
+  currentLang = 'zh'
+}
+
+const STATIC_TRANSLATIONS = {
+  title: {
+    zh: '图像 AI 趣玩工具箱 - 本地处理不上传',
+    en: 'IPlay AI Image Toolbox - Local Processing, No Upload',
+  },
+  brand: {
+    zh: '图像 AI 趣玩工具箱',
+    en: 'IPlay AI Image Toolbox',
+  },
+  nav: {
+    zh: ['图片信息', '图片编辑', 'AI 去水印', 'AI 换脸', '人像与创作', '修复与增强', '识别与隐私', '批量与输出', '高级玩法'],
+    en: ['Image Info', 'Image Editor', 'AI Watermark Removal', 'AI Face Swap', 'Portrait & Create', 'Restore & Enhance', 'OCR & Privacy', 'Batch & Output', 'Advanced Studio'],
+  },
+  navDesc: {
+    zh: [
+      '查看元数据、指纹与导出信息',
+      '裁剪、压缩、旋转等基础编辑',
+      '去除水印与画面中的干扰元素',
+      '本地合成人像并拖拽微调位置',
+      '抠图、证件照、美化、风格化、表情包',
+      '老照片修复、移除、扩图、清晰增强、调色',
+      'OCR、翻译、隐私保护与敏感区域处理',
+      '批处理、拼图海报、图像与 PDF 工作流',
+      '进入完整高级工作台，查看全部任务分组',
+    ],
+    en: [
+      'View metadata, fingerprints, and exports',
+      'Crop, compress, rotate, and other basics',
+      'Remove watermarks and unwanted objects',
+      'Local face compositing with drag fine-tune',
+      'Cutout, ID photo, beauty, style, meme',
+      'Restore old photos, remove objects, upscale',
+      'OCR, translation, privacy masking workflows',
+      'Batch processing, collage, image/PDF workflows',
+      'Open full advanced workspace with all task groups',
+    ],
+  },
+}
+
+const MESSAGE_TRANSLATIONS = {
+  '请先上传并加载图片。': 'Please upload and load an image first.',
+  '请先框选水印区域': 'Please select a watermark area first.',
+  '图片已加载，请先框选水印区域后再执行。': 'Image loaded. Select the watermark area before running.',
+  '图片加载失败，请更换图片重试。': 'Image loading failed. Please try another image.',
+  '请先在图片上框选需要去除的水印区域': 'Please select the watermark area to remove first.',
+  'AI 模型处理中...': 'AI model is processing...',
+  '水印去除完成！': 'Watermark removal completed!',
+  '水印去除完成': 'Watermark removed successfully.',
+  '处理失败，请重试': 'Processing failed, please try again.',
+  '请先上传图片': 'Please upload an image first.',
+  '图片信息已复制到剪贴板': 'Image information copied to clipboard.',
+  '图片摘要已复制到剪贴板': 'Image summary copied to clipboard.',
+  '复制失败，请重试': 'Copy failed, please try again.',
+  '图片信息模块加载失败，请重试': 'Image info module failed to load, please try again.',
+  '源脸已加载，请再上传目标图并开始换脸预览。': 'Source face loaded. Upload target image to start preview.',
+  '目标图已加载，可开始拖拽调整脸部位置。': 'Target image loaded. You can drag to adjust face position.',
+  '源脸加载失败，请更换图片重试。': 'Failed to load source face image. Please try another one.',
+  '目标图加载失败，请更换图片重试。': 'Failed to load target image. Please try another one.',
+  '位置已重置，可继续拖拽微调。': 'Position has been reset. Continue drag fine-tuning.',
+  '请先上传源脸和目标图。': 'Please upload both source face and target image first.',
+  '开始换脸前，请先确认已获得图像授权。': 'Please confirm image authorization before face swapping.',
+  '换脸预览已生成。可拖拽位置、调节参数后继续下载。': 'Face swap preview generated. Adjust position/params then download.',
+  '请先上传主画布图片。': 'Please upload the main canvas image first.',
+  '请在画布上框选要移除的物体区域。': 'Select the object region on canvas to remove.',
+  '区域已框选，点击“执行当前任务”进行物体移除。': 'Area selected. Click "Run current task" to remove object.',
+  '请先框选一个有效区域。': 'Please select a valid area first.',
+  '物体移除完成。': 'Object removal complete.',
+  'OCR 识别中，请稍候...': 'Running OCR, please wait...',
+  'OCR 识别完成。': 'OCR completed.',
+  '没有可翻译内容。': 'No content available for translation.',
+  '简易翻译完成。': 'Quick translation completed.',
+  '未检测到明显隐私区域，可改用手动刷抹。': 'No obvious privacy region detected. Try manual brush mode.',
+  '自动隐私马赛克已完成。': 'Automatic privacy mosaic completed.',
+  '手动刷抹模式已开启，请在画布上拖动鼠标。': 'Manual brush mode enabled. Drag on canvas to apply.',
+  '请先选择批量图片。': 'Please select batch images first.',
+  '批量压缩与批量水印完成，共 ': 'Batch compression and watermark finished: ',
+  ' 张。': ' images.',
+  '拼图海报至少需要 2 张图片。': 'Collage requires at least 2 images.',
+  '拼图海报生成完成。': 'Collage generated successfully.',
+  '请先生成拼图海报。': 'Please generate the collage first.',
+  '请选择要转 PDF 的图片。': 'Please select images to convert to PDF.',
+  'jsPDF 加载失败，请检查网络后重试。': 'Failed to load jsPDF. Check network and retry.',
+  '图像转 PDF 完成。': 'Image to PDF conversion completed.',
+  '请选择 PDF 文件。': 'Please select a PDF file.',
+  'PDF 转图片完成。': 'PDF to image conversion completed.',
+  '请先上传主图。': 'Please upload the main image first.',
+  '已恢复上传原图。': 'Original uploaded image restored.',
+}
+
+function t(zhText, enText) {
+  return currentLang === 'en' ? enText : zhText
+}
+
+function translateMessage(message) {
+  if (currentLang !== 'en' || typeof message !== 'string') return message
+  if (MESSAGE_TRANSLATIONS[message]) return MESSAGE_TRANSLATIONS[message]
+  return message
+    .replace(/批量压缩与批量水印完成，共\s*(\d+)\s*张。/, 'Batch compression and watermark finished: $1 images.')
+}
+
+function setButtonTextWithIcon(selector, text) {
+  const el = document.querySelector(selector)
+  if (!el) return
+  const icon = el.querySelector('i')
+  if (!icon) {
+    el.textContent = text
+    return
+  }
+  const iconClone = icon.cloneNode(true)
+  el.innerHTML = ''
+  el.appendChild(iconClone)
+  el.appendChild(document.createTextNode(' ' + text))
+}
+
+function applyStaticTranslations() {
+  document.title = STATIC_TRANSLATIONS.title[currentLang]
+  document.documentElement.lang = currentLang === 'en' ? 'en' : 'zh-CN'
+
+  const brand = document.querySelector('nav .text-lg')
+  if (brand) {
+    const icon = brand.querySelector('i')
+    if (icon) {
+      const iconClone = icon.cloneNode(true)
+      brand.innerHTML = ''
+      brand.appendChild(iconClone)
+      brand.appendChild(document.createTextNode(STATIC_TRANSLATIONS.brand[currentLang]))
+    }
+  }
+
+  const navTitles = Array.from(document.querySelectorAll('.main-nav-title'))
+  const navDescs = Array.from(document.querySelectorAll('.main-nav-desc'))
+  const titleList = STATIC_TRANSLATIONS.nav[currentLang]
+  const descList = STATIC_TRANSLATIONS.navDesc[currentLang]
+  navTitles.forEach((node, index) => {
+    if (titleList[index]) node.textContent = titleList[index]
+  })
+  navDescs.forEach((node, index) => {
+    if (descList[index]) node.textContent = descList[index]
+  })
+
+  const heroTitle = document.querySelector('main h1')
+  if (heroTitle) heroTitle.textContent = t('图像 AI 趣玩工具箱', 'IPlay AI Image Toolbox')
+  const heroMain = document.querySelector('.hero-highlight')
+  if (heroMain) heroMain.textContent = t('图片信息、编辑修复、创意处理，一站式本地完成', 'Image info, editing, and creative workflows in one local-first workspace')
+  const heroSub = document.querySelector('.hero-subtle')
+  if (heroSub) heroSub.textContent = t(' · 隐私安全 · 无需上传', ' · Privacy First · No Upload Required')
+
+  setButtonTextWithIcon('#nav_vip_top', t('会员升级', 'Upgrade'))
+  setButtonTextWithIcon('#toggleTheme', t('切换模式', 'Theme'))
+  setButtonTextWithIcon('#btn_img_go', t('AI去除水印', 'Remove Watermark'))
+  setButtonTextWithIcon('#btn_img_down', t('下载图片', 'Download'))
+  setButtonTextWithIcon('#btn_face_go', t('开始换脸', 'Start Face Swap'))
+  setButtonTextWithIcon('#btn_face_reset', t('重置位置', 'Reset Position'))
+  setButtonTextWithIcon('#btn_face_down', t('下载结果', 'Download Result'))
+  setButtonTextWithIcon('#tab_adv_jump', titleList[8] || t('高级玩法', 'Advanced Studio'))
+}
+
+function updateLanguageToggleUI() {
+  setButtonTextWithIcon('#toggleLang', currentLang === 'en' ? '中文' : 'EN')
+}
+
+function applyLanguage(lang) {
+  currentLang = lang === 'en' ? 'en' : 'zh'
+  localStorage.setItem(LANG_STORAGE_KEY, currentLang)
+  updateLanguageToggleUI()
+  applyStaticTranslations()
+  if (typeof setAdvCategory === 'function') {
+    setAdvCategory(advCurrentCategory || 'portrait')
+  }
+  if (typeof _updateCropRatioHint === 'function') {
+    _updateCropRatioHint()
+  }
+}
+
+const toggleLangBtn = document.getElementById('toggleLang')
+if (toggleLangBtn) {
+  toggleLangBtn.addEventListener('click', () => {
+    applyLanguage(currentLang === 'en' ? 'zh' : 'en')
+  })
+}
+
+function getCurrentPositionAsync(options = {}) {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation || typeof navigator.geolocation.getCurrentPosition !== 'function') {
+      reject(new Error('geolocation-unavailable'))
+      return
+    }
+    navigator.geolocation.getCurrentPosition(resolve, reject, options)
+  })
+}
+
+const THEME_SUN_CACHE_KEY = 'iplay_theme_sun_cache_v1'
+const THEME_SUN_CACHE_TTL_MS = 20 * 60 * 1000
+
+function readSunThemeCache() {
+  try {
+    const raw = localStorage.getItem(THEME_SUN_CACHE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object') return null
+    return parsed
+  } catch (_) {
+    return null
+  }
+}
+
+function writeSunThemeCache(payload) {
+  try {
+    localStorage.setItem(THEME_SUN_CACHE_KEY, JSON.stringify(payload))
+  } catch (_) {
+    // localStorage 不可用时静默降级
+  }
+}
+
+function computeNightBySunriseSunset(sunriseIso, sunsetIso, now = new Date()) {
+  const sunrise = new Date(sunriseIso)
+  const sunset = new Date(sunsetIso)
+  if (Number.isNaN(sunrise.getTime()) || Number.isNaN(sunset.getTime())) return null
+  return now < sunrise || now >= sunset
+}
+
+async function applyAutoThemeBySunCycle() {
+  const root = document.documentElement
+  const now = Date.now()
+  const cache = readSunThemeCache()
+  if (cache && cache.sunrise && cache.sunset && cache.fetchedAt && (now - Number(cache.fetchedAt) <= THEME_SUN_CACHE_TTL_MS)) {
+    const isNightFromCache = computeNightBySunriseSunset(cache.sunrise, cache.sunset, new Date(now))
+    if (typeof isNightFromCache === 'boolean') {
+      root.classList.toggle('dark', isNightFromCache)
+      return
+    }
+  }
+
+  try {
+    const position = await getCurrentPositionAsync({
+      enableHighAccuracy: false,
+      timeout: 7000,
+      maximumAge: 10 * 60 * 1000,
+    })
+    const lat = position.coords && Number(position.coords.latitude)
+    const lng = position.coords && Number(position.coords.longitude)
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      root.classList.remove('dark')
+      return
+    }
+
+    const response = await fetch(
+      `https://api.sunrise-sunset.org/json?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&formatted=0`
+    )
+    if (!response.ok) {
+      root.classList.remove('dark')
+      return
+    }
+    const data = await response.json()
+    const sunriseIso = data && data.results ? data.results.sunrise : ''
+    const sunsetIso = data && data.results ? data.results.sunset : ''
+    const isNight = computeNightBySunriseSunset(sunriseIso, sunsetIso, new Date(now))
+    if (typeof isNight !== 'boolean') {
+      root.classList.remove('dark')
+      return
+    }
+    root.classList.toggle('dark', isNight)
+    writeSunThemeCache({
+      sunrise: sunriseIso,
+      sunset: sunsetIso,
+      lat: Number(lat.toFixed(4)),
+      lng: Number(lng.toFixed(4)),
+      fetchedAt: now,
+    })
+  } catch (_) {
+    root.classList.remove('dark')
+  }
+}
+
+applyAutoThemeBySunCycle()
+
+function setMainNavActive(activeButton) {
+  const navButtons = Array.from(document.querySelectorAll('.main-nav-card')).filter(Boolean)
+  navButtons.forEach((btn) => {
+    btn.classList.remove('is-active')
+    btn.setAttribute('aria-pressed', 'false')
+  })
+  if (activeButton) {
+    activeButton.classList.add('is-active')
+    activeButton.setAttribute('aria-pressed', 'true')
+  }
+}
+
+function toggleToolsWorkspace(mode = 'basic') {
+  const basicWorkspace = document.getElementById('tools_basic_workspace')
+  const advancedWorkspace = document.getElementById('advanced_workspace')
+  if (basicWorkspace) basicWorkspace.classList.toggle('hidden', mode !== 'basic')
+  if (advancedWorkspace) advancedWorkspace.classList.toggle('hidden', mode !== 'advanced')
+}
+
+function showMainPane(tabKey, activeButton, options = {}) {
+  document.querySelectorAll('.tab-pane').forEach((pane) => pane.classList.add('hidden'))
+  const target = document.getElementById('tab_' + tabKey)
+  if (target) target.classList.remove('hidden')
+  setMainNavActive(activeButton || null)
+  if (tabKey === 'tools') {
+    toggleToolsWorkspace(options.toolsMode || 'basic')
+  } else {
+    toggleToolsWorkspace('none')
+  }
+}
+
 // 选项卡切换
 document.querySelectorAll('.tab-btn').forEach(b => {
   b.onclick = () => {
-    document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'))
-    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('btn-primary'))
-    document.getElementById('tab_adv_jump').classList.remove('btn-primary')
-    b.classList.add('btn-primary')
-    document.getElementById('tab_' + b.getAttribute('tab')).classList.remove('hidden')
-    const basicWorkspace = document.getElementById('tools_basic_workspace')
-    const advancedWorkspace = document.getElementById('advanced_workspace')
-    if (b.getAttribute('tab') === 'tools') {
-      if (basicWorkspace) basicWorkspace.classList.remove('hidden')
-      if (advancedWorkspace) advancedWorkspace.classList.add('hidden')
-    } else {
-      if (basicWorkspace) basicWorkspace.classList.add('hidden')
-      if (advancedWorkspace) advancedWorkspace.classList.add('hidden')
-    }
+    const tabKey = b.getAttribute('tab')
+    showMainPane(tabKey, b, { toolsMode: 'basic' })
   }
 })
 
 document.getElementById('tab_adv_jump').onclick = () => {
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'))
-  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('btn-primary'))
-  document.getElementById('tab_adv_jump').classList.add('btn-primary')
-  document.getElementById('tab_tools').classList.remove('hidden')
-  const basicWorkspace = document.getElementById('tools_basic_workspace')
   const target = document.getElementById('advanced_workspace')
-  if (basicWorkspace) basicWorkspace.classList.add('hidden')
+  showMainPane('tools', document.getElementById('tab_adv_jump'), { toolsMode: 'advanced' })
   if (target) {
-    target.classList.remove('hidden')
     setTimeout(() => {
       target.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }, 80)
   }
 }
 
+function openAdvancedCategory(categoryKey, activeButton) {
+  const target = document.getElementById('advanced_workspace')
+  showMainPane('tools', activeButton || document.getElementById('tab_adv_jump'), { toolsMode: 'advanced' })
+  if (typeof setAdvCategory === 'function') {
+    setAdvCategory(categoryKey)
+  }
+  if (target) {
+    setTimeout(() => {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+  }
+}
+
+document.querySelectorAll('.main-nav-adv-link').forEach((button) => {
+  button.onclick = () => openAdvancedCategory(button.dataset.advCategory, button)
+})
+
 document.getElementById('nav_vip_top').onclick = () => {
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'))
-  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('btn-primary'))
-  document.getElementById('tab_adv_jump').classList.remove('btn-primary')
-  const basicWorkspace = document.getElementById('tools_basic_workspace')
-  const advancedWorkspace = document.getElementById('advanced_workspace')
-  if (basicWorkspace) basicWorkspace.classList.add('hidden')
-  if (advancedWorkspace) advancedWorkspace.classList.add('hidden')
-  document.getElementById('tab_vip').classList.remove('hidden')
+  showMainPane('vip', null)
 }
 
 // ==============================================
@@ -65,6 +370,18 @@ const imgStatus = document.getElementById('img_status');
 const imgProgress = document.getElementById('img_progress');
 const ctx = imgCanvas.getContext('2d');
 const fileEdit = document.getElementById('file_edit');
+const btnEditUndo = document.getElementById('btn_edit_undo');
+const btnEditRedo = document.getElementById('btn_edit_redo');
+const cropAspectSelect = document.getElementById('crop_aspect_ratio');
+const cropRatioHint = document.getElementById('crop_ratio_hint');
+const toastContainer = document.getElementById('toast_container');
+const uploadInfoArea = document.getElementById('upload_info_area');
+const fileInfo = document.getElementById('file_info');
+const infoPreviewWrap = document.getElementById('info_preview_wrap');
+const infoPreview = document.getElementById('info_preview');
+const infoSideControls = document.getElementById('info_side_controls');
+const infoUploadPrompt = document.getElementById('info_upload_prompt');
+const btnInfoDelete = document.getElementById('btn_info_delete');
 // const fileVideo = document.getElementById('file_video'); // 视频去水印已移除
 const uploadFaceSourceArea = document.getElementById('upload_face_source_area');
 const uploadFaceTargetArea = document.getElementById('upload_face_target_area');
@@ -135,6 +452,15 @@ const advToPdf = document.getElementById('adv_to_pdf');
 const advPdfFile = document.getElementById('adv_pdf_file');
 const advPdfFileDrop = document.getElementById('adv_pdf_file_drop');
 const advPdfToImg = document.getElementById('adv_pdf_to_img');
+const advSingleImageWorkspace = document.getElementById('adv_single_image_workspace');
+const advWorkflowWorkspace = document.getElementById('adv_workflow_workspace');
+const advCategoryTitle = document.getElementById('adv_category_title');
+const advCategoryDesc = document.getElementById('adv_category_desc');
+const advFeatureSummary = document.getElementById('adv_feature_summary');
+const advFeatureDesc = document.getElementById('adv_feature_desc');
+const advPanelEmpty = document.getElementById('adv_panel_empty');
+const advCategoryButtons = Array.from(document.querySelectorAll('.adv-category-btn'));
+const advFeatureCards = Array.from(document.querySelectorAll('.adv-feature-card'));
 
 let isDraw = false;
 let startX = 0, startY = 0;
@@ -155,6 +481,45 @@ let advDrawing = false;
 let advDragStart = { x: 0, y: 0 };
 let advMode = 'none';
 let advPdfLib = null;
+let advCurrentCategory = 'portrait';
+
+const ADV_CATEGORY_META = {
+  portrait: {
+    title: '人像与创作',
+    desc: '以单张图片为主，适合做人像优化、风格化输出和轻创作。',
+    defaultFeature: 'cutout',
+  },
+  enhance: {
+    title: '修复与增强',
+    desc: '围绕旧图修复、干扰物清理、扩图和清晰增强等质量提升任务。',
+    defaultFeature: 'restore',
+  },
+  text: {
+    title: '识别与隐私',
+    desc: '用于提取图片中的文字，或对隐私区域做自动和手动保护。',
+    defaultFeature: 'ocr',
+  },
+  workflow: {
+    title: '批量与输出',
+    desc: '面向多图、多文件和文档转换的流程型任务，不再混在单图编辑里。',
+    defaultFeature: null,
+  },
+};
+
+const ADV_FEATURE_META = {
+  cutout: { title: '智能抠图与换背景', desc: '快速替换底色或背景，适合商品图和人像抠图。' },
+  idphoto: { title: '一键证件照', desc: '按证件比例输出，并支持切换底色。' },
+  beauty: { title: '人像美化', desc: '轻量磨皮提亮，适合自拍和人物照优化。' },
+  style: { title: '风格化', desc: '漫画、素描、油画三种风格快速转化。' },
+  meme: { title: '表情包工厂', desc: '给图片加上下文案，适合做梗图输出。' },
+  restore: { title: '老照片修复', desc: '改善泛黄、轻微模糊和旧照的整体观感。' },
+  remove: { title: '物体移除', desc: '框选后修补干扰元素，适合清理杂物或瑕疵。' },
+  outpaint: { title: 'AI 扩图', desc: '扩展画面边缘，为封面、海报和横版留白。' },
+  upscale: { title: '清晰度增强', desc: '输出 2 倍尺寸并提升整体锐利感。' },
+  lut: { title: '智能调色 LUT', desc: '用胶片、日系、赛博等色调快速建立氛围。' },
+  ocr: { title: 'OCR 识别与翻译', desc: '识别图片文字并进行简易翻译与整理。' },
+  privacy: { title: '图片隐私保护', desc: '自动识别或手动画刷马赛克，保护敏感区域。' },
+};
 
 function getCanvasPoint(e) {
   const rect = imgCanvas.getBoundingClientRect();
@@ -173,12 +538,73 @@ function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
 }
 
+function setImgStatus(message, isError = false) {
+  if (!imgStatus) return;
+  imgStatus.classList.remove('hidden');
+  imgStatus.className = 'mt-4 text-center text-sm ' + (isError ? 'text-red-500 dark:text-red-300' : 'text-gray-500 dark:text-gray-300');
+  imgStatus.textContent = translateMessage(message);
+}
+
+function updateWatermarkGuidePulse() {
+  if (!btnImgGo || !imgPreview) return;
+  const hasLoadedImage = Boolean(imgPreview.src && imgPreview.naturalWidth && imgPreview.naturalHeight);
+  const hasSelection = Boolean(selectedRect && selectedRect.w >= 2 && selectedRect.h >= 2);
+  const hasProcessedResult = Boolean(processedImageUrl && imgPreview.src === processedImageUrl);
+  const shouldGuide = hasLoadedImage && !hasProcessedResult && !hasSelection && !btnImgGo.disabled;
+  btnImgGo.classList.toggle('btn-guide-pulse', shouldGuide);
+}
+
 function setFaceStatus(message, isError = false) {
   faceStatus.classList.remove('hidden');
   faceStatus.className = 'mt-4 text-sm';
   faceStatus.classList.add(isError ? 'text-red-500' : 'text-gray-500');
   faceStatus.classList.add(isError ? 'dark:text-red-300' : 'dark:text-gray-300');
-  faceStatus.textContent = message;
+  faceStatus.textContent = translateMessage(message);
+}
+
+function showToast(message, type = 'info') {
+  if (!toastContainer) return;
+  const normalizedType = ['info', 'success', 'warning', 'error'].includes(type) ? type : 'info';
+  const iconMap = {
+    info: 'fa-info',
+    success: 'fa-check',
+    warning: 'fa-exclamation',
+    error: 'fa-times',
+  };
+  const durationMap = {
+    info: 2400,
+    success: 2200,
+    warning: 3000,
+    error: 3600,
+  };
+  const duration = durationMap[normalizedType] || 2400;
+  const node = document.createElement('div');
+  node.className = 'toast-item ' + normalizedType;
+  node.style.setProperty('--toast-duration', duration + 'ms');
+  node.setAttribute('role', normalizedType === 'error' ? 'alert' : 'status');
+
+  const iconWrap = document.createElement('span');
+  iconWrap.className = 'toast-icon';
+  const icon = document.createElement('i');
+  icon.className = 'fa ' + iconMap[normalizedType];
+  iconWrap.appendChild(icon);
+
+  const text = document.createElement('span');
+  text.className = 'toast-text';
+  text.textContent = translateMessage(message);
+
+  const progress = document.createElement('span');
+  progress.className = 'toast-progress';
+
+  node.appendChild(iconWrap);
+  node.appendChild(text);
+  node.appendChild(progress);
+  toastContainer.appendChild(node);
+  requestAnimationFrame(() => node.classList.add('show'));
+  setTimeout(() => {
+    node.classList.remove('show');
+    setTimeout(() => node.remove(), 220);
+  }, duration);
 }
 
 function readImageFile(file) {
@@ -615,7 +1041,7 @@ function drawSelectionRect(x, y, w, h) {
 
 function setAdvStatus(message, isError = false) {
   advStatus.className = 'text-sm mb-6 ' + (isError ? 'text-red-500' : 'text-gray-500');
-  advStatus.textContent = message;
+  advStatus.textContent = translateMessage(message);
 }
 
 function advEnsureImage() {
@@ -1060,15 +1486,15 @@ function loadPreviewImage() {
   selectedRect = null;
   processedImageUrl = null;
   btnImgDown.classList.add('hidden');
+  btnImgGo.disabled = true;
+  btnImgGo.classList.remove('btn-guide-pulse');
   btnImgGo.innerHTML = '<i class="fa fa-magic mr-1"></i>AI去除水印';
   imgStatus.classList.add('hidden');
   imgProgress.parentElement.classList.add('hidden');
   imgProgress.style.width = '0%';
 
-  const url = URL.createObjectURL(file);
-  imgPreview.src = url;
-
-  imgPreview.onload = function () {
+  const mountImageStage = () => {
+    const hasProcessedResult = Boolean(processedImageUrl && imgPreview.src === processedImageUrl);
     imgPreviewWrap.classList.remove('hidden');
 
     requestAnimationFrame(() => {
@@ -1083,8 +1509,26 @@ function loadPreviewImage() {
       imgCanvas.style.height = displayHeight + 'px';
       ctx.clearRect(0, 0, imgCanvas.width, imgCanvas.height);
       btnImgGo.disabled = false;
+      if (!hasProcessedResult) {
+        setImgStatus('图片已加载，请先框选水印区域后再执行。');
+      }
+      updateWatermarkGuidePulse();
     });
   };
+
+  const url = URL.createObjectURL(file);
+  imgPreview.onerror = () => {
+    setImgStatus('图片加载失败，请更换图片重试。', true);
+    showToast('图片加载失败，请更换图片重试。', 'error');
+    btnImgGo.disabled = false;
+    updateWatermarkGuidePulse();
+  };
+  imgPreview.src = url;
+
+  imgPreview.onload = mountImageStage;
+  if (imgPreview.complete && imgPreview.naturalWidth > 0) {
+    mountImageStage();
+  }
 }
 
 // 框选水印（修复完成）
@@ -1121,11 +1565,13 @@ function finalizeSelection() {
   if (w < 2 || h < 2) {
     selectedRect = null;
     ctx.clearRect(0, 0, imgCanvas.width, imgCanvas.height);
+    updateWatermarkGuidePulse();
     return;
   }
 
   selectedRect = { x, y, w, h };
   drawSelectionRect(x, y, w, h);
+  updateWatermarkGuidePulse();
 }
 
 imgCanvas.onmouseup = (e) => {
@@ -1147,17 +1593,24 @@ window.addEventListener('mouseup', (e) => {
 
 // AI 处理（修复：正常显示状态 + 正常处理）
 btnImgGo.onclick = async function () {
+  if (!imgPreview.src || !imgPreview.naturalWidth || !imgPreview.naturalHeight) {
+    imgStatus.classList.add('hidden');
+    showToast('请先上传并加载图片。', 'warning');
+    return;
+  }
+
   if (!selectedRect || selectedRect.w < 2 || selectedRect.h < 2) {
-    imgStatus.classList.remove('hidden');
-    imgStatus.textContent = '请先在图片上框选需要去除的水印区域';
+    setImgStatus('请先在图片上框选需要去除的水印区域', true);
+    showToast('请先框选水印区域', 'warning');
     return;
   }
 
   btnImgGo.disabled = true;
+  updateWatermarkGuidePulse();
   imgStatus.classList.remove('hidden');
   imgProgress.parentElement.classList.remove('hidden');
 
-  imgStatus.textContent = "AI 模型处理中...";
+  setImgStatus('AI 模型处理中...');
   imgProgress.style.width = "30%";
 
   await new Promise(resolve => requestAnimationFrame(resolve));
@@ -1189,14 +1642,17 @@ btnImgGo.onclick = async function () {
     selectedRect = null;
 
     imgProgress.style.width = "100%";
-    imgStatus.textContent = "水印去除完成！";
+    setImgStatus('水印去除完成！');
+    showToast('水印去除完成', 'success');
     btnImgDown.classList.remove('hidden');
     btnImgGo.innerHTML = '<i class="fa fa-check mr-1"></i>处理完成';
   } catch (error) {
-    imgStatus.textContent = '处理失败，请重试';
+    setImgStatus('处理失败，请重试', true);
+    showToast('处理失败，请重试', 'error');
     imgProgress.style.width = '0%';
   } finally {
     btnImgGo.disabled = false;
+    updateWatermarkGuidePulse();
   }
 };
 
@@ -1212,6 +1668,523 @@ btnImgDown.onclick = () => {
 // 👆👆👆 修复结束，其他功能完全不动
 // ==============================================
 
+let infoOriginalUrl = null;
+let infoOriginalFile = null;
+let infoOriginalImage = null;
+let infoExifTags = null;
+let infoRotateDeg = 0;
+
+function _formatBytes(size) {
+  if (!Number.isFinite(size) || size <= 0) return '-';
+  if (size >= 1024 * 1024) return (size / 1024 / 1024).toFixed(2) + ' MB';
+  if (size >= 1024) return (size / 1024).toFixed(1) + ' KB';
+  return size + ' B';
+}
+
+function _formatDateTime(ts) {
+  if (!ts) return '-';
+  const d = new Date(ts);
+  if (Number.isNaN(d.getTime())) return '-';
+  return d.toLocaleString('zh-CN');
+}
+
+function _ratioString(w, h) {
+  if (!w || !h) return '-';
+  const gcd = (a, b) => (b ? gcd(b, a % b) : a);
+  const g = gcd(w, h);
+  return (w / g) + ':' + (h / g);
+}
+
+function _exifGpsToDecimal(vals, ref) {
+  if (!Array.isArray(vals) || vals.length < 3) return null;
+  const toNum = (v) => {
+    if (typeof v === 'number') return v;
+    if (v && typeof v.numerator === 'number' && typeof v.denominator === 'number' && v.denominator !== 0) {
+      return v.numerator / v.denominator;
+    }
+    return Number(v) || 0;
+  };
+  const deg = toNum(vals[0]);
+  const min = toNum(vals[1]);
+  const sec = toNum(vals[2]);
+  let dec = deg + min / 60 + sec / 3600;
+  if (ref === 'S' || ref === 'W') dec *= -1;
+  return dec;
+}
+
+function _readExifTags(file) {
+  return new Promise((resolve) => {
+    if (!file || !window.EXIF || typeof EXIF.readFromBinaryFile !== 'function') {
+      resolve({});
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const tags = EXIF.readFromBinaryFile(e.target.result) || {};
+        resolve(tags);
+      } catch (_) {
+        resolve({});
+      }
+    };
+    reader.onerror = () => resolve({});
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function _hashFileSha256(file) {
+  if (!file || !window.crypto || !crypto.subtle) return '-';
+  try {
+    const buf = await file.arrayBuffer();
+    const digest = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  } catch (_) {
+    return '-';
+  }
+}
+
+function _setInfoText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+function _syncInfoSideControlsPosition() {
+  if (!infoPreviewWrap || !infoSideControls || infoPreviewWrap.classList.contains('hidden')) return;
+  infoSideControls.style.top = infoPreviewWrap.offsetTop + 'px';
+}
+
+function _renderInfoPreviewImage() {
+  if (!infoOriginalImage || !infoPreview) return;
+  const sw = infoOriginalImage.naturalWidth || 0;
+  const sh = infoOriginalImage.naturalHeight || 0;
+  if (!sw || !sh) return;
+  const container = uploadInfoArea;
+  const maxW = container ? Math.max(container.offsetWidth - 16, 200) : 400;
+  const maxH = Math.min(Math.round(maxW * 0.55), 360);
+  const scale = Math.min(1, maxW / sw, maxH / sh);
+  const dw = Math.max(60, Math.round(sw * scale));
+  const dh = Math.max(60, Math.round(sh * scale));
+  if (infoPreviewWrap) {
+    infoPreviewWrap.style.width = dw + 'px';
+    infoPreviewWrap.style.height = dh + 'px';
+  }
+  infoPreview.style.width = dw + 'px';
+  infoPreview.style.height = dh + 'px';
+  _syncInfoSideControlsPosition();
+}
+
+function _showEditInfo(show) {
+  const empty = document.getElementById('edit_info_empty');
+  const content = document.getElementById('edit_info_content');
+  if (!empty || !content) return;
+  empty.classList.toggle('hidden', show);
+  content.classList.toggle('hidden', !show);
+}
+
+function _loadInfoImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => resolve({ url, img });
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+function _fillExifInfo(tags) {
+  const make = tags.Make || '';
+  const model = tags.Model || '';
+  const lens = tags.LensModel || tags.LensMake || '';
+  const camera = [make, model].filter(Boolean).join(' ') || '-';
+  _setInfoText('edit_info_camera', lens ? `${camera} / ${lens}` : camera);
+
+  const iso = tags.ISOSpeedRatings ? `ISO ${tags.ISOSpeedRatings}` : '';
+  const exposure = tags.ExposureTime ? `快门 ${tags.ExposureTime}s` : '';
+  const fnum = tags.FNumber ? `光圈 f/${tags.FNumber}` : '';
+  const focal = tags.FocalLength ? `焦距 ${tags.FocalLength}mm` : '';
+  const exposureInfo = [iso, exposure, fnum, focal].filter(Boolean).join(' · ') || '-';
+  _setInfoText('edit_info_exposure', exposureInfo);
+
+  const dt = tags.DateTimeOriginal || tags.CreateDate || '-';
+  const sw = tags.Software || '-';
+  _setInfoText('edit_info_datetime', `${dt} / ${sw}`);
+
+  const lat = _exifGpsToDecimal(tags.GPSLatitude, tags.GPSLatitudeRef);
+  const lng = _exifGpsToDecimal(tags.GPSLongitude, tags.GPSLongitudeRef);
+  const alt = tags.GPSAltitude;
+  if (typeof lat === 'number' && typeof lng === 'number') {
+    const pos = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    const altText = alt ? ` · 海拔 ${alt}m` : '';
+    _setInfoText('edit_info_gps', pos + altText);
+  } else {
+    _setInfoText('edit_info_gps', '-');
+  }
+
+  _setInfoText('edit_info_orientation', tags.Orientation ? String(tags.Orientation) : '-');
+}
+
+function _updateEditInfoDisplayOnly() {
+  if (!infoOriginalImage) return;
+  const displayW = Math.round(infoPreview?.offsetWidth || 0);
+  const displayH = Math.round(infoPreview?.offsetHeight || 0);
+  _setInfoText('edit_info_rotate', `${infoRotateDeg}deg`);
+  _setInfoText('edit_info_display', displayW && displayH ? `${displayW} × ${displayH}` : '-');
+}
+
+async function _updateEditInfoAll() {
+  if (!infoOriginalImage || !infoOriginalFile) {
+    _showEditInfo(false);
+    return;
+  }
+  _showEditInfo(true);
+
+  const name = infoOriginalFile.name || '-';
+  const ext = (name.includes('.') ? name.split('.').pop() : '').toUpperCase() || '-';
+  const type = infoOriginalFile.type || '-';
+  const path = infoOriginalFile.webkitRelativePath || '浏览器安全限制，无法读取本机绝对路径';
+  const w = infoOriginalImage.naturalWidth || 0;
+  const h = infoOriginalImage.naturalHeight || 0;
+  const pixels = w * h;
+  const mp = pixels ? (pixels / 1e6).toFixed(2) + ' MP' : '-';
+
+  _setInfoText('edit_info_name', name);
+  _setInfoText('edit_info_path', path);
+  _setInfoText('edit_info_ext', ext);
+  _setInfoText('edit_info_type', type);
+  _setInfoText('edit_info_size', _formatBytes(infoOriginalFile.size));
+  _setInfoText('edit_info_last_modified', _formatDateTime(infoOriginalFile.lastModified));
+  _setInfoText('edit_info_dim', `${w} × ${h}`);
+  _setInfoText('edit_info_ratio', _ratioString(w, h));
+  _setInfoText('edit_info_pixels', pixels ? pixels.toLocaleString('zh-CN') : '-');
+  _setInfoText('edit_info_megapixel', mp);
+  _updateEditInfoDisplayOnly();
+
+  if (!infoExifTags) infoExifTags = await _readExifTags(infoOriginalFile);
+  _fillExifInfo(infoExifTags || {});
+
+  const alpha = (type.includes('png') || type.includes('webp')) ? '可能支持透明' : '通常不支持';
+  _setInfoText('edit_info_alpha', alpha);
+
+  _setInfoText('edit_info_hash', '计算中...');
+  const hash = await _hashFileSha256(infoOriginalFile);
+  _setInfoText('edit_info_hash', hash);
+}
+
+function _resetEditInfo() {
+  infoExifTags = null;
+  infoRotateDeg = 0;
+  _showEditInfo(false);
+  [
+    'edit_info_name', 'edit_info_path', 'edit_info_ext', 'edit_info_type', 'edit_info_size',
+    'edit_info_last_modified', 'edit_info_dim', 'edit_info_ratio', 'edit_info_pixels',
+    'edit_info_megapixel', 'edit_info_orientation', 'edit_info_rotate', 'edit_info_display',
+    'edit_info_alpha', 'edit_info_camera', 'edit_info_exposure', 'edit_info_datetime',
+    'edit_info_gps', 'edit_info_hash'
+  ].forEach((id) => _setInfoText(id, '-'));
+  _setInfoText('edit_info_rotate', '0deg');
+  if (infoOriginalUrl) {
+    URL.revokeObjectURL(infoOriginalUrl);
+    infoOriginalUrl = null;
+  }
+  infoOriginalFile = null;
+  infoOriginalImage = null;
+  if (infoPreviewWrap) infoPreviewWrap.classList.add('hidden');
+  if (infoPreviewWrap) {
+    infoPreviewWrap.style.width = '';
+    infoPreviewWrap.style.height = '';
+  }
+  if (infoPreview) infoPreview.src = '';
+  if (infoUploadPrompt) infoUploadPrompt.classList.remove('hidden');
+  if (btnInfoDelete) btnInfoDelete.classList.add('hidden');
+  if (infoSideControls) {
+    infoSideControls.classList.add('hidden');
+    infoSideControls.style.top = '';
+  }
+  if (uploadInfoArea) uploadInfoArea.classList.remove('has-image');
+  if (fileInfo) fileInfo.value = '';
+}
+
+function _getInfoExportOptions(maskSensitive = false) {
+  const read = (id, fallback) => {
+    const el = document.getElementById(id);
+    return el ? !!el.checked : fallback;
+  };
+  const opts = {
+    includePath: read('info_opt_path', false),
+    includeGps: read('info_opt_gps', false),
+    includeExif: read('info_opt_exif', true),
+    includeHash: read('info_opt_hash', true),
+  };
+  if (maskSensitive) {
+    opts.includePath = false;
+    opts.includeGps = false;
+    opts.includeHash = false;
+  }
+  return opts;
+}
+
+function _buildEditInfoPayload(maskSensitive = false) {
+  if (!infoOriginalImage || !infoOriginalFile) return null;
+  const opts = _getInfoExportOptions(maskSensitive);
+  const fileName = infoOriginalFile.name || '-';
+  const extension = (fileName.includes('.') ? fileName.split('.').pop() : '').toUpperCase() || '-';
+  const mimeType = infoOriginalFile.type || '-';
+  const width = infoOriginalImage.naturalWidth || 0;
+  const height = infoOriginalImage.naturalHeight || 0;
+  const totalPixels = width * height;
+  const payload = {
+    file: {
+      name: fileName,
+      extension,
+      mimeType,
+      sizeBytes: infoOriginalFile.size,
+      sizeHuman: _formatBytes(infoOriginalFile.size),
+      browserPath: opts.includePath ? (infoOriginalFile.webkitRelativePath || '') : '',
+      lastModified: _formatDateTime(infoOriginalFile.lastModified),
+      sha256: opts.includeHash ? (document.getElementById('edit_info_hash')?.textContent || '-') : '-',
+    },
+    image: {
+      width,
+      height,
+      ratio: _ratioString(width, height),
+      totalPixels,
+      megaPixels: totalPixels ? Number((totalPixels / 1e6).toFixed(2)) : 0,
+      displayWidth: Math.round(infoPreview?.offsetWidth || 0),
+      displayHeight: Math.round(infoPreview?.offsetHeight || 0),
+      rotationDeg: infoRotateDeg,
+      zoom: 1,
+    },
+    exif: opts.includeExif
+      ? (maskSensitive
+        ? {
+            Orientation: infoExifTags?.Orientation || null,
+            PixelXDimension: infoExifTags?.PixelXDimension || null,
+            PixelYDimension: infoExifTags?.PixelYDimension || null,
+          }
+        : (infoExifTags || {}))
+      : {},
+    gps: {
+      text: opts.includeGps ? (document.getElementById('edit_info_gps')?.textContent || '-') : '-',
+    },
+    exportedAt: new Date().toISOString(),
+    privacy: {
+      masked: maskSensitive,
+      note: maskSensitive ? '已按脱敏规则过滤敏感信息' : '包含按勾选字段导出的信息',
+      options: opts,
+    },
+  };
+  return payload;
+}
+
+function _buildEditInfoSummaryText() {
+  const payload = _buildEditInfoPayload(true);
+  if (!payload) return '';
+  const opts = payload.privacy?.options || {};
+  const lines = [
+    '图片信息摘要',
+    `文件名: ${payload.file.name}`,
+    `扩展名: ${payload.file.extension}`,
+    `MIME: ${payload.file.mimeType}`,
+    `大小: ${payload.file.sizeHuman}`,
+    `最后修改: ${payload.file.lastModified}`,
+    `像素尺寸: ${payload.image.width} x ${payload.image.height}`,
+    `纵横比: ${payload.image.ratio}`,
+    `百万像素: ${payload.image.megaPixels}`,
+    `总像素: ${payload.image.totalPixels}`,
+    `当前旋转: ${payload.image.rotationDeg}deg`,
+    `显示尺寸: ${payload.image.displayWidth} x ${payload.image.displayHeight}`,
+    `导出选项: 路径=${opts.includePath ? '是' : '否'} GPS=${opts.includeGps ? '是' : '否'} EXIF=${opts.includeExif ? '是' : '否'} 哈希=${opts.includeHash ? '是' : '否'}`,
+    `生成时间: ${new Date(payload.exportedAt).toLocaleString('zh-CN')}`,
+  ];
+  return lines.join('\n');
+}
+
+async function _copyEditInfoToClipboard() {
+  const payload = _buildEditInfoPayload();
+  if (!payload) {
+    showToast('请先上传图片', 'info');
+    return;
+  }
+  const text = JSON.stringify(payload, null, 2);
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    showToast('图片信息已复制到剪贴板', 'success');
+  } catch (_) {
+    showToast('复制失败，请重试', 'error');
+  }
+}
+
+function _exportEditInfoAsJson() {
+  const payload = _buildEditInfoPayload(false);
+  if (!payload) {
+    showToast('请先上传图片', 'info');
+    return;
+  }
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const raw = (infoOriginalFile.name || 'image').replace(/\.[^.]+$/, '');
+  const safe = raw.replace(/[^a-zA-Z0-9-_\u4e00-\u9fa5]/g, '_');
+  a.download = safe + '_info.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+function _exportEditInfoAsMaskedJson() {
+  const payload = _buildEditInfoPayload(true);
+  if (!payload) {
+    showToast('请先上传图片', 'info');
+    return;
+  }
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const raw = (infoOriginalFile.name || 'image').replace(/\.[^.]+$/, '');
+  const safe = raw.replace(/[^a-zA-Z0-9-_\u4e00-\u9fa5]/g, '_');
+  a.download = safe + '_info_masked.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+async function _copyEditInfoSummaryToClipboard() {
+  const text = _buildEditInfoSummaryText();
+  if (!text) {
+    showToast('请先上传图片', 'info');
+    return;
+  }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    showToast('图片摘要已复制到剪贴板', 'success');
+  } catch (_) {
+    showToast('复制失败，请重试', 'error');
+  }
+}
+
+const btnInfoCopy = document.getElementById('btn_info_copy');
+const btnInfoCopySummary = document.getElementById('btn_info_copy_summary');
+const btnInfoExport = document.getElementById('btn_info_export');
+const btnInfoExportMasked = document.getElementById('btn_info_export_masked');
+const infoExportFieldGroup = document.getElementById('info_export_field_group');
+
+function _setInfoActionContext(mode) {
+  const full = mode === 'full';
+  if (infoExportFieldGroup) infoExportFieldGroup.classList.toggle('hidden', !full);
+}
+
+_setInfoActionContext('full');
+
+if (btnInfoCopy) {
+  btnInfoCopy.onclick = async () => {
+    _setInfoActionContext('full');
+    await _copyEditInfoToClipboard();
+  };
+}
+if (btnInfoExport) {
+  btnInfoExport.onclick = () => {
+    _setInfoActionContext('full');
+    _exportEditInfoAsJson();
+  };
+}
+if (btnInfoCopySummary) {
+  btnInfoCopySummary.onclick = async () => {
+    _setInfoActionContext('safe');
+    await _copyEditInfoSummaryToClipboard();
+  };
+}
+if (btnInfoExportMasked) {
+  btnInfoExportMasked.onclick = () => {
+    _setInfoActionContext('safe');
+    _exportEditInfoAsMaskedJson();
+  };
+}
+
+if (uploadInfoArea && fileInfo) {
+  uploadInfoArea.onclick = (e) => {
+    if (e.target.closest('#btn_info_delete')) return;
+    if (uploadInfoArea.classList.contains('has-image')) return;
+    fileInfo.click();
+  };
+  uploadInfoArea.addEventListener('dragover', (e) => {
+    if (uploadInfoArea.classList.contains('has-image')) return;
+    e.preventDefault();
+    uploadInfoArea.classList.add('border-primary', 'bg-primary/5');
+  });
+  uploadInfoArea.addEventListener('dragleave', () => {
+    if (uploadInfoArea.classList.contains('has-image')) return;
+    uploadInfoArea.classList.remove('border-primary', 'bg-primary/5');
+  });
+  uploadInfoArea.addEventListener('drop', async (e) => {
+    if (uploadInfoArea.classList.contains('has-image')) return;
+    e.preventDefault();
+    uploadInfoArea.classList.remove('border-primary', 'bg-primary/5');
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileInfo.files = dt.files;
+    fileInfo.dispatchEvent(new Event('change'));
+  });
+
+  fileInfo.addEventListener('change', async () => {
+    const file = fileInfo.files && fileInfo.files[0];
+    if (!file) return;
+    if (infoOriginalUrl) URL.revokeObjectURL(infoOriginalUrl);
+    try {
+      const loaded = await _loadInfoImage(file);
+      infoOriginalUrl = loaded.url;
+      infoOriginalFile = file;
+      infoOriginalImage = loaded.img;
+      infoExifTags = null;
+      infoRotateDeg = 0;
+      if (infoPreview) infoPreview.src = infoOriginalUrl;
+      if (infoPreviewWrap) infoPreviewWrap.classList.remove('hidden');
+      if (infoUploadPrompt) infoUploadPrompt.classList.add('hidden');
+      if (infoSideControls) infoSideControls.classList.remove('hidden');
+      if (btnInfoDelete) btnInfoDelete.classList.remove('hidden');
+      uploadInfoArea.classList.add('has-image');
+      _renderInfoPreviewImage();
+      _updateEditInfoAll();
+    } catch (_) {
+      showToast('图片信息模块加载失败，请重试', 'error');
+    }
+  });
+}
+
+window.addEventListener('resize', () => {
+  if (!infoOriginalImage) return;
+  _renderInfoPreviewImage();
+  _updateEditInfoDisplayOnly();
+});
+
+if (btnInfoDelete) {
+  btnInfoDelete.onclick = (e) => {
+    e.stopPropagation();
+    _resetEditInfo();
+  };
+}
+
+_resetEditInfo();
+
 // 图片编辑
 let editOriginalUrl = null;
 let editOriginalImage = null;
@@ -1222,6 +2195,10 @@ let cropRect = null;
 let cropDragging = false;
 let cropDragType = null;
 let cropShape = 'rect';  // 裁剪图形类型: rect, circle, star, heart, pentagon
+let cropAspectRatio = null;
+let editHistory = [];
+let editHistoryIndex = -1;
+let editHistoryRestoring = false;
 
 // ---- 缩放/平移状态 ----
 // ---- 裁剪视图缩放 ----
@@ -1237,6 +2214,101 @@ let editDragBasePanX = 0;
 let editDragBasePanY = 0;
 let editDragEnabled = false;
 
+function _parseAspectRatio(value) {
+  if (!value || value === 'free') return null;
+  const parts = value.split(':').map(Number);
+  if (parts.length !== 2 || !parts[0] || !parts[1]) return null;
+  return { w: parts[0], h: parts[1] };
+}
+
+function _applyAspectToPoint(sx, sy, x, y) {
+  if (!cropAspectRatio) return { x, y };
+  const ratio = cropAspectRatio.w / cropAspectRatio.h;
+  const dx = x - sx;
+  const dy = y - sy;
+  const signX = dx >= 0 ? 1 : -1;
+  const signY = dy >= 0 ? 1 : -1;
+  const absDx = Math.abs(dx);
+  const absDy = Math.abs(dy);
+  if (!absDx && !absDy) return { x, y };
+  let w = absDx;
+  let h = absDy;
+  if (!h || w / h > ratio) {
+    h = Math.max(1, Math.round(w / ratio));
+  } else {
+    w = Math.max(1, Math.round(h * ratio));
+  }
+  return {
+    x: sx + signX * w,
+    y: sy + signY * h,
+  };
+}
+
+function _updateCropRatioHint() {
+  if (!cropRatioHint) return;
+  const text = cropAspectRatio ? `${cropAspectRatio.w}:${cropAspectRatio.h}` : '自由比例';
+  cropRatioHint.textContent = '当前：' + text;
+}
+
+function _updateEditHistoryButtons() {
+  if (btnEditUndo) btnEditUndo.disabled = editHistoryIndex <= 0;
+  if (btnEditRedo) btnEditRedo.disabled = editHistoryIndex < 0 || editHistoryIndex >= editHistory.length - 1;
+}
+
+function _captureEditImageDataUrl() {
+  if (!editOriginalImage) return null;
+  const canvas = document.createElement('canvas');
+  canvas.width = editOriginalImage.naturalWidth;
+  canvas.height = editOriginalImage.naturalHeight;
+  const c = canvas.getContext('2d');
+  c.drawImage(editOriginalImage, 0, 0);
+  return canvas.toDataURL('image/png');
+}
+
+function _resetEditHistory() {
+  editHistory = [];
+  editHistoryIndex = -1;
+  _updateEditHistoryButtons();
+}
+
+async function _pushEditHistory() {
+  if (editHistoryRestoring || !editOriginalImage) return;
+  const state = {
+    imageDataUrl: _captureEditImageDataUrl(),
+    rotateDeg: editRotateDeg,
+  };
+  if (!state.imageDataUrl) return;
+  if (editHistoryIndex < editHistory.length - 1) {
+    editHistory = editHistory.slice(0, editHistoryIndex + 1);
+  }
+  editHistory.push(state);
+  if (editHistory.length > 40) {
+    editHistory.shift();
+  }
+  editHistoryIndex = editHistory.length - 1;
+  _updateEditHistoryButtons();
+}
+
+function _restoreEditHistoryState(state) {
+  return new Promise((resolve) => {
+    if (!state || !state.imageDataUrl) {
+      resolve(false);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      editHistoryRestoring = true;
+      editOriginalImage = img;
+      editRotateDeg = state.rotateDeg || 0;
+      renderEditCanvas();
+      editHistoryRestoring = false;
+      resolve(true);
+    };
+    img.onerror = () => resolve(false);
+    img.src = state.imageDataUrl;
+  });
+}
+
 function _updateEditDragButton() {
   const dragBtn = document.getElementById('btn_edit_drag_toggle');
   if (!dragBtn) return;
@@ -1244,6 +2316,19 @@ function _updateEditDragButton() {
   dragBtn.classList.toggle('text-primary', editDragEnabled);
   dragBtn.classList.toggle('bg-primary/10', editDragEnabled);
   dragBtn.title = editDragEnabled ? '关闭拖动' : '启用拖动';
+}
+
+if (cropAspectSelect) {
+  cropAspectSelect.addEventListener('change', () => {
+    cropAspectRatio = _parseAspectRatio(cropAspectSelect.value);
+    _updateCropRatioHint();
+    if (cropRect && cropAspectRatio) {
+      const fixed = _applyAspectToPoint(cropRect.sx, cropRect.sy, cropRect.ex, cropRect.ey);
+      cropRect.ex = fixed.x;
+      cropRect.ey = fixed.y;
+      drawCropOverlay();
+    }
+  });
 }
 
 function _syncEditSideControlsPosition() {
@@ -1453,6 +2538,8 @@ function loadEditPreview(file) {
     document.getElementById('crop_zoom_btns').classList.remove('hidden');
     _updateEditDragButton();
     renderEditCanvas();
+    _resetEditHistory();
+    _pushEditHistory();
   };
   editOriginalImage.src = editOriginalUrl;
 }
@@ -1494,6 +2581,7 @@ document.getElementById('btn_edit_delete').onclick = (e) => {
   document.getElementById('file_edit').value = '';
   document.getElementById('edit_preview_wrap').classList.add('hidden');
   document.getElementById('edit_upload_prompt').classList.remove('hidden');
+  _resetEditHistory();
 }
 updateFaceControlTexts()
 uploadFaceSourceArea.onclick = () => fileFaceSource.click()
@@ -1573,10 +2661,38 @@ window.addEventListener('mouseup', () => {
 document.getElementById('btn_edit_rotate_ccw').onclick = () => {
   editRotateDeg = (editRotateDeg - 90 + 360) % 360;
   renderEditCanvas();
+  _pushEditHistory();
 }
 document.getElementById('btn_edit_rotate_cw').onclick = () => {
   editRotateDeg = (editRotateDeg + 90) % 360;
   renderEditCanvas();
+  _pushEditHistory();
+}
+
+if (btnEditUndo) {
+  btnEditUndo.onclick = async () => {
+    if (editHistoryIndex <= 0) return;
+    editHistoryIndex -= 1;
+    const ok = await _restoreEditHistoryState(editHistory[editHistoryIndex]);
+    if (!ok) {
+      showToast('撤销失败，请重试', 'error');
+      editHistoryIndex += 1;
+    }
+    _updateEditHistoryButtons();
+  };
+}
+
+if (btnEditRedo) {
+  btnEditRedo.onclick = async () => {
+    if (editHistoryIndex >= editHistory.length - 1) return;
+    editHistoryIndex += 1;
+    const ok = await _restoreEditHistoryState(editHistory[editHistoryIndex]);
+    if (!ok) {
+      showToast('重做失败，请重试', 'error');
+      editHistoryIndex -= 1;
+    }
+    _updateEditHistoryButtons();
+  };
 }
 document.getElementById('btn_zoom_in').onclick = () => {
   if (!editOriginalImage) return;
@@ -1684,7 +2800,7 @@ function _updateCompressEstimate() {
 }
 
 document.querySelector('.compress').onclick = () => {
-  if (!editOriginalImage) { alert('请先上传图片'); return; }
+  if (!editOriginalImage) { showToast('请先上传图片', 'info'); return; }
   // 与裁剪互斥：进入压缩前退出裁剪并重置裁剪状态
   if (cropMode) exitCropMode();
   const panel = document.getElementById('compress_panel');
@@ -1727,7 +2843,7 @@ document.getElementById('compress_execute').onclick = () => {
   const q = fmt === 'image/png' ? undefined : quality;
   const ext = fmt.split('/')[1];
   c.toBlob(blob => {
-    if (!blob) { alert('压缩失败，请重试'); return; }
+    if (!blob) { showToast('压缩失败，请重试', 'error'); return; }
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -1742,8 +2858,8 @@ document.getElementById('compress_execute').onclick = () => {
 let cropTouchStartX = 0, cropTouchStartY = 0;
 
 function enterCropMode() {
-  if (!editOriginalImage) { alert('请先上传图片'); return; }
-  if (editRotateDeg !== 0) { alert('请先重置图片再进行裁剪'); return; }
+  if (!editOriginalImage) { showToast('请先上传图片', 'info'); return; }
+  if (editRotateDeg !== 0) { showToast('请先重置图片再进行裁剪', 'info'); return; }
   // 与压缩互斥：进入裁剪前关闭并重置压缩状态
   _closeCompressPanel(true);
   cropMode = true;
@@ -1751,6 +2867,8 @@ function enterCropMode() {
   cropDragging = false;
   cropDragType = null;
   cropShape = 'rect';  // 重置为矩形
+  cropAspectRatio = _parseAspectRatio(cropAspectSelect ? cropAspectSelect.value : 'free');
+  _updateCropRatioHint();
   const editCanvas = document.getElementById('edit_preview');
   const cropOverlay = document.getElementById('crop_overlay');
   
@@ -1793,7 +2911,8 @@ function updateCropHint() {
     'heart': '在图片上拖拽选择心形裁剪区域',
     'pentagon': '在图片上拖拽选择五边形裁剪区域'
   };
-  document.getElementById('crop_hint').textContent = hints[cropShape] || hints['rect'];
+  const ratioText = cropAspectRatio ? `（固定比例 ${cropAspectRatio.w}:${cropAspectRatio.h}）` : '';
+  document.getElementById('crop_hint').textContent = (hints[cropShape] || hints['rect']) + ratioText;
 }
 
 function exitCropMode() {
@@ -2010,6 +3129,17 @@ function getCropHandleType(pos) {
   const cx = x + w / 2;
   const cy = y + h / 2;
   const r = Math.max(w, h) / 2;
+
+  if (cropAspectRatio) {
+    if (cropShape === 'circle') {
+      const dist = Math.sqrt((pos.x - cx) * (pos.x - cx) + (pos.y - cy) * (pos.y - cy));
+      return dist < r ? 'move' : null;
+    }
+    if (cropShape === 'heart') {
+      return (pos.x > x + w * 0.2 && pos.x < x + w * 0.8 && pos.y > y + h * 0.1 && pos.y < y + h * 0.7) ? 'move' : null;
+    }
+    return (pos.x > x && pos.x < x + w && pos.y > y && pos.y < y + h) ? 'move' : null;
+  }
   
   if (cropShape === 'rect') {
     // 检查四个角
@@ -2099,7 +3229,11 @@ document.addEventListener('mousemove', (e) => {
   
   if (cropDragType === 'draw') {
     // 绘制新选区
-    if (cropShape === 'heart') {
+    if (cropAspectRatio) {
+      const fixed = _applyAspectToPoint(cropRect.sx, cropRect.sy, pos.x, pos.y);
+      cropRect.ex = fixed.x;
+      cropRect.ey = fixed.y;
+    } else if (cropShape === 'heart') {
       const dx = pos.x - cropRect.sx;
       const dy = pos.y - cropRect.sy;
       const s = Math.max(Math.abs(dx), Math.abs(dy));
@@ -2228,6 +3362,7 @@ document.getElementById('crop_confirm').onclick = () => {
       editRotateDeg = 0;
       renderEditCanvas();
       exitCropMode();
+      _pushEditHistory();
     };
     img.src = url;
   });
@@ -2408,19 +3543,79 @@ bindDropUpload(advPdfFileDrop, advPdfFile, {
 function switchAdvPanel() {
   const key = advFeature.value
   advPanels.forEach(panel => panel.classList.add('hidden'))
+  if (advPanelEmpty) advPanelEmpty.classList.add('hidden')
   const target = document.querySelector('.adv-panel[data-panel="' + key + '"]')
   if (target) target.classList.remove('hidden')
+  else if (advPanelEmpty) advPanelEmpty.classList.remove('hidden')
   advMode = 'none'
   advSelection = null
   advClearOverlay()
+  const meta = ADV_FEATURE_META[key]
+  if (meta) {
+    if (advFeatureSummary) advFeatureSummary.textContent = meta.title
+    if (advFeatureDesc) advFeatureDesc.textContent = meta.desc
+  }
   if (key === 'remove') {
     advMode = 'remove-select'
     setAdvStatus('请在画布上框选要移除的物体区域。')
+  } else if (key === 'privacy') {
+    setAdvStatus('可使用自动检测或手动画刷，对敏感区域做保护。')
+  } else if (key === 'ocr') {
+    setAdvStatus('上传图片后可识别文字，识别结果会显示在文本框中。')
   }
 }
 
-advFeature.addEventListener('change', switchAdvPanel)
-switchAdvPanel()
+function setAdvFeature(featureKey) {
+  if (!advFeature || !featureKey) return
+  advFeature.value = featureKey
+  advFeatureCards.forEach((card) => {
+    card.classList.toggle('is-active', card.dataset.feature === featureKey)
+  })
+  switchAdvPanel()
+}
+
+function setAdvCategory(categoryKey) {
+  const meta = ADV_CATEGORY_META[categoryKey]
+  if (!meta) return
+  advCurrentCategory = categoryKey
+  advCategoryButtons.forEach((button) => {
+    button.classList.toggle('is-active', button.dataset.category === categoryKey)
+  })
+  if (advCategoryTitle) advCategoryTitle.textContent = meta.title
+  if (advCategoryDesc) advCategoryDesc.textContent = meta.desc
+
+  const workflowMode = categoryKey === 'workflow'
+  if (advSingleImageWorkspace) advSingleImageWorkspace.classList.toggle('hidden', workflowMode)
+  if (advWorkflowWorkspace) advWorkflowWorkspace.classList.toggle('hidden', !workflowMode)
+
+  advFeatureCards.forEach((card) => {
+    card.classList.toggle('hidden', card.dataset.category !== categoryKey)
+  })
+
+  if (workflowMode) {
+    advMode = 'none'
+    advSelection = null
+    advClearOverlay()
+    setAdvStatus('已进入批量与输出工作流，可直接选择批处理、拼图或 PDF 任务。')
+    return
+  }
+
+  const currentFeature = advFeature ? advFeature.value : null
+  const visibleFeatureCard = advFeatureCards.find((card) => card.dataset.category === categoryKey && card.dataset.feature === currentFeature)
+  setAdvFeature(visibleFeatureCard ? currentFeature : meta.defaultFeature)
+}
+
+advCategoryButtons.forEach((button) => {
+  button.onclick = () => setAdvCategory(button.dataset.category)
+})
+
+advFeatureCards.forEach((card) => {
+  card.onclick = () => setAdvFeature(card.dataset.feature)
+})
+
+advFeature.addEventListener('change', () => setAdvFeature(advFeature.value))
+setAdvCategory('portrait')
+applyLanguage(currentLang)
 
 advOverlay.addEventListener('mousedown', (e) => {
   if (!advEnsureImage()) return
@@ -2456,9 +3651,17 @@ window.addEventListener('mouseup', () => {
   if (!advDrawing) return
   advDrawing = false
   if (advMode === 'remove-select' && advSelection && advSelection.w > 5 && advSelection.h > 5) {
-    setAdvStatus('区域已框选，点击“执行玩法”进行物体移除。')
+    setAdvStatus('区域已框选，点击“执行当前任务”进行物体移除。')
   }
 })
+
+async function advRunOcrRecognition() {
+  if (!advEnsureImage()) return
+  setAdvStatus('OCR 识别中，请稍候...')
+  const result = await Tesseract.recognize(advCanvas.toDataURL('image/png'), advOcrLang.value)
+  advOcrOutput.value = (result.data && result.data.text ? result.data.text : '').trim()
+  setAdvStatus('OCR 识别完成。')
+}
 
 advRun.onclick = async () => {
   await runWithBusy(advRun, '<i class="fa fa-spinner fa-spin mr-1"></i>处理中...', async () => {
@@ -2481,8 +3684,9 @@ advRun.onclick = async () => {
     else if (key === 'outpaint') advApplyOutpaint()
     else if (key === 'upscale') advApplyUpscale()
     else if (key === 'meme') advApplyMeme()
+    else if (key === 'ocr') await advRunOcrRecognition()
     else if (key === 'lut') advApplyLut()
-    else if (key === 'privacy') setAdvStatus('请使用“自动检测马赛克”或“手动刷抹模式”。')
+    else if (key === 'privacy') advApplyAutoPrivacy()
   })
 }
 
@@ -2523,13 +3727,7 @@ advPrivacyBrush.onclick = () => {
 }
 
 advOcrRun.onclick = async () => {
-  await runWithBusy(advOcrRun, '<i class="fa fa-spinner fa-spin mr-1"></i>识别中...', async () => {
-    if (!advEnsureImage()) return
-    setAdvStatus('OCR 识别中，请稍候...')
-    const result = await Tesseract.recognize(advCanvas.toDataURL('image/png'), advOcrLang.value)
-    advOcrOutput.value = (result.data && result.data.text ? result.data.text : '').trim()
-    setAdvStatus('OCR 识别完成。')
-  })
+  await runWithBusy(advOcrRun, '<i class="fa fa-spinner fa-spin mr-1"></i>识别中...', advRunOcrRecognition)
 }
 
 advOcrTranslate.onclick = () => {

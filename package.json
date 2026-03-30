@@ -1,0 +1,27 @@
+{
+  "name": "iplay.git",
+  "version": "1.0.0",
+  "description": "一个纯前端、本地运行的图像工具箱。",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ui": "playwright test --ui"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/geekmister/IPlay.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/geekmister/IPlay/issues"
+  },
+  "homepage": "https://github.com/geekmister/IPlay#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
+  }
+}

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="IPlay Favicon">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1D4ED8"/>
+      <stop offset="100%" stop-color="#0EA5E9"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="0.25" cy="0.2" r="0.8">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#bg)"/>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#shine)"/>
+
+  <path
+    d="M33 14l3.1 8.4L44 25l-7.9 2.6L33 36l-3.1-8.4L22 25l7.9-2.6L33 14z"
+    fill="#FFFFFF"
+  />
+  <path
+    d="M21 31l1.8 4.9L27 38l-4.2 1.4L21 44l-1.8-4.6L15 38l4.2-2.1L21 31z"
+    fill="#E0F2FE"
+  />
+  <path
+    d="M45 33l1.8 4.9L51 40l-4.2 1.4L45 46l-1.8-4.6L39 40l4.2-2.1L45 33z"
+    fill="#E0F2FE"
+  />
+
+  <circle cx="20" cy="18" r="2" fill="#FFFFFF" fill-opacity="0.9"/>
+  <circle cx="46" cy="19" r="1.6" fill="#FFFFFF" fill-opacity="0.85"/>
+</svg>
