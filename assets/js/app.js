@@ -1,7 +1,16 @@
+function syncContentCenterLinkTheme() {
+  const link = document.getElementById('nav_content_center')
+  if (!link) return
+  const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+  link.setAttribute('href', `content/index.html?theme=${currentTheme}`)
+}
+
 // 主题切换
 document.getElementById('toggleTheme').onclick = () => {
   document.documentElement.classList.toggle('dark')
+  syncContentCenterLinkTheme()
 }
+syncContentCenterLinkTheme()
 
 const LANG_STORAGE_KEY = 'iplay_lang'
 let currentLang = (localStorage.getItem(LANG_STORAGE_KEY) || '').toLowerCase()
@@ -156,6 +165,7 @@ function applyStaticTranslations() {
   const heroSub = document.querySelector('.hero-subtle')
   if (heroSub) heroSub.textContent = t(' · 隐私安全 · 无需上传', ' · Privacy First · No Upload Required')
 
+  setButtonTextWithIcon('#nav_content_center', t('内容中心', 'Content'))
   setButtonTextWithIcon('#nav_vip_top', t('会员升级', 'Upgrade'))
   setButtonTextWithIcon('#toggleTheme', t('切换模式', 'Theme'))
   setButtonTextWithIcon('#btn_img_go', t('AI去除水印', 'Remove Watermark'))
@@ -283,7 +293,9 @@ async function applyAutoThemeBySunCycle() {
   }
 }
 
-applyAutoThemeBySunCycle()
+applyAutoThemeBySunCycle().finally(() => {
+  syncContentCenterLinkTheme()
+})
 
 function setMainNavActive(activeButton) {
   const navButtons = Array.from(document.querySelectorAll('.main-nav-card')).filter(Boolean)

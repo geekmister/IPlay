@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IPlay 内容中心</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"/>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --line: #e2e8f0;
+    --text: #0f172a;
+    --muted: #475569;
+    --brand: #4f46e5;
+    --brand-soft: #eef2ff;
+    --brand-strong: #4338ca;
+    --topbar-bg: rgba(255, 255, 255, 0.72);
+    --crumb-bg: #ffffff;
+    --crumb-border: #cbd5e1;
+    --hero-bg: linear-gradient(135deg, #ffffff 0%, #f8fbff 42%, #eef2ff 100%);
+    --hero-border: #dbe3ff;
+  }
+  html.dark {
+    --bg: #0f172a;
+    --surface: #111827;
+    --line: #334155;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --brand: #a5b4fc;
+    --brand-soft: rgba(79, 70, 229, 0.22);
+    --brand-strong: #c7d2fe;
+    --topbar-bg: rgba(15, 23, 42, 0.75);
+    --crumb-bg: #1e293b;
+    --crumb-border: #475569;
+    --hero-bg: linear-gradient(135deg, #111827 0%, #172554 48%, #1e1b4b 100%);
+    --hero-border: #334155;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif;
+    background:
+      radial-gradient(900px 500px at -10% -10%, rgba(99, 102, 241, 0.20), transparent 60%),
+      radial-gradient(700px 420px at 110% 0%, rgba(14, 165, 233, 0.18), transparent 62%),
+      var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .page {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 34px 18px 72px;
+  }
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--topbar-bg);
+    backdrop-filter: blur(8px);
+  }
+  .topbar-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: var(--brand-strong);
+  }
+  .crumb {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--crumb-border);
+    background: var(--crumb-bg);
+  }
+  .theme-btn {
+    border: 1px solid var(--crumb-border);
+    background: var(--crumb-bg);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .hero {
+    background: var(--hero-bg);
+    border: 1px solid var(--hero-border);
+    border-radius: 22px;
+    padding: 24px;
+    box-shadow: 0 18px 42px rgba(79, 70, 229, 0.10);
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    right: -80px;
+    top: -80px;
+    width: 240px;
+    height: 240px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.28), transparent 68%);
+    pointer-events: none;
+  }
+  .hero h1 {
+    margin: 0;
+    font-size: clamp(1.5rem, 2.8vw, 2.05rem);
+  }
+  .hero p {
+    margin: 10px 0 0;
+    color: var(--muted);
+  }
+  .list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 14px;
+  }
+  @media (min-width: 860px) {
+    .list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .list li {
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .list li:hover {
+    transform: translateY(-2px);
+    border-color: #c7d2fe;
+    box-shadow: 0 16px 34px rgba(79, 70, 229, 0.12);
+  }
+  .post-card {
+    position: relative;
+    overflow: hidden;
+  }
+  .post-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: linear-gradient(180deg, #6366f1, #0ea5e9);
+    opacity: .72;
+  }
+  .post-card.is-featured {
+    grid-column: 1 / -1;
+    background:
+      linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(14, 165, 233, 0.08)),
+      var(--surface);
+    border-color: #c7d2fe;
+  }
+  .post-card.is-featured .post-link {
+    padding: 20px 20px 22px 22px;
+  }
+  .post-card.is-featured .post-title {
+    font-size: 1.18rem;
+  }
+  .post-link {
+    display: block;
+    padding: 18px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .post-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .cat {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(79, 70, 229, 0.12);
+    color: var(--brand-strong);
+    font-size: .78rem;
+    font-weight: 700;
+    border: 1px solid rgba(79, 70, 229, 0.18);
+  }
+  .post-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    font-size: 1.05rem;
+  }
+  .post-title::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #6366f1, #0ea5e9);
+    flex: 0 0 auto;
+  }
+  .post-desc {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: .95rem;
+  }
+  .meta {
+    color: var(--muted);
+    font-size: .8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+    padding: 0;
+  }
+  .pick,
+  .serial {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    border-radius: 999px;
+    border: 1px solid var(--crumb-border);
+    background: var(--crumb-bg);
+    color: var(--muted);
+    font-size: .72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    margin-right: 2px;
+  }
+  .pick {
+    border-color: #a5b4fc;
+    background: rgba(99, 102, 241, 0.16);
+    color: var(--brand-strong);
+  }
+  .tags {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--crumb-border);
+    background: var(--crumb-bg);
+    border-radius: 999px;
+    padding: 3px 9px;
+    color: var(--muted);
+    font-size: .78rem;
+  }
+  .empty {
+    border: 1px dashed var(--crumb-border);
+    border-radius: 14px;
+    background: var(--topbar-bg);
+    color: var(--muted);
+    padding: 16px;
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <section class="topbar">
+      <span class="brand">IPlay · 内容中心</span>
+      <span class="topbar-actions">
+        <a class="crumb" href="../index.html">返回工具首页</a>
+        <button id="themeToggle" class="theme-btn" type="button">切换主题</button>
+      </span>
+    </section>
+    <section class="hero">
+      <h1>内容中心（MDX）</h1>
+      <p>与当前工具站风格统一的内容层，支持教程、案例和 FAQ 的持续发布。文章卡片显示分类、阅读时长与标签信息，便于检索和运营。</p>
+    </section>
+    <ul class="list"><li class="post-card is-featured"><a class="post-link" href="./iplay-content-starter.html"><div class="post-head"><span class="cat">架构实践</span><span class="meta">2026-03-30 · 4 分钟阅读</span></div><p class="post-title"><span class="pick">精选</span>IPlay 内容系统起步：为什么引入 MDX</p><p class="post-desc">在当前静态工具站中，以最小成本加入可扩展的内容系统。</p><div class="tags"><span class="tag">#MDX</span><span class="tag">#内容系统</span></div></a></li></ul>
+  </main>
+  <script>
+    (function () {
+      var key = 'iplay_content_theme';
+      var root = document.documentElement;
+      var queryTheme = new URLSearchParams(location.search).get('theme');
+      var saved = localStorage.getItem(key);
+      if (queryTheme === 'dark' || queryTheme === 'light') {
+        root.classList.toggle('dark', queryTheme === 'dark');
+        localStorage.setItem(key, queryTheme);
+      } else if (saved === 'dark' || saved === 'light') {
+        root.classList.toggle('dark', saved === 'dark');
+      } else {
+        root.classList.toggle('dark', window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      }
+      var btn = document.getElementById('themeToggle');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        var nextIsDark = !root.classList.contains('dark');
+        root.classList.toggle('dark', nextIsDark);
+        localStorage.setItem(key, nextIsDark ? 'dark' : 'light');
+      });
+    })();
+  </script>
+</body>
+</html>
