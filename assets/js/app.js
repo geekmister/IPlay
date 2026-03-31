@@ -2751,6 +2751,26 @@ document.addEventListener('keydown', (e) => {
   _toggleEditDragMode();
 });
 
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const target = e.target;
+  if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) {
+    return;
+  }
+  if (cropAspectMenu && !cropAspectMenu.classList.contains('hidden')) return;
+  if (!cropMode || !cropRect) return;
+  e.preventDefault();
+  cropRect = null;
+  cropDragging = false;
+  cropDragType = null;
+  const cropOverlay = document.getElementById('crop_overlay');
+  if (cropOverlay) {
+    cropOverlay.style.cursor = 'crosshair';
+  }
+  document.getElementById('crop_confirm').disabled = true;
+  drawCropOverlay();
+});
+
 window.addEventListener('resize', _syncEditSideControlsPosition);
 
 // ---- 预览区拖动平移 ----
