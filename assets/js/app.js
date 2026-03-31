@@ -2574,8 +2574,9 @@ window.addEventListener('mouseup', () => {
   _syncEditStageTransform();
 });
 
-document.getElementById('btn_edit_drag_toggle').onclick = () => {
+document.getElementById('btn_edit_drag_toggle').onclick = function() {
   _toggleEditDragMode();
+  this.blur();
 };
 
 document.addEventListener('keydown', (e) => {
