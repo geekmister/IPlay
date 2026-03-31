@@ -184,8 +184,15 @@ function renderHtmlPage({ title, description, body, lang = 'zh-CN', date, readMi
     border: 1px solid #bfdbfe;
     border-radius: 6px;
     padding: 2px 6px;
+    color: #1e293b;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: .95em;
+  }
+  html.dark p code,
+  html.dark li code {
+    background: #1e293b;
+    border-color: #334155;
+    color: #dbeafe;
   }
   pre {
     background: #0f172a;

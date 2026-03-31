@@ -173,7 +173,11 @@ function applyStaticTranslations() {
   setButtonTextWithIcon('#btn_face_go', t('开始换脸', 'Start Face Swap'))
   setButtonTextWithIcon('#btn_face_reset', t('重置位置', 'Reset Position'))
   setButtonTextWithIcon('#btn_face_down', t('下载结果', 'Download Result'))
-  setButtonTextWithIcon('#tab_adv_jump', titleList[8] || t('高级玩法', 'Advanced Studio'))
+
+  const advJumpTitle = document.querySelector('#tab_adv_jump .main-nav-title')
+  const advJumpDesc = document.querySelector('#tab_adv_jump .main-nav-desc')
+  if (advJumpTitle) advJumpTitle.textContent = titleList[8] || t('高级玩法', 'Advanced Studio')
+  if (advJumpDesc) advJumpDesc.textContent = descList[8] || t('进入完整高级工作台，查看全部任务分组', 'Open full advanced workspace with all task groups')
 }
 
 function updateLanguageToggleUI() {
