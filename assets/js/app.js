@@ -2342,7 +2342,7 @@ function _restoreEditHistoryState(state) {
 function _updateEditDragButton() {
   const dragBtn = document.getElementById('btn_edit_drag_toggle');
   if (!dragBtn) return;
-  const canUseDrag = Boolean(editOriginalImage && !cropMode && cropViewZoom > 1 && _isEditOverflow());
+  const canUseDrag = Boolean(editOriginalImage && cropViewZoom > 1 && _isEditOverflow());
   if (!canUseDrag) {
     editDragEnabled = false;
     editDragging = false;
@@ -2357,7 +2357,7 @@ function _updateEditDragButton() {
 }
 
 function _toggleEditDragMode() {
-  const canUseDrag = Boolean(editOriginalImage && !cropMode && cropViewZoom > 1 && _isEditOverflow());
+  const canUseDrag = Boolean(editOriginalImage && cropViewZoom > 1 && _isEditOverflow());
   if (!canUseDrag) {
     editDragEnabled = false;
     editDragging = false;
@@ -2547,14 +2547,18 @@ function _clampEditPan() {
 function _syncEditStageTransform() {
   const stage = document.getElementById('edit_canvas_stage');
   const wrap = document.getElementById('edit_preview_wrap');
+  const cropOverlay = document.getElementById('crop_overlay');
   if (!stage || !wrap) return;
   _clampEditPan();
-  if (!(editOriginalImage && !cropMode && cropViewZoom > 1 && _isEditOverflow())) {
+  if (!(editOriginalImage && cropViewZoom > 1 && _isEditOverflow())) {
     editDragEnabled = false;
     editDragging = false;
   }
   stage.style.transform = `translate(${editPanX}px, ${editPanY}px)`;
-  wrap.style.cursor = _isEditOverflow() && !cropMode && editDragEnabled ? (editDragging ? 'grabbing' : 'grab') : 'default';
+  wrap.style.cursor = _isEditOverflow() && editDragEnabled ? (editDragging ? 'grabbing' : 'grab') : 'default';
+  if (cropOverlay && cropMode && editDragEnabled && _isEditOverflow()) {
+    cropOverlay.style.cursor = editDragging ? 'grabbing' : 'grab';
+  }
 }
 
 function _applyCropZoom() {
@@ -2684,7 +2688,7 @@ if (document.readyState === 'loading') {
 
 const editPreviewWrap = document.getElementById('edit_preview_wrap');
 editPreviewWrap.addEventListener('mousedown', (e) => {
-  if (!editOriginalImage || cropMode || !editDragEnabled || !_isEditOverflow()) return;
+  if (!editOriginalImage || !editDragEnabled || !_isEditOverflow()) return;
   if (e.target.closest('#btn_edit_delete,#btn_edit_rotate_cw,#btn_edit_rotate_ccw,#btn_zoom_in,#btn_zoom_out,#btn_zoom_reset,#btn_edit_drag_toggle')) return;
   editDragging = true;
   editDragStartX = e.clientX;
@@ -2719,7 +2723,7 @@ document.addEventListener('keydown', (e) => {
   if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) {
     return;
   }
-  if (!editOriginalImage || cropMode || cropViewZoom <= 1) return;
+  if (!editOriginalImage || cropViewZoom <= 1) return;
   e.preventDefault();
   _toggleEditDragMode();
 });
@@ -3099,9 +3103,8 @@ function enterCropMode() {
   cropOverlay.classList.remove('hidden');
   document.getElementById('crop_panel').classList.remove('hidden');
   document.getElementById('crop_confirm').disabled = true;
-  editDragEnabled = false;
-  editDragging = false;
   _updateEditDragButton();
+  _syncEditStageTransform();
   _setEditToolHighlight('crop');
   updateCropHint();
   
@@ -3405,7 +3408,7 @@ function getCropHandleType(pos) {
 }
 
 cropOverlay.addEventListener('mousedown', (e) => {
-  if (!cropMode) return;
+  if (!cropMode || editDragEnabled) return;
   const pos = getCanvasCoordFromMouse(e);
   const handleType = getCropHandleType(pos);
   
@@ -3422,6 +3425,10 @@ cropOverlay.addEventListener('mousedown', (e) => {
 
 document.addEventListener('mousemove', (e) => {
   if (!cropMode) return;
+  if (editDragEnabled) {
+    cropOverlay.style.cursor = _isEditOverflow() ? (editDragging ? 'grabbing' : 'grab') : 'default';
+    return;
+  }
   
   // 更新鼠标光标
   if (cropRect && !cropDragging) {
