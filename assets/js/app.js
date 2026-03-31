@@ -2,7 +2,8 @@ function syncContentCenterLinkTheme() {
   const link = document.getElementById('nav_content_center')
   if (!link) return
   const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-  link.setAttribute('href', `content/index.html?theme=${currentTheme}`)
+  const lang = (currentLang === 'en') ? 'en' : 'zh'
+  link.setAttribute('href', `content/index.html?theme=${currentTheme}&lang=${lang}`)
 }
 
 // 主题切换
@@ -189,6 +190,7 @@ function applyLanguage(lang) {
   localStorage.setItem(LANG_STORAGE_KEY, currentLang)
   updateLanguageToggleUI()
   applyStaticTranslations()
+  syncContentCenterLinkTheme()
   if (typeof setAdvCategory === 'function') {
     setAdvCategory(advCurrentCategory || 'portrait')
   }

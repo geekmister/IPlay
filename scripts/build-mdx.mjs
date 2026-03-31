@@ -45,7 +45,13 @@ function estimateReadMinutes(markdown = '') {
   return Math.max(1, Math.round(units / 450));
 }
 
-function renderHtmlPage({ title, description, body, lang = 'zh-CN', date, readMinutes, category, tags = [] }) {
+function parseLocalizedSlug(slug) {
+  if (slug.endsWith('-en')) return { baseSlug: slug.slice(0, -3), lang: 'en' };
+  if (slug.endsWith('-zh')) return { baseSlug: slug.slice(0, -3), lang: 'zh' };
+  return { baseSlug: slug, lang: 'zh' };
+}
+
+function renderHtmlPage({ title, description, body, lang = 'zh-CN', date, readMinutes, category, tags = [], slug, pageLang = 'zh', alternateSlug = '' }) {
   const safeTitle = escapeHtml(title);
   const safeDescription = escapeHtml(description);
   const safeCategory = escapeHtml(category || '教程');
@@ -54,6 +60,10 @@ function renderHtmlPage({ title, description, body, lang = 'zh-CN', date, readMi
   const tagHtml = tags.length
     ? tags.slice(0, 4).map((tag) => `<span class="meta-pill">#${escapeHtml(tag)}</span>`).join('')
     : '<span class="meta-pill">#IPlay</span>';
+  const zhHref = pageLang === 'zh' ? `./${escapeHtml(slug)}.html?lang=zh` : (alternateSlug ? `./${escapeHtml(alternateSlug)}.html?lang=zh` : `./${escapeHtml(slug)}.html?lang=zh`);
+  const enHref = pageLang === 'en' ? `./${escapeHtml(slug)}.html?lang=en` : (alternateSlug ? `./${escapeHtml(alternateSlug)}.html?lang=en` : `./${escapeHtml(slug)}.html?lang=en`);
+  const zhClass = pageLang === 'zh' ? 'lang-link is-active' : 'lang-link';
+  const enClass = pageLang === 'en' ? 'lang-link is-active' : 'lang-link';
   return `<!DOCTYPE html>
 <html lang="${lang}">
 <head>
@@ -136,6 +146,57 @@ function renderHtmlPage({ title, description, body, lang = 'zh-CN', date, readMi
     color: var(--muted);
     font-size: .82rem;
   }
+  .paper-switch {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 8px 0 14px;
+  }
+  .paper-switch button {
+    border: 1px solid var(--pill-border);
+    background: var(--pill-bg);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .paper-switch button.active {
+    background: #4f46e5;
+    border-color: #4f46e5;
+    color: #fff;
+  }
+  .paper-lang { display: none; }
+  .paper-lang.active { display: block; }
+  .paper-media-grid {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 1fr;
+  }
+  .paper-media-grid img,
+  .paper-media-grid video {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+  }
+  .pulse-line {
+    height: 8px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  html.dark .pulse-line { background: #334155; }
+  .pulse-line span {
+    display: block;
+    height: 100%;
+    width: 35%;
+    background: linear-gradient(90deg, #6366f1, #0ea5e9);
+    animation: pulseMove 2s ease-in-out infinite;
+  }
+  @keyframes pulseMove {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(300%); }
+  }
   .topbar {
     display: flex;
     align-items: center;
@@ -168,6 +229,20 @@ function renderHtmlPage({ title, description, body, lang = 'zh-CN', date, readMi
     padding: 7px 12px;
     font-size: 14px;
     cursor: pointer;
+  }
+  .lang-link {
+    border: 1px solid var(--pill-border);
+    background: var(--pill-bg);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 14px;
+    text-decoration: none;
+  }
+  .lang-link.is-active {
+    background: #4f46e5;
+    border-color: #4f46e5;
+    color: #fff;
   }
   .card {
     background: var(--card);
@@ -209,6 +284,8 @@ function renderHtmlPage({ title, description, body, lang = 'zh-CN', date, readMi
     <section class="topbar">
       <a class="crumb" href="./index.html">← 返回内容中心</a>
       <span class="topbar-actions">
+        <a class="${zhClass}" href="${zhHref}">中文</a>
+        <a class="${enClass}" href="${enHref}">English</a>
         <a class="crumb" href="../index.html">工具首页</a>
         <button id="themeToggle" class="theme-btn" type="button">切换主题</button>
       </span>
@@ -228,8 +305,23 @@ function renderHtmlPage({ title, description, body, lang = 'zh-CN', date, readMi
   <script>
     (function () {
       var key = 'iplay_content_theme';
+      var langKey = 'iplay_lang';
       var root = document.documentElement;
+      var pageLang = '${pageLang}';
+      var alternateSlug = '${alternateSlug}';
       var queryTheme = new URLSearchParams(location.search).get('theme');
+      var queryLang = new URLSearchParams(location.search).get('lang');
+      var preferredLang = (queryLang === 'zh' || queryLang === 'en') ? queryLang : localStorage.getItem(langKey);
+      if (!preferredLang) preferredLang = pageLang;
+      if (preferredLang !== pageLang && alternateSlug) {
+        var redirectTarget = './' + alternateSlug + '.html?lang=' + preferredLang;
+        if (queryTheme === 'dark' || queryTheme === 'light') {
+          redirectTarget += '&theme=' + queryTheme;
+        }
+        location.replace(redirectTarget);
+        return;
+      }
+      localStorage.setItem(langKey, pageLang);
       var saved = localStorage.getItem(key);
       if (queryTheme === 'dark' || queryTheme === 'light') {
         root.classList.toggle('dark', queryTheme === 'dark');
@@ -245,6 +337,26 @@ function renderHtmlPage({ title, description, body, lang = 'zh-CN', date, readMi
         var nextIsDark = !root.classList.contains('dark');
         root.classList.toggle('dark', nextIsDark);
         localStorage.setItem(key, nextIsDark ? 'dark' : 'light');
+      });
+
+      document.querySelectorAll('.paper-root').forEach(function (article) {
+        var btns = article.querySelectorAll('[data-paper-lang-btn]');
+        var blocks = article.querySelectorAll('[data-paper-lang]');
+        if (!btns.length || !blocks.length) return;
+        function setLang(lang) {
+          btns.forEach(function (button) {
+            button.classList.toggle('active', button.getAttribute('data-paper-lang-btn') === lang);
+          });
+          blocks.forEach(function (block) {
+            block.classList.toggle('active', block.getAttribute('data-paper-lang') === lang);
+          });
+        }
+        btns.forEach(function (button) {
+          button.addEventListener('click', function () {
+            setLang(button.getAttribute('data-paper-lang-btn'));
+          });
+        });
+        setLang('zh');
       });
     })();
   </script>
@@ -283,19 +395,27 @@ async function compileMdxToHtml(source) {
 
 async function build() {
   await fs.mkdir(outputDir, { recursive: true });
+  const oldOutputFiles = await fs.readdir(outputDir, { withFileTypes: true });
+  for (const entry of oldOutputFiles) {
+    if (entry.isFile() && entry.name.endsWith('.html')) {
+      await fs.rm(path.join(outputDir, entry.name));
+    }
+  }
+
   const mdxFiles = await getMdxFiles(sourceDir);
   if (!mdxFiles.length) {
     console.log('No MDX files found in content-src/posts');
     return;
   }
 
-  const indexItems = [];
+  const entries = [];
 
   for (const filePath of mdxFiles) {
     const raw = await fs.readFile(filePath, 'utf8');
     const { data, content } = matter(raw);
 
     const slug = path.basename(filePath, '.mdx');
+    const { baseSlug, lang } = parseLocalizedSlug(slug);
     const title = data.title || slug;
     const description = data.description || 'IPlay 内容文章';
     const publishedDate = toIsoDate(data.date);
@@ -303,24 +423,14 @@ async function build() {
     const category = data.category ? String(data.category) : '教程';
     const tags = Array.isArray(data.tags) ? data.tags.map((item) => String(item)) : [];
     const htmlBody = await compileMdxToHtml(content);
-    const pageHtml = renderHtmlPage({
+    entries.push({
+      slug,
+      baseSlug,
+      lang,
       title,
       description,
       body: htmlBody,
-      lang: (data.lang || 'zh-CN'),
-      date: publishedDate,
-      readMinutes,
-      category,
-      tags,
-    });
-
-    const outputFile = path.join(outputDir, `${slug}.html`);
-    await fs.writeFile(outputFile, pageHtml, 'utf8');
-
-    indexItems.push({
-      slug,
-      title,
-      description,
+      htmlLang: data.lang || (lang === 'en' ? 'en' : 'zh-CN'),
       date: publishedDate,
       readMinutes,
       category,
@@ -328,17 +438,49 @@ async function build() {
     });
   }
 
+  const pairMap = new Map();
+  entries.forEach((entry) => {
+    if (!pairMap.has(entry.baseSlug)) pairMap.set(entry.baseSlug, { zh: '', en: '' });
+    const pair = pairMap.get(entry.baseSlug);
+    pair[entry.lang] = entry.slug;
+  });
+
+  for (const entry of entries) {
+    const pair = pairMap.get(entry.baseSlug) || { zh: '', en: '' };
+    const alternateSlug = entry.lang === 'zh' ? pair.en : pair.zh;
+    const pageHtml = renderHtmlPage({
+      title: entry.title,
+      description: entry.description,
+      body: entry.body,
+      lang: entry.htmlLang,
+      date: entry.date,
+      readMinutes: entry.readMinutes,
+      category: entry.category,
+      tags: entry.tags,
+      slug: entry.slug,
+      pageLang: entry.lang,
+      alternateSlug,
+    });
+    const outputFile = path.join(outputDir, `${entry.slug}.html`);
+    await fs.writeFile(outputFile, pageHtml, 'utf8');
+  }
+
+  const indexItems = entries.slice();
+
   indexItems.sort((a, b) => (a.date < b.date ? 1 : -1));
 
+  const featuredAssigned = { zh: false, en: false };
+
   const listHtml = indexItems
-    .map((item, index) => {
+    .map((item) => {
       const dateLabel = new Date(item.date).toISOString().slice(0, 10);
       const tagPart = Array.isArray(item.tags) && item.tags.length
         ? item.tags.slice(0, 2).map((tag) => `<span class="tag">#${escapeHtml(tag)}</span>`).join('')
         : '<span class="tag">#IPlay</span>';
-      const badge = index === 0 ? '<span class="pick">精选</span>' : `<span class="serial">${String(index + 1).padStart(2, '0')}</span>`;
-      const cardClass = index === 0 ? 'post-card is-featured' : 'post-card';
-      return `<li class="${cardClass}"><a class="post-link" href="./${escapeHtml(item.slug)}.html"><div class="post-head"><span class="cat">${escapeHtml(item.category || '教程')}</span><span class="meta">${escapeHtml(dateLabel)} · ${escapeHtml(String(item.readMinutes || 1))} 分钟阅读</span></div><p class="post-title">${badge}${escapeHtml(item.title)}</p><p class="post-desc">${escapeHtml(item.description)}</p><div class="tags">${tagPart}</div></a></li>`;
+      const shouldFeature = !featuredAssigned[item.lang];
+      featuredAssigned[item.lang] = true;
+      const cardClass = shouldFeature ? 'post-card is-featured' : 'post-card';
+      return `<li class="${cardClass}" data-lang="${item.lang}"><a class="post-link" href="./${escapeHtml(item.slug)}.html?lang=${item.lang}"><div class="post-head"><span class="cat">${escapeHtml(item.category || '教程')}</span><span class="meta">${escapeHtml(dateLabel)} · ${escapeHtml(String(item.readMinutes || 1))} 分钟阅读</span></div><p class="post-title">${escapeHtml(item.title)}</p><p class="post-desc">${escapeHtml(item.description)}</p><div class="tags">${tagPart}</div></a></li>`;
     })
     .join('');
 
@@ -467,6 +609,29 @@ async function build() {
     margin: 10px 0 0;
     color: var(--muted);
   }
+  .lang-switch {
+    margin-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid var(--crumb-border);
+    background: var(--crumb-bg);
+  }
+  .lang-switch-btn {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .lang-switch-btn.is-active {
+    background: #4f46e5;
+    color: #fff;
+  }
   .list {
     list-style: none;
     padding: 0;
@@ -575,26 +740,6 @@ async function build() {
     border-radius: 999px;
     padding: 0;
   }
-  .pick,
-  .serial {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 40px;
-    border-radius: 999px;
-    border: 1px solid var(--crumb-border);
-    background: var(--crumb-bg);
-    color: var(--muted);
-    font-size: .72rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    margin-right: 2px;
-  }
-  .pick {
-    border-color: #a5b4fc;
-    background: rgba(99, 102, 241, 0.16);
-    color: var(--brand-strong);
-  }
   .tags {
     margin-top: 12px;
     display: flex;
@@ -632,14 +777,20 @@ async function build() {
     <section class="hero">
       <h1>内容中心（MDX）</h1>
       <p>与当前工具站风格统一的内容层，支持教程、案例和 FAQ 的持续发布。文章卡片显示分类、阅读时长与标签信息，便于检索和运营。</p>
+      <div class="lang-switch">
+        <button class="lang-switch-btn" data-lang-switch="zh" type="button">中文</button>
+        <button class="lang-switch-btn" data-lang-switch="en" type="button">English</button>
+      </div>
     </section>
     <ul class="list">${listHtml || '<li class="empty">暂无文章，请先在 content-src/posts 下创建 .mdx 文件。</li>'}</ul>
   </main>
   <script>
     (function () {
       var key = 'iplay_content_theme';
+      var langKey = 'iplay_lang';
       var root = document.documentElement;
       var queryTheme = new URLSearchParams(location.search).get('theme');
+      var queryLang = new URLSearchParams(location.search).get('lang');
       var saved = localStorage.getItem(key);
       if (queryTheme === 'dark' || queryTheme === 'light') {
         root.classList.toggle('dark', queryTheme === 'dark');
@@ -650,12 +801,51 @@ async function build() {
         root.classList.toggle('dark', window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
       }
       var btn = document.getElementById('themeToggle');
-      if (!btn) return;
-      btn.addEventListener('click', function () {
-        var nextIsDark = !root.classList.contains('dark');
-        root.classList.toggle('dark', nextIsDark);
-        localStorage.setItem(key, nextIsDark ? 'dark' : 'light');
+      var langButtons = Array.prototype.slice.call(document.querySelectorAll('[data-lang-switch]'));
+      var cards = Array.prototype.slice.call(document.querySelectorAll('.post-card[data-lang]'));
+
+      function syncCardLinks() {
+        var theme = root.classList.contains('dark') ? 'dark' : 'light';
+        var activeLang = localStorage.getItem(langKey) === 'en' ? 'en' : 'zh';
+        cards.forEach(function (card) {
+          var link = card.querySelector('a.post-link');
+          if (!link) return;
+          var url = new URL(link.getAttribute('href'), location.href);
+          url.searchParams.set('lang', activeLang);
+          url.searchParams.set('theme', theme);
+          link.setAttribute('href', './' + url.pathname.split('/').pop() + '?' + url.searchParams.toString());
+        });
+      }
+
+      function applyLang(lang) {
+        var target = lang === 'en' ? 'en' : 'zh';
+        localStorage.setItem(langKey, target);
+        langButtons.forEach(function (button) {
+          button.classList.toggle('is-active', button.getAttribute('data-lang-switch') === target);
+        });
+        cards.forEach(function (card) {
+          card.style.display = card.getAttribute('data-lang') === target ? '' : 'none';
+        });
+        syncCardLinks();
+      }
+
+      langButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          applyLang(button.getAttribute('data-lang-switch'));
+        });
       });
+
+      var initialLang = (queryLang === 'en' || queryLang === 'zh') ? queryLang : (localStorage.getItem(langKey) === 'en' ? 'en' : 'zh');
+      applyLang(initialLang);
+
+      if (btn) {
+        btn.addEventListener('click', function () {
+          var nextIsDark = !root.classList.contains('dark');
+          root.classList.toggle('dark', nextIsDark);
+          localStorage.setItem(key, nextIsDark ? 'dark' : 'light');
+          syncCardLinks();
+        });
+      }
     })();
   </script>
 </body>
