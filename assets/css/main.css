@@ -396,10 +396,23 @@
   min-width: 118px;
 }
 
-.crop-aspect-select {
-  appearance: none;
-  -webkit-appearance: none;
+.crop-aspect-native {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.crop-aspect-trigger {
   width: 100%;
+  min-width: 160px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: left;
   padding: 0.38rem 1.85rem 0.38rem 0.65rem;
   border-radius: 0.75rem;
   border: 1px solid #93c5fd;
@@ -408,17 +421,117 @@
   font-size: 0.78rem;
   font-weight: 600;
   line-height: 1.2;
+  cursor: pointer;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
-.crop-aspect-select:hover {
+.crop-aspect-trigger:hover {
   border-color: #60a5fa;
 }
 
-.crop-aspect-select:focus {
+.crop-aspect-trigger:focus {
   outline: none;
   border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.16);
+}
+
+.crop-aspect-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  z-index: 45;
+  width: 100%;
+  min-width: 180px;
+  max-height: 208px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.3rem;
+  border-radius: 0.8rem;
+  border: 1px solid #93c5fd;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(30, 58, 138, 0.16);
+}
+
+.crop-aspect-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  border: 0;
+  background: transparent;
+  border-radius: 0.55rem;
+  padding: 0.42rem 0.45rem;
+  color: #1e3a8a;
+  font-size: 0.77rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.crop-aspect-option-text {
+  flex: 1;
+  text-align: left;
+}
+
+.crop-aspect-option:hover {
+  background: #dbeafe;
+}
+
+.crop-aspect-option.is-active {
+  background: #c7d2fe;
+  color: #312e81;
+}
+
+.crop-aspect-check {
+  opacity: 0;
+  color: #4338ca;
+  font-size: 0.74rem;
+  transition: opacity 0.15s ease;
+}
+
+.crop-aspect-option.is-active .crop-aspect-check {
+  opacity: 1;
+}
+
+.crop-aspect-icon {
+  display: inline-block;
+  border: 2px solid currentColor;
+  border-radius: 0.18rem;
+  flex: 0 0 1.06rem;
+  min-width: 1.06rem;
+  opacity: 0.86;
+}
+
+.crop-aspect-icon.is-free {
+  width: 0.92rem;
+  height: 0.72rem;
+  border-style: dashed;
+}
+
+.crop-aspect-icon.is-11 {
+  width: 0.78rem;
+  height: 0.78rem;
+}
+
+.crop-aspect-icon.is-43 {
+  width: 0.96rem;
+  height: 0.72rem;
+}
+
+.crop-aspect-icon.is-34 {
+  width: 0.72rem;
+  height: 0.96rem;
+}
+
+.crop-aspect-icon.is-169 {
+  width: 1.06rem;
+  height: 0.6rem;
+}
+
+.crop-aspect-icon.is-916 {
+  width: 0.6rem;
+  height: 1.06rem;
 }
 
 .crop-aspect-caret {
@@ -431,14 +544,37 @@
   pointer-events: none;
 }
 
-.dark .crop-aspect-select {
+.dark .crop-aspect-trigger {
   border-color: rgba(129, 140, 248, 0.38);
   background: linear-gradient(135deg, rgba(55, 65, 81, 0.96), rgba(17, 24, 39, 0.98));
   color: #e0e7ff;
 }
 
-.dark .crop-aspect-select:hover {
+.dark .crop-aspect-trigger:hover {
   border-color: rgba(129, 140, 248, 0.66);
+}
+
+.dark .crop-aspect-menu {
+  border-color: rgba(129, 140, 248, 0.44);
+  background: rgba(17, 24, 39, 0.98);
+  box-shadow: 0 14px 34px rgba(2, 6, 23, 0.55);
+}
+
+.dark .crop-aspect-option {
+  color: #dbeafe;
+}
+
+.dark .crop-aspect-option:hover {
+  background: rgba(55, 65, 81, 0.92);
+}
+
+.dark .crop-aspect-option.is-active {
+  background: rgba(67, 56, 202, 0.42);
+  color: #e0e7ff;
+}
+
+.dark .crop-aspect-check {
+  color: #c7d2fe;
 }
 
 .dark .crop-aspect-caret {

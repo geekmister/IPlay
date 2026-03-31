@@ -346,6 +346,10 @@ const fileEdit = document.getElementById('file_edit');
 const btnEditUndo = document.getElementById('btn_edit_undo');
 const btnEditRedo = document.getElementById('btn_edit_redo');
 const cropAspectSelect = document.getElementById('crop_aspect_ratio');
+const cropAspectTrigger = document.getElementById('crop_aspect_trigger');
+const cropAspectTriggerIcon = document.getElementById('crop_aspect_trigger_icon');
+const cropAspectTriggerText = document.getElementById('crop_aspect_trigger_text');
+const cropAspectMenu = document.getElementById('crop_aspect_menu');
 const cropRatioGroup = document.getElementById('crop_ratio_group');
 const cropRatioHint = document.getElementById('crop_ratio_hint');
 const toastContainer = document.getElementById('toast_container');
@@ -2250,8 +2254,21 @@ function _updateCropRatioHint() {
     cropRatioHint.textContent = '当前：按图形自由';
     return;
   }
-  const text = cropAspectRatio ? `${cropAspectRatio.w}:${cropAspectRatio.h}` : '自由比例';
-  cropRatioHint.textContent = '当前：' + text;
+  const currentValue = cropAspectSelect ? cropAspectSelect.value : 'free';
+  const meta = _getCropAspectMeta(currentValue);
+  cropRatioHint.textContent = '当前：' + meta.hint;
+}
+
+function _getCropAspectMeta(value) {
+  const map = {
+    'free': { text: '自由比例', iconClass: 'is-free', hint: '自由比例（任意图形）' },
+    '1:1': { text: '1:1 正方形', iconClass: 'is-11', hint: '1:1（正方形）' },
+    '4:3': { text: '4:3 横向', iconClass: 'is-43', hint: '4:3（横向矩形）' },
+    '3:4': { text: '3:4 竖向', iconClass: 'is-34', hint: '3:4（竖向矩形）' },
+    '16:9': { text: '16:9 宽屏', iconClass: 'is-169', hint: '16:9（宽屏横向）' },
+    '9:16': { text: '9:16 竖屏', iconClass: 'is-916', hint: '9:16（竖屏纵向）' },
+  };
+  return map[value] || map.free;
 }
 
 function _syncCropAspectUI() {
@@ -2356,8 +2373,125 @@ function _toggleEditDragMode() {
   _syncEditStageTransform();
 }
 
+function _syncCropAspectPickerUI() {
+  if (!cropAspectSelect || !cropAspectTriggerText || !cropAspectMenu) return;
+  const selectedValue = cropAspectSelect.value || 'free';
+  const selectedOption = cropAspectMenu.querySelector(`.crop-aspect-option[data-value="${selectedValue}"]`);
+  const meta = _getCropAspectMeta(selectedValue);
+  cropAspectTriggerText.textContent = meta.text;
+  if (cropAspectTriggerIcon) {
+    cropAspectTriggerIcon.className = `crop-aspect-icon ${meta.iconClass}`;
+  }
+  cropAspectMenu.querySelectorAll('.crop-aspect-option').forEach(btn => {
+    const isActive = btn.getAttribute('data-value') === selectedValue;
+    btn.classList.toggle('is-active', isActive);
+    btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+  });
+}
+
+function _setCropAspectMenuOpen(open) {
+  if (!cropAspectMenu || !cropAspectTrigger) return;
+  cropAspectMenu.classList.toggle('hidden', !open);
+  cropAspectTrigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+function _getCropAspectOptions() {
+  return cropAspectMenu ? Array.from(cropAspectMenu.querySelectorAll('.crop-aspect-option')) : [];
+}
+
+function _focusCropAspectByOffset(offset) {
+  if (!cropAspectSelect || !cropAspectMenu) return;
+  const options = _getCropAspectOptions();
+  if (!options.length) return;
+  const currentIndex = options.findIndex(btn => btn.getAttribute('data-value') === cropAspectSelect.value);
+  const baseIndex = currentIndex >= 0 ? currentIndex : 0;
+  const nextIndex = (baseIndex + offset + options.length) % options.length;
+  const next = options[nextIndex];
+  if (!next) return;
+  const nextValue = next.getAttribute('data-value') || 'free';
+  if (cropAspectSelect.value !== nextValue) {
+    cropAspectSelect.value = nextValue;
+    cropAspectSelect.dispatchEvent(new Event('change', { bubbles: true }));
+  } else {
+    _syncCropAspectPickerUI();
+  }
+  next.scrollIntoView({ block: 'nearest' });
+}
+
+function _initCropAspectPicker() {
+  if (!cropAspectSelect || !cropAspectTrigger || !cropAspectMenu) return;
+  _syncCropAspectPickerUI();
+
+  cropAspectTrigger.addEventListener('click', () => {
+    const willOpen = cropAspectMenu.classList.contains('hidden');
+    _setCropAspectMenuOpen(willOpen);
+  });
+
+  cropAspectTrigger.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      _setCropAspectMenuOpen(true);
+      _focusCropAspectByOffset(e.key === 'ArrowDown' ? 1 : -1);
+      return;
+    }
+    if ((e.key === 'Enter' || e.key === ' ') && cropAspectMenu.classList.contains('hidden')) {
+      e.preventDefault();
+      _setCropAspectMenuOpen(true);
+      return;
+    }
+    if (e.key === 'Escape' && !cropAspectMenu.classList.contains('hidden')) {
+      e.preventDefault();
+      _setCropAspectMenuOpen(false);
+    }
+  });
+
+  cropAspectMenu.querySelectorAll('.crop-aspect-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const value = btn.getAttribute('data-value') || 'free';
+      if (cropAspectSelect.value !== value) {
+        cropAspectSelect.value = value;
+        cropAspectSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      } else {
+        _syncCropAspectPickerUI();
+      }
+      _setCropAspectMenuOpen(false);
+    });
+  });
+
+  cropAspectMenu.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      _focusCropAspectByOffset(e.key === 'ArrowDown' ? 1 : -1);
+      return;
+    }
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      _setCropAspectMenuOpen(false);
+      return;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      _setCropAspectMenuOpen(false);
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (cropAspectMenu.classList.contains('hidden')) return;
+    if (cropAspectTrigger.contains(e.target) || cropAspectMenu.contains(e.target)) return;
+    _setCropAspectMenuOpen(false);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !cropAspectMenu.classList.contains('hidden')) {
+      _setCropAspectMenuOpen(false);
+    }
+  });
+}
+
 if (cropAspectSelect) {
+  _initCropAspectPicker();
   cropAspectSelect.addEventListener('change', () => {
+    _syncCropAspectPickerUI();
     if (cropShape !== 'rect') {
       cropAspectRatio = null;
       _updateCropRatioHint();

@@ -426,7 +426,7 @@ tailwind.config = {
       </div>
 
       <!-- 裁剪控制面板 -->
-      <div id="crop_panel" class="hidden mt-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-500/10 overflow-hidden">
+      <div id="crop_panel" class="hidden mt-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-500/10 overflow-visible">
         <!-- 图形选择工具栏 -->
         <div class="p-4 border-b border-gray-200 dark:border-gray-700">
           <p class="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium">裁剪图形</p>
@@ -454,15 +454,51 @@ tailwind.config = {
           <div id="crop_ratio_group" class="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-blue-200/80 dark:border-blue-400/30 bg-white/80 dark:bg-gray-900/55 px-3 py-2">
             <label for="crop_aspect_ratio" class="text-xs font-semibold tracking-wide text-blue-700 dark:text-blue-200">固定比例</label>
             <div class="crop-aspect-wrap relative">
-              <select id="crop_aspect_ratio" class="crop-aspect-select">
-                <option value="free">自由</option>
-                <option value="1:1">1:1</option>
-                <option value="4:3">4:3</option>
-                <option value="3:4">3:4</option>
-                <option value="16:9">16:9</option>
-                <option value="9:16">9:16</option>
+              <select id="crop_aspect_ratio" class="crop-aspect-native" aria-hidden="true" tabindex="-1">
+                <option value="free">自由比例</option>
+                <option value="1:1">1:1 正方形</option>
+                <option value="4:3">4:3 横向</option>
+                <option value="3:4">3:4 竖向</option>
+                <option value="16:9">16:9 宽屏</option>
+                <option value="9:16">9:16 竖屏</option>
               </select>
-              <i class="fa fa-angle-down crop-aspect-caret" aria-hidden="true"></i>
+              <button id="crop_aspect_trigger" type="button" class="crop-aspect-trigger" aria-haspopup="listbox" aria-expanded="false">
+                <span id="crop_aspect_trigger_icon" class="crop-aspect-icon is-free" aria-hidden="true"></span>
+                <span id="crop_aspect_trigger_text">自由比例</span>
+                <i class="fa fa-angle-down crop-aspect-caret" aria-hidden="true"></i>
+              </button>
+              <div id="crop_aspect_menu" class="crop-aspect-menu hidden" role="listbox" aria-label="固定比例选项">
+                <button type="button" class="crop-aspect-option" data-value="free" role="option" aria-selected="true">
+                  <span class="crop-aspect-icon is-free" aria-hidden="true"></span>
+                  <span class="crop-aspect-option-text">自由比例</span>
+                  <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="crop-aspect-option" data-value="1:1" role="option" aria-selected="false">
+                  <span class="crop-aspect-icon is-11" aria-hidden="true"></span>
+                  <span class="crop-aspect-option-text">1:1 正方形</span>
+                  <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="crop-aspect-option" data-value="4:3" role="option" aria-selected="false">
+                  <span class="crop-aspect-icon is-43" aria-hidden="true"></span>
+                  <span class="crop-aspect-option-text">4:3 横向</span>
+                  <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="crop-aspect-option" data-value="3:4" role="option" aria-selected="false">
+                  <span class="crop-aspect-icon is-34" aria-hidden="true"></span>
+                  <span class="crop-aspect-option-text">3:4 竖向</span>
+                  <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="crop-aspect-option" data-value="16:9" role="option" aria-selected="false">
+                  <span class="crop-aspect-icon is-169" aria-hidden="true"></span>
+                  <span class="crop-aspect-option-text">16:9 宽屏</span>
+                  <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="crop-aspect-option" data-value="9:16" role="option" aria-selected="false">
+                  <span class="crop-aspect-icon is-916" aria-hidden="true"></span>
+                  <span class="crop-aspect-option-text">9:16 竖屏</span>
+                  <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                </button>
+              </div>
             </div>
             <span id="crop_ratio_hint" class="text-xs font-medium text-blue-700/80 dark:text-blue-200/80">当前：自由比例</span>
           </div>
