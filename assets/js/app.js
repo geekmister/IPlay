@@ -1,3 +1,11 @@
+
+console.log('app.js loaded: start');
+const LANG_STORAGE_KEY = 'iplay_lang';
+let currentLang = (localStorage.getItem(LANG_STORAGE_KEY) || '').toLowerCase();
+if (!['zh', 'en'].includes(currentLang)) {
+  currentLang = 'zh';
+}
+
 function syncContentCenterLinkTheme() {
   const link = document.getElementById('nav_content_center')
   if (!link) return
@@ -13,62 +21,7 @@ document.getElementById('toggleTheme').onclick = () => {
 }
 syncContentCenterLinkTheme()
 
-const LANG_STORAGE_KEY = 'iplay_lang'
-let currentLang = (localStorage.getItem(LANG_STORAGE_KEY) || '').toLowerCase()
-if (!['zh', 'en'].includes(currentLang)) {
-  currentLang = 'zh'
-}
-
-const STATIC_TRANSLATIONS = {
-  title: {
-    zh: '图像 AI 趣玩工具箱 - 本地处理不上传',
-    en: 'IPlay AI Image Toolbox - Local Processing, No Upload',
-  },
-  brand: {
-    zh: '图像 AI 趣玩工具箱',
-    en: 'IPlay AI Image Toolbox',
-  },
-  nav: {
-    zh: ['图片信息', '图片编辑', 'AI 去水印', 'AI 换脸', '人像与创作', '修复与增强', '识别与隐私', '批量与输出', '高级玩法'],
-    en: ['Image Info', 'Image Editor', 'AI Watermark Removal', 'AI Face Swap', 'Portrait & Create', 'Restore & Enhance', 'OCR & Privacy', 'Batch & Output', 'Advanced Studio'],
-  },
-  navDesc: {
-    zh: [
-      '查看元数据、指纹与导出信息',
-      '裁剪、压缩、旋转等基础编辑',
-      '去除水印与画面中的干扰元素',
-      '本地合成人像并拖拽微调位置',
-      '抠图、证件照、美化、风格化、表情包',
-      '老照片修复、移除、扩图、清晰增强、调色',
-      'OCR、翻译、隐私保护与敏感区域处理',
-      '批处理、拼图海报、图像与 PDF 工作流',
-      '进入完整高级工作台，查看全部任务分组',
-    ],
-    en: [
-      'View metadata, fingerprints, and exports',
-      'Crop, compress, rotate, and other basics',
-      'Remove watermarks and unwanted objects',
-      'Local face compositing with drag fine-tune',
-      'Cutout, ID photo, beauty, style, meme',
-      'Restore old photos, remove objects, upscale',
-      'OCR, translation, privacy masking workflows',
-      'Batch processing, collage, image/PDF workflows',
-      'Open full advanced workspace with all task groups',
-    ],
-  },
-}
-
 const MESSAGE_TRANSLATIONS = {
-  '请先上传并加载图片。': 'Please upload and load an image first.',
-  '请先框选水印区域': 'Please select a watermark area first.',
-  '图片已加载，请先框选水印区域后再执行。': 'Image loaded. Select the watermark area before running.',
-  '图片加载失败，请更换图片重试。': 'Image loading failed. Please try another image.',
-  '请先在图片上框选需要去除的水印区域': 'Please select the watermark area to remove first.',
-  'AI 模型处理中...': 'AI model is processing...',
-  '水印去除完成！': 'Watermark removal completed!',
-  '水印去除完成': 'Watermark removed successfully.',
-  '处理失败，请重试': 'Processing failed, please try again.',
-  '请先上传图片': 'Please upload an image first.',
   '图片信息已复制到剪贴板': 'Image information copied to clipboard.',
   '图片摘要已复制到剪贴板': 'Image summary copied to clipboard.',
   '复制失败，请重试': 'Copy failed, please try again.',
@@ -323,8 +276,10 @@ function toggleToolsWorkspace(mode = 'basic') {
 }
 
 function showMainPane(tabKey, activeButton, options = {}) {
+  console.log(`[ShowMainPane] Called with tabKey="${tabKey}"`)
   document.querySelectorAll('.tab-pane').forEach((pane) => pane.classList.add('hidden'))
   const target = document.getElementById('tab_' + tabKey)
+  console.log(`[ShowMainPane] Target element: ${ target ? 'found' : 'not found'} for #tab_${tabKey}`)
   if (target) target.classList.remove('hidden')
   setMainNavActive(activeButton || null)
   if (tabKey === 'tools') {
@@ -332,12 +287,14 @@ function showMainPane(tabKey, activeButton, options = {}) {
   } else {
     toggleToolsWorkspace('none')
   }
+  console.log(`[ShowMainPane] Complete`)
 }
 
 // 选项卡切换
 document.querySelectorAll('.tab-btn').forEach(b => {
   b.onclick = () => {
     const tabKey = b.getAttribute('tab')
+    console.log(`[Tab Click] tab-btn clicked: ${tabKey}`)
     showMainPane(tabKey, b, { toolsMode: 'basic' })
   }
 })
@@ -387,6 +344,7 @@ const btnImgDown = document.getElementById('btn_img_down');
 const imgStatus = document.getElementById('img_status');
 const imgProgress = document.getElementById('img_progress');
 const ctx = imgCanvas.getContext('2d');
+const uploadEditArea = document.getElementById('upload_edit_area');
 const fileEdit = document.getElementById('file_edit');
 const btnEditUndo = document.getElementById('btn_edit_undo');
 const btnEditRedo = document.getElementById('btn_edit_redo');
@@ -2136,35 +2094,47 @@ if (btnInfoExportMasked) {
   };
 }
 
-if (uploadInfoArea && fileInfo) {
-  uploadInfoArea.onclick = (e) => {
+function _initInfoUploadBindings() {
+  const uploadArea = document.getElementById('upload_info_area');
+  const fileInput = document.getElementById('file_info');
+  
+  if (!uploadArea || !fileInput) {
+    console.warn('Info upload area elements not found, retrying...');
+    setTimeout(_initInfoUploadBindings, 100);
+    return;
+  }
+
+  uploadArea.onclick = (e) => {
     if (e.target.closest('#btn_info_delete')) return;
-    if (uploadInfoArea.classList.contains('has-image')) return;
-    fileInfo.click();
+    if (uploadArea.classList.contains('has-image')) return;
+    fileInput.click();
   };
-  uploadInfoArea.addEventListener('dragover', (e) => {
-    if (uploadInfoArea.classList.contains('has-image')) return;
+  
+  uploadArea.addEventListener('dragover', (e) => {
+    if (uploadArea.classList.contains('has-image')) return;
     e.preventDefault();
-    uploadInfoArea.classList.add('border-primary', 'bg-primary/5');
+    uploadArea.classList.add('border-primary', 'bg-primary/5');
   });
-  uploadInfoArea.addEventListener('dragleave', () => {
-    if (uploadInfoArea.classList.contains('has-image')) return;
-    uploadInfoArea.classList.remove('border-primary', 'bg-primary/5');
+  
+  uploadArea.addEventListener('dragleave', () => {
+    if (uploadArea.classList.contains('has-image')) return;
+    uploadArea.classList.remove('border-primary', 'bg-primary/5');
   });
-  uploadInfoArea.addEventListener('drop', async (e) => {
-    if (uploadInfoArea.classList.contains('has-image')) return;
+  
+  uploadArea.addEventListener('drop', async (e) => {
+    if (uploadArea.classList.contains('has-image')) return;
     e.preventDefault();
-    uploadInfoArea.classList.remove('border-primary', 'bg-primary/5');
+    uploadArea.classList.remove('border-primary', 'bg-primary/5');
     const file = e.dataTransfer.files && e.dataTransfer.files[0];
     if (!file || !file.type.startsWith('image/')) return;
     const dt = new DataTransfer();
     dt.items.add(file);
-    fileInfo.files = dt.files;
-    fileInfo.dispatchEvent(new Event('change'));
+    fileInput.files = dt.files;
+    fileInput.dispatchEvent(new Event('change'));
   });
 
-  fileInfo.addEventListener('change', async () => {
-    const file = fileInfo.files && fileInfo.files[0];
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files && fileInput.files[0];
     if (!file) return;
     if (infoOriginalUrl) URL.revokeObjectURL(infoOriginalUrl);
     try {
@@ -2174,18 +2144,32 @@ if (uploadInfoArea && fileInfo) {
       infoOriginalImage = loaded.img;
       infoExifTags = null;
       infoRotateDeg = 0;
-      if (infoPreview) infoPreview.src = infoOriginalUrl;
-      if (infoPreviewWrap) infoPreviewWrap.classList.remove('hidden');
-      if (infoUploadPrompt) infoUploadPrompt.classList.add('hidden');
-      if (infoSideControls) infoSideControls.classList.remove('hidden');
-      if (btnInfoDelete) btnInfoDelete.classList.remove('hidden');
-      uploadInfoArea.classList.add('has-image');
+      const preview = document.getElementById('info_preview');
+      const previewWrap = document.getElementById('info_preview_wrap');
+      const uploadPrompt = document.getElementById('info_upload_prompt');
+      const sideControls = document.getElementById('info_side_controls');
+      const deleteBtn = document.getElementById('btn_info_delete');
+      
+      if (preview) preview.src = infoOriginalUrl;
+      if (previewWrap) previewWrap.classList.remove('hidden');
+      if (uploadPrompt) uploadPrompt.classList.add('hidden');
+      if (sideControls) sideControls.classList.remove('hidden');
+      if (deleteBtn) deleteBtn.classList.remove('hidden');
+      uploadArea.classList.add('has-image');
       _renderInfoPreviewImage();
       _updateEditInfoAll();
-    } catch (_) {
+    } catch (error) {
+      console.error('Info image loading error:', error);
       showToast('图片信息模块加载失败，请重试', 'error');
     }
   });
+}
+
+// 在 DOMContentLoaded 后立即初始化
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _initInfoUploadBindings);
+} else {
+  _initInfoUploadBindings();
 }
 
 window.addEventListener('resize', () => {
@@ -2464,36 +2448,59 @@ function renderEditCanvas() {
   _syncEditSideControlsPosition();
 }
 
-const uploadEditArea = document.getElementById('upload_edit_area');
-uploadEditArea.onclick = (e) => {
-  if (e.target.closest('#btn_edit_delete')) return;
-  const wrap = document.getElementById('edit_preview_wrap');
-  if (!wrap.classList.contains('hidden')) return;
-  document.getElementById('file_edit').click();
-}
-uploadEditArea.addEventListener('dragover', (e) => {
-  if (uploadEditArea.classList.contains('has-image')) return;
-  e.preventDefault();
-  uploadEditArea.classList.add('border-primary', 'bg-primary/5');
-});
-uploadEditArea.addEventListener('dragleave', () => {
-  if (uploadEditArea.classList.contains('has-image')) return;
-  uploadEditArea.classList.remove('border-primary', 'bg-primary/5');
-});
-uploadEditArea.addEventListener('drop', (e) => {
-  if (uploadEditArea.classList.contains('has-image')) return;
-  e.preventDefault();
-  uploadEditArea.classList.remove('border-primary', 'bg-primary/5');
-  const wrap = document.getElementById('edit_preview_wrap');
-  if (!wrap.classList.contains('hidden')) return;
-  const file = e.dataTransfer.files && e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) {
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    document.getElementById('file_edit').files = dt.files;
-    loadEditPreview(file);
+function _initEditUploadBindings() {
+  const uploadArea = document.getElementById('upload_edit_area');
+  const fileInput = document.getElementById('file_edit');
+  
+  if (!uploadArea || !fileInput) {
+    console.warn('Edit upload area elements not found, retrying...');
+    setTimeout(_initEditUploadBindings, 100);
+    return;
   }
-});
+
+  uploadArea.onclick = (e) => {
+    if (e.target.closest('#btn_edit_delete')) return;
+    const wrap = document.getElementById('edit_preview_wrap');
+    if (!wrap.classList.contains('hidden')) return;
+    fileInput.click();
+  };
+  
+  uploadArea.addEventListener('dragover', (e) => {
+    if (uploadArea.classList.contains('has-image')) return;
+    e.preventDefault();
+    uploadArea.classList.add('border-primary', 'bg-primary/5');
+  });
+  
+  uploadArea.addEventListener('dragleave', () => {
+    if (uploadArea.classList.contains('has-image')) return;
+    uploadArea.classList.remove('border-primary', 'bg-primary/5');
+  });
+  
+  uploadArea.addEventListener('drop', (e) => {
+    if (uploadArea.classList.contains('has-image')) return;
+    e.preventDefault();
+    uploadArea.classList.remove('border-primary', 'bg-primary/5');
+    const wrap = document.getElementById('edit_preview_wrap');
+    if (!wrap.classList.contains('hidden')) return;
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+      loadEditPreview(file);
+    }
+  });
+
+  // 绑定 file input change 事件
+  fileInput.onchange = e => loadEditPreview(e.target.files[0]);
+}
+
+// 在 DOMContentLoaded 后立即初始化
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _initEditUploadBindings);
+} else {
+  _initEditUploadBindings();
+}
 
 const editPreviewWrap = document.getElementById('edit_preview_wrap');
 editPreviewWrap.addEventListener('mousedown', (e) => {
@@ -2561,8 +2568,6 @@ function loadEditPreview(file) {
   };
   editOriginalImage.src = editOriginalUrl;
 }
-
-fileEdit.onchange = e => loadEditPreview(e.target.files[0]);
 
 document.getElementById('btn_edit_delete').onclick = (e) => {
   e.stopPropagation();
