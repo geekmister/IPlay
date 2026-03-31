@@ -2342,7 +2342,8 @@ function _restoreEditHistoryState(state) {
 function _updateEditDragButton() {
   const dragBtn = document.getElementById('btn_edit_drag_toggle');
   if (!dragBtn) return;
-  const canUseDrag = Boolean(editOriginalImage && cropViewZoom > 1 && _isEditOverflow());
+  const maskLocked = Boolean(cropMode && cropRect);
+  const canUseDrag = Boolean(editOriginalImage && cropViewZoom > 1 && _isEditOverflow() && !maskLocked);
   if (!canUseDrag) {
     editDragEnabled = false;
     editDragging = false;
@@ -2353,7 +2354,29 @@ function _updateEditDragButton() {
   dragBtn.classList.toggle('border-primary', editDragEnabled);
   dragBtn.classList.toggle('text-primary', editDragEnabled);
   dragBtn.classList.toggle('bg-primary/10', editDragEnabled);
-  dragBtn.title = !canUseDrag ? '请先放大图片后再启用拖动' : (editDragEnabled ? '关闭拖动' : '启用拖动（空格）');
+  if (maskLocked) {
+    dragBtn.title = '请先取消裁剪蒙版后再启用拖动';
+  } else {
+    dragBtn.title = !canUseDrag ? '请先放大图片后再启用拖动' : (editDragEnabled ? '关闭拖动' : '启用拖动（空格）');
+  }
+}
+
+function _updateCropMaskLockControls() {
+  const lockByMask = Boolean(cropMode && cropRect);
+  const lockIds = ['btn_edit_rotate_cw', 'btn_edit_rotate_ccw', 'btn_zoom_in', 'btn_zoom_out', 'btn_zoom_reset'];
+  lockIds.forEach(id => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.disabled = lockByMask;
+    btn.classList.toggle('opacity-50', lockByMask);
+    btn.classList.toggle('cursor-not-allowed', lockByMask);
+  });
+  if (lockByMask) {
+    editDragEnabled = false;
+    editDragging = false;
+    _syncEditStageTransform();
+  }
+  _updateEditDragButton();
 }
 
 function _toggleEditDragMode() {
@@ -2723,7 +2746,7 @@ document.addEventListener('keydown', (e) => {
   if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) {
     return;
   }
-  if (!editOriginalImage || cropViewZoom <= 1) return;
+  if (!editOriginalImage || cropViewZoom <= 1 || (cropMode && cropRect)) return;
   e.preventDefault();
   _toggleEditDragMode();
 });
@@ -2751,7 +2774,7 @@ function loadEditPreview(file) {
     document.getElementById('edit_preview_wrap').classList.remove('hidden');
     document.getElementById('edit_side_controls').classList.remove('hidden');
     document.getElementById('crop_zoom_btns').classList.remove('hidden');
-    _updateEditDragButton();
+    _updateCropMaskLockControls();
     renderEditCanvas();
     _resetEditHistory();
     _pushEditHistory();
@@ -2779,7 +2802,7 @@ document.getElementById('btn_edit_delete').onclick = (e) => {
   editPanY = 0;
   editDragging = false;
   editDragEnabled = false;
-  _updateEditDragButton();
+  _updateCropMaskLockControls();
   const stage = document.getElementById('edit_canvas_stage');
   if (stage) stage.style.transform = 'translate(0px, 0px)';
   const wrap = document.getElementById('edit_preview_wrap');
@@ -3103,7 +3126,7 @@ function enterCropMode() {
   cropOverlay.classList.remove('hidden');
   document.getElementById('crop_panel').classList.remove('hidden');
   document.getElementById('crop_confirm').disabled = true;
-  _updateEditDragButton();
+  _updateCropMaskLockControls();
   _syncEditStageTransform();
   _setEditToolHighlight('crop');
   updateCropHint();
@@ -3144,6 +3167,7 @@ function exitCropMode() {
   const ctx = cropOverlay.getContext('2d');
   ctx.clearRect(0, 0, cropOverlay.width, cropOverlay.height);
   document.getElementById('crop_panel').classList.add('hidden');
+  _updateCropMaskLockControls();
   if (editOriginalImage) renderEditCanvas();
   _setEditToolHighlight(document.getElementById('compress_panel').classList.contains('hidden') ? null : 'compress');
 }
@@ -3152,6 +3176,7 @@ function drawCropOverlay() {
   const cropOverlay = document.getElementById('crop_overlay');
   const ctx = cropOverlay.getContext('2d');
   ctx.clearRect(0, 0, cropOverlay.width, cropOverlay.height);
+  _updateCropMaskLockControls();
   if (!cropRect) return;
   
   const x = Math.min(cropRect.sx, cropRect.ex);
@@ -3420,6 +3445,7 @@ cropOverlay.addEventListener('mousedown', (e) => {
     cropDragging = true;
     cropDragType = 'draw';
     cropRect = { sx: pos.x, sy: pos.y, ex: pos.x, ey: pos.y };
+    _updateCropMaskLockControls();
   }
 });
 
