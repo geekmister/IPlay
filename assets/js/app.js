@@ -330,9 +330,6 @@ document.getElementById('nav_vip_top').onclick = () => {
   showMainPane('vip', null)
 }
 
-// ==============================================
-// 👇👇👇 只修复这里：AI 去水印功能（已100%修好）
-// ==============================================
 const uploadImgArea = document.getElementById('upload_img_area');
 const fileImg = document.getElementById('file_img');
 const imgPreviewWrap = document.getElementById('img_preview_wrap');
@@ -349,6 +346,7 @@ const fileEdit = document.getElementById('file_edit');
 const btnEditUndo = document.getElementById('btn_edit_undo');
 const btnEditRedo = document.getElementById('btn_edit_redo');
 const cropAspectSelect = document.getElementById('crop_aspect_ratio');
+const cropRatioGroup = document.getElementById('crop_ratio_group');
 const cropRatioHint = document.getElementById('crop_ratio_hint');
 const toastContainer = document.getElementById('toast_container');
 const uploadInfoArea = document.getElementById('upload_info_area');
@@ -2248,8 +2246,21 @@ function _applyAspectToPoint(sx, sy, x, y) {
 
 function _updateCropRatioHint() {
   if (!cropRatioHint) return;
+  if (cropShape !== 'rect') {
+    cropRatioHint.textContent = '当前：按图形自由';
+    return;
+  }
   const text = cropAspectRatio ? `${cropAspectRatio.w}:${cropAspectRatio.h}` : '自由比例';
   cropRatioHint.textContent = '当前：' + text;
+}
+
+function _syncCropAspectUI() {
+  const isRectShape = cropShape === 'rect';
+  if (cropRatioGroup) {
+    cropRatioGroup.classList.toggle('hidden', !isRectShape);
+  }
+  cropAspectRatio = isRectShape ? _parseAspectRatio(cropAspectSelect ? cropAspectSelect.value : 'free') : null;
+  _updateCropRatioHint();
 }
 
 function _updateEditHistoryButtons() {
@@ -2314,14 +2325,44 @@ function _restoreEditHistoryState(state) {
 function _updateEditDragButton() {
   const dragBtn = document.getElementById('btn_edit_drag_toggle');
   if (!dragBtn) return;
+  const canUseDrag = Boolean(editOriginalImage && !cropMode && cropViewZoom > 1 && _isEditOverflow());
+  if (!canUseDrag) {
+    editDragEnabled = false;
+    editDragging = false;
+  }
+  dragBtn.disabled = !canUseDrag;
+  dragBtn.classList.toggle('opacity-50', !canUseDrag);
+  dragBtn.classList.toggle('cursor-not-allowed', !canUseDrag);
   dragBtn.classList.toggle('border-primary', editDragEnabled);
   dragBtn.classList.toggle('text-primary', editDragEnabled);
   dragBtn.classList.toggle('bg-primary/10', editDragEnabled);
-  dragBtn.title = editDragEnabled ? '关闭拖动' : '启用拖动';
+  dragBtn.title = !canUseDrag ? '请先放大图片后再启用拖动' : (editDragEnabled ? '关闭拖动' : '启用拖动（空格）');
+}
+
+function _toggleEditDragMode() {
+  const canUseDrag = Boolean(editOriginalImage && !cropMode && cropViewZoom > 1 && _isEditOverflow());
+  if (!canUseDrag) {
+    editDragEnabled = false;
+    editDragging = false;
+    _updateEditDragButton();
+    _syncEditStageTransform();
+    return;
+  }
+  editDragEnabled = !editDragEnabled;
+  if (!editDragEnabled) {
+    editDragging = false;
+  }
+  _updateEditDragButton();
+  _syncEditStageTransform();
 }
 
 if (cropAspectSelect) {
   cropAspectSelect.addEventListener('change', () => {
+    if (cropShape !== 'rect') {
+      cropAspectRatio = null;
+      _updateCropRatioHint();
+      return;
+    }
     cropAspectRatio = _parseAspectRatio(cropAspectSelect.value);
     _updateCropRatioHint();
     if (cropRect && cropAspectRatio) {
@@ -2374,6 +2415,10 @@ function _syncEditStageTransform() {
   const wrap = document.getElementById('edit_preview_wrap');
   if (!stage || !wrap) return;
   _clampEditPan();
+  if (!(editOriginalImage && !cropMode && cropViewZoom > 1 && _isEditOverflow())) {
+    editDragEnabled = false;
+    editDragging = false;
+  }
   stage.style.transform = `translate(${editPanX}px, ${editPanY}px)`;
   wrap.style.cursor = _isEditOverflow() && !cropMode && editDragEnabled ? (editDragging ? 'grabbing' : 'grab') : 'default';
 }
@@ -2445,6 +2490,7 @@ function renderEditCanvas() {
   } else {
     _syncEditStageTransform();
   }
+  _updateEditDragButton();
   _syncEditSideControlsPosition();
 }
 
@@ -2529,14 +2575,19 @@ window.addEventListener('mouseup', () => {
 });
 
 document.getElementById('btn_edit_drag_toggle').onclick = () => {
-  if (!editOriginalImage || cropMode) return;
-  editDragEnabled = !editDragEnabled;
-  if (!editDragEnabled) {
-    editDragging = false;
-  }
-  _updateEditDragButton();
-  _syncEditStageTransform();
+  _toggleEditDragMode();
 };
+
+document.addEventListener('keydown', (e) => {
+  if (e.code !== 'Space' || e.repeat) return;
+  const target = e.target;
+  if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) {
+    return;
+  }
+  if (!editOriginalImage || cropMode || cropViewZoom <= 1) return;
+  e.preventDefault();
+  _toggleEditDragMode();
+});
 
 window.addEventListener('resize', _syncEditSideControlsPosition);
 
@@ -2721,18 +2772,23 @@ document.getElementById('btn_zoom_in').onclick = () => {
   if (!editOriginalImage) return;
   cropViewZoom = Math.min(cropViewZoom * 1.3, 4);
   _applyCropZoom();
+  _updateEditDragButton();
 };
 document.getElementById('btn_zoom_out').onclick = () => {
   if (!editOriginalImage) return;
   cropViewZoom = Math.max(cropViewZoom / 1.3, 0.4);
   _applyCropZoom();
+  _updateEditDragButton();
 };
 document.getElementById('btn_zoom_reset').onclick = () => {
   if (!editOriginalImage) return;
   cropViewZoom = 1;
   editPanX = 0;
   editPanY = 0;
+  editDragEnabled = false;
+  editDragging = false;
   renderEditCanvas();
+  _updateEditDragButton();
 };
 // ---- 压缩面板逻辑 ----
 let _compressEstTimer = null;
@@ -2890,8 +2946,7 @@ function enterCropMode() {
   cropDragging = false;
   cropDragType = null;
   cropShape = 'rect';  // 重置为矩形
-  cropAspectRatio = _parseAspectRatio(cropAspectSelect ? cropAspectSelect.value : 'free');
-  _updateCropRatioHint();
+  _syncCropAspectUI();
   const editCanvas = document.getElementById('edit_preview');
   const cropOverlay = document.getElementById('crop_overlay');
   
@@ -2934,7 +2989,7 @@ function updateCropHint() {
     'heart': '在图片上拖拽选择心形裁剪区域',
     'pentagon': '在图片上拖拽选择五边形裁剪区域'
   };
-  const ratioText = cropAspectRatio ? `（固定比例 ${cropAspectRatio.w}:${cropAspectRatio.h}）` : '';
+  const ratioText = (cropShape === 'rect' && cropAspectRatio) ? `（固定比例 ${cropAspectRatio.w}:${cropAspectRatio.h}）` : '';
   document.getElementById('crop_hint').textContent = (hints[cropShape] || hints['rect']) + ratioText;
 }
 
@@ -2944,6 +2999,7 @@ function exitCropMode() {
   cropDragging = false;
   cropDragType = null;
   cropShape = 'rect';
+  _syncCropAspectUI();
   const cropOverlay = document.getElementById('crop_overlay');
   cropOverlay.style.display = 'none';
   cropOverlay.classList.add('hidden');
@@ -3399,6 +3455,7 @@ document.querySelectorAll('.crop-shape-btn').forEach(btn => {
   btn.onclick = () => {
     if (!cropMode) return;
     cropShape = btn.getAttribute('data-shape');
+    _syncCropAspectUI();
     cropRect = null;  // 重置选区
     updateCropHint();
     

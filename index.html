@@ -423,8 +423,6 @@ tailwind.config = {
       <div class="flex justify-center gap-3 flex-wrap mb-4">
         <button class="btn btn-secondary compress"><i class="fa fa-compress mr-1"></i>压缩图片</button>
         <button class="btn btn-secondary crop"><i class="fa fa-crop mr-1"></i>裁剪图片</button>
-        <button id="btn_edit_undo" class="btn btn-secondary" disabled><i class="fa fa-reply mr-1"></i>撤销</button>
-        <button id="btn_edit_redo" class="btn btn-secondary" disabled><i class="fa fa-share mr-1"></i>重做</button>
       </div>
 
       <!-- 裁剪控制面板 -->
@@ -453,17 +451,20 @@ tailwind.config = {
         <!-- 操作提示 -->
         <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-blue-100 dark:bg-blue-500/20">
           <p class="text-sm text-blue-600 dark:text-blue-300"><i class="fa fa-info-circle mr-1"></i><span id="crop_hint">在图片上拖拽选择矩形裁剪区域</span></p>
-          <div class="mt-3 flex flex-wrap items-center gap-2">
-            <label for="crop_aspect_ratio" class="text-xs text-blue-700 dark:text-blue-200">固定比例</label>
-            <select id="crop_aspect_ratio" class="px-2 py-1 rounded-lg text-xs border border-blue-200 dark:border-blue-400/30 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200">
-              <option value="free">自由</option>
-              <option value="1:1">1:1</option>
-              <option value="4:3">4:3</option>
-              <option value="3:4">3:4</option>
-              <option value="16:9">16:9</option>
-              <option value="9:16">9:16</option>
-            </select>
-            <span id="crop_ratio_hint" class="text-xs text-blue-700/80 dark:text-blue-200/80">当前：自由比例</span>
+          <div id="crop_ratio_group" class="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-blue-200/80 dark:border-blue-400/30 bg-white/80 dark:bg-gray-900/55 px-3 py-2">
+            <label for="crop_aspect_ratio" class="text-xs font-semibold tracking-wide text-blue-700 dark:text-blue-200">固定比例</label>
+            <div class="crop-aspect-wrap relative">
+              <select id="crop_aspect_ratio" class="crop-aspect-select">
+                <option value="free">自由</option>
+                <option value="1:1">1:1</option>
+                <option value="4:3">4:3</option>
+                <option value="3:4">3:4</option>
+                <option value="16:9">16:9</option>
+                <option value="9:16">9:16</option>
+              </select>
+              <i class="fa fa-angle-down crop-aspect-caret" aria-hidden="true"></i>
+            </div>
+            <span id="crop_ratio_hint" class="text-xs font-medium text-blue-700/80 dark:text-blue-200/80">当前：自由比例</span>
           </div>
         </div>
         <!-- 操作按钮 -->
