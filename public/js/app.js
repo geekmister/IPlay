@@ -4185,3 +4185,22 @@ advPdfToImg.onclick = async () => {
     setAdvStatus('PDF 转图片完成。')
   })
 }
+
+// 清理 data-cloak：在 DOM 准备好后移除以允许客户端脚本修改已 SSR 渲染的节点
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        document.querySelectorAll('[data-cloak]').forEach(el => el.removeAttribute('data-cloak'))
+      } catch (e) {
+        console.warn('Failed to clear data-cloak:', e)
+      }
+    })
+  } else {
+    try {
+      document.querySelectorAll('[data-cloak]').forEach(el => el.removeAttribute('data-cloak'))
+    } catch (e) {
+      console.warn('Failed to clear data-cloak:', e)
+    }
+  }
+}

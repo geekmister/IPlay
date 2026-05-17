@@ -33,13 +33,13 @@ watch(locale, (nextLocale) => {
 <template>
   <div class="min-h-screen">
 <!-- 导航 -->
-<nav class="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-sm px-4 py-3">
+<nav data-cloak class="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-sm px-4 py-3">
   <div class="max-w-6xl mx-auto flex justify-between items-center">
     <div class="text-lg md:text-xl font-bold text-primary flex items-center">
       <i class="fa fa-magic mr-2"></i>{{ $t('title') }}
     </div>
     <div class="flex items-center gap-2">
-      <a id="nav_content_center" href="javascript:void(0)" class="btn btn-secondary text-sm inline-flex items-center">
+      <a id="nav_content_center" data-cloak href="javascript:void(0)" class="btn btn-secondary text-sm inline-flex items-center">
         <i class="fa fa-book mr-1"></i>{{ $t('nav.content') }}
       </a>
       <button id="nav_vip_top" class="btn btn-vip text-sm">
@@ -61,7 +61,7 @@ watch(locale, (nextLocale) => {
   </div>
 </nav>
 
-<main class="max-w-6xl mx-auto px-4 py-10">
+<main data-cloak class="max-w-6xl mx-auto px-4 py-10">
   <!-- 标题 -->
   <div class="text-center mb-10">
     <h1 class="text-[clamp(1.7rem,4vw,2.8rem)] font-bold mb-3">{{ $t('title') }}</h1>

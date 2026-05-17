@@ -29,6 +29,20 @@ html.dark body {
   --color-primary-950: 30 27 75;
 }
 
+/* Hide elements during SSR → client hydration to avoid visual mismatch
+   Elements marked with `data-cloak` will be hidden until client JS removes the attribute */
+[data-cloak] {
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+[data-cloak].no-hide {
+  opacity: 1;
+  pointer-events: auto;
+  user-select: auto;
+}
+
 .gradient-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
 .gradient-vip { background: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899); }
 
