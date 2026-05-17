@@ -4,6 +4,10 @@
   "description": "Nuxt SSR 版本的 IPlay 图像工具箱，使用 NuxtUI 和 Tailwind 构建。",
   "private": true,
   "type": "module",
+  "imports": {
+    "#imports": "./.nuxt/imports.mjs",
+    "#build": "./.nuxt/"
+  },
   "scripts": {
     "dev": "nuxi dev",
     "build": "nuxi build",
