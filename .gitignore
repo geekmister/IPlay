@@ -81,6 +81,10 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
+.output
+
+# Project backups (kept outside repo)
+IPlay-backup/
 
 # Gatsby files
 .cache/

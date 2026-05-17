@@ -1,32 +1,25 @@
 {
-  "name": "iplay.git",
+  "name": "iplay",
   "version": "1.0.0",
-  "description": "一个纯前端、本地运行的图像工具箱。",
-  "main": "index.js",
+  "description": "Nuxt SSR 版本的 IPlay 图像工具箱，使用 NuxtUI 和 Tailwind 构建。",
+  "private": true,
+  "type": "module",
   "scripts": {
+    "dev": "nuxi dev",
+    "build": "nuxi build",
+    "preview": "nuxi preview",
     "test": "playwright test",
     "test:e2e": "playwright test",
-    "test:e2e:headed": "playwright test --headed",
-    "test:e2e:ui": "playwright test --ui",
-    "build:mdx": "node scripts/build-mdx.mjs"
+    "test:e2e:headed": "playwright test --headed"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/geekmister/IPlay.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/geekmister/IPlay/issues"
-  },
-  "homepage": "https://github.com/geekmister/IPlay#readme",
   "devDependencies": {
-    "@mdx-js/mdx": "^3.1.1",
+    "@nuxt/ui": "^4.5.0",
+    "@nuxtjs/tailwindcss": "^6.9.0",
     "@playwright/test": "^1.58.2",
-    "gray-matter": "^4.0.3",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.37",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.6.0",
+    "nuxt": "^4.4.5"
   }
 }

@@ -1,0 +1,80 @@
+{
+  "title": "이미지 AI 툴박스",
+  "desc": "이미지 정보, 편집, 창의적 처리, 모두 로컬에서 완료 · 개인정보 안전 · 업로드 불필요",
+  "nav": {
+    "content": "콘텐츠 센터",
+    "vip": "VIP 업그레이드",
+    "lang": "한국어",
+    "theme": "테마"
+  },
+  "mainNav": {
+    "cards": {
+      "info": { "title": "이미지 정보", "desc": "메타데이터, 지문, 내보내기 정보 확인" },
+      "tools": { "title": "이미지 편집", "desc": "자르기, 압축, 회전 등 기본 편집" },
+      "image": { "title": "AI 워터마크 제거", "desc": "워터마크와 방해 요소 제거" },
+      "face": { "title": "AI 얼굴 교체", "desc": "로컬 합성과 드래그 미세 조정" },
+      "portrait": { "title": "인물 및 창작", "desc": "배경 제거, 증명사진, 보정, 스타일링, 밈" },
+      "enhance": { "title": "복원 및 향상", "desc": "옛사진 복원, 제거, 확장, 선명화, 색보정" },
+      "text": { "title": "인식 및 프라이버시", "desc": "OCR, 번역, 민감 영역 보호" },
+      "workflow": { "title": "일괄 처리 및 출력", "desc": "배치 작업, 콜라주, 이미지/PDF 워크플로" },
+      "advanced": { "title": "고급 기능", "desc": "전체 고급 작업공간에서 모든 작업 보기" }
+    }
+  },
+  "info": {
+    "section": {
+      "title": "이미지 정보 개요",
+      "subtitle": "이미지를 업로드하면 전체 메타데이터를 확인할 수 있습니다."
+    },
+    "full": {
+      "title": "전체 정보 작업",
+      "badge": "선택 필드",
+      "desc": "보관, 점검 및 전체 데이터 내보내기에 사용됩니다.",
+      "copy": "전체 정보 복사",
+      "export": "JSON 내보내기",
+      "exportFields": "내보내기 필드:",
+      "path": "경로",
+      "hash": "해시"
+    },
+    "safe": {
+      "title": "요약/마스킹 작업",
+      "badge": "고정 보안 필드",
+      "desc": "공유용이며 경로, GPS, 해시 등 민감 정보를 기본 제외합니다.",
+      "copy": "요약 복사",
+      "export": "마스킹 내보내기"
+    },
+    "upload": {
+      "title": "정보 분석을 위해 이미지 업로드",
+      "support": "JPG, PNG, WEBP, HEIC 지원(브라우저 읽기 가능)",
+      "previewAlt": "정보 미리보기 이미지",
+      "deleteTitle": "이미지 삭제",
+      "empty": "이미지가 없습니다. 먼저 업로드하세요."
+    },
+    "fields": {
+      "fileName": "파일명",
+      "browserPath": "브라우저 경로",
+      "ext": "확장자",
+      "size": "크기",
+      "lastModified": "수정일",
+      "pixelSize": "픽셀 크기",
+      "aspectRatio": "가로세로 비율",
+      "megapixel": "메가픽셀",
+      "totalPixels": "총 픽셀",
+      "exifOrientation": "EXIF 방향",
+      "currentRotation": "현재 회전",
+      "displaySize": "표시 크기",
+      "alphaChannel": "알파 채널",
+      "cameraLens": "장치 및 렌즈",
+      "shootingParams": "촬영 파라미터",
+      "datetimeSoftware": "촬영 시간 / 소프트웨어",
+      "gpsInfo": "GPS 위치 정보",
+      "sha256Fingerprint": "SHA-256 지문"
+    }
+  },
+  "watermark": {
+    "upload": {
+      "title": "클릭 또는 드래그하여 이미지 업로드",
+      "support": "JPG, PNG, WEBP 지원"
+    }
+  },
+  "legalNotice": "본 도구는 본인이 권리를 가진 콘텐츠만 처리합니다 · 침해 금지 · 순수 프런트엔드 로컬 실행"
+}
