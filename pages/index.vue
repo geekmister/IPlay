@@ -7,15 +7,17 @@ const localeOptions = [
   { value: 'en', label: 'English' },
   { value: 'ja', label: '日本語' },
   { value: 'ko', label: '한국어' },
-  { value: 'zh-tw', label: '繁體中文' }
+  { value: 'zh-tw', label: '繁體中文' },
 ];
 const selectedLocale = computed({
   get: () => locale.value,
   set: async (nextLocale: string) => {
     await setLocale(nextLocale);
-  }
+  },
 });
-const localeLabel = computed(() => localeOptions.find(l => l.value === locale.value)?.label || '');
+const localeLabel = computed(
+  () => localeOptions.find((l) => l.value === locale.value)?.label || ''
+);
 
 function syncLegacyLanguageRuntime(code: string) {
   if (typeof document === 'undefined') return;
@@ -32,882 +34,1513 @@ watch(locale, (nextLocale) => {
 </script>
 <template>
   <div class="min-h-screen">
-<!-- 导航 -->
-<nav data-cloak class="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-sm px-4 py-3">
-  <div class="max-w-6xl mx-auto flex justify-between items-center">
-    <div class="text-lg md:text-xl font-bold text-primary flex items-center">
-      <i class="fa fa-magic mr-2"></i>{{ $t('title') }}
-    </div>
-    <div class="flex items-center gap-2">
-      <a id="nav_content_center" data-cloak href="javascript:void(0)" class="btn btn-secondary text-sm inline-flex items-center">
-        <i class="fa fa-book mr-1"></i>{{ $t('nav.content') }}
-      </a>
-      <button id="nav_vip_top" class="btn btn-vip text-sm">
-        <i class="fa fa-diamond mr-1"></i>{{ $t('nav.vip') }}
-      </button>
-      <select
-        v-model="selectedLocale"
-        class="btn btn-secondary text-sm px-2 min-w-[70px]"
-        style="padding-left:0.5rem;padding-right:0.5rem;"
-      >
-        <option v-for="opt in localeOptions" :key="opt.value" :value="opt.value">
-          {{ opt.label }}
-        </option>
-      </select>
-      <button id="toggleTheme" class="btn btn-secondary text-sm">
-        <i class="fa fa-moon-o mr-1"></i>{{ $t('nav.theme') }}
-      </button>
-    </div>
-  </div>
-</nav>
+    <!-- 导航 -->
+    <nav
+      data-cloak
+      class="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-sm px-4 py-3"
+    >
+      <div class="max-w-6xl mx-auto flex justify-between items-center">
+        <div class="text-lg md:text-xl font-bold text-primary flex items-center">
+          <i class="fa fa-magic mr-2"></i>{{ $t('title') }}
+        </div>
+        <div class="flex items-center gap-2">
+          <a
+            id="nav_content_center"
+            data-cloak
+            href="javascript:void(0)"
+            class="btn btn-secondary text-sm inline-flex items-center"
+          >
+            <i class="fa fa-book mr-1"></i>{{ $t('nav.content') }}
+          </a>
+          <button id="nav_vip_top" class="btn btn-vip text-sm">
+            <i class="fa fa-diamond mr-1"></i>{{ $t('nav.vip') }}
+          </button>
+          <select
+            v-model="selectedLocale"
+            class="btn btn-secondary text-sm px-2 min-w-[70px]"
+            style="padding-left: 0.5rem; padding-right: 0.5rem"
+          >
+            <option v-for="opt in localeOptions" :key="opt.value" :value="opt.value">
+              {{ opt.label }}
+            </option>
+          </select>
+          <button id="toggleTheme" class="btn btn-secondary text-sm">
+            <i class="fa fa-moon-o mr-1"></i>{{ $t('nav.theme') }}
+          </button>
+        </div>
+      </div>
+    </nav>
 
-<main data-cloak class="max-w-6xl mx-auto px-4 py-10">
-  <!-- 标题 -->
-  <div class="text-center mb-10">
-    <h1 class="text-[clamp(1.7rem,4vw,2.8rem)] font-bold mb-3">{{ $t('title') }}</h1>
-    <p class="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-7">
-      <span class="hero-highlight">{{ $t('desc').split('·')[0] }}</span>
-      <span class="hero-subtle"> · {{ $t('desc').split('·').slice(1).join(' · ') }}</span>
-    </p>
-  </div>
+    <main data-cloak class="max-w-6xl mx-auto px-4 py-10">
+      <!-- 标题 -->
+      <div class="text-center mb-10">
+        <h1 class="text-[clamp(1.7rem,4vw,2.8rem)] font-bold mb-3">{{ $t('title') }}</h1>
+        <p class="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-7">
+          <span class="hero-highlight">{{ $t('desc').split('·')[0] }}</span>
+          <span class="hero-subtle"> · {{ $t('desc').split('·').slice(1).join(' · ') }}</span>
+        </p>
+      </div>
 
-  <!-- 选项卡 -->
-  <div class="main-nav-grid mb-8">
-    <button tab="info" class="tab-btn main-nav-card is-active" type="button">
-      <span class="main-nav-icon"><i class="fa fa-info-circle"></i></span>
-      <span class="main-nav-copy">
-        <span class="main-nav-title">{{ $t('mainNav.cards.info.title') }}</span>
-        <span class="main-nav-desc">{{ $t('mainNav.cards.info.desc') }}</span>
-      </span>
-    </button>
-    <button tab="tools" class="tab-btn main-nav-card" type="button">
-      <span class="main-nav-icon"><i class="fa fa-sliders"></i></span>
-      <span class="main-nav-copy">
-        <span class="main-nav-title">{{ $t('mainNav.cards.tools.title') }}</span>
-        <span class="main-nav-desc">{{ $t('mainNav.cards.tools.desc') }}</span>
-      </span>
-    </button>
-    <button tab="image" class="tab-btn main-nav-card" type="button">
-      <span class="main-nav-icon"><i class="fa fa-eraser"></i></span>
-      <span class="main-nav-copy">
-        <span class="main-nav-title">{{ $t('mainNav.cards.image.title') }}</span>
-        <span class="main-nav-desc">{{ $t('mainNav.cards.image.desc') }}</span>
-      </span>
-    </button>
-    <button tab="face" class="tab-btn main-nav-card" type="button">
-      <span class="main-nav-icon"><i class="fa fa-user-circle-o"></i></span>
-      <span class="main-nav-copy">
-        <span class="main-nav-title">{{ $t('mainNav.cards.face.title') }}</span>
-        <span class="main-nav-desc">{{ $t('mainNav.cards.face.desc') }}</span>
-      </span>
-    </button>
-    <button class="main-nav-card main-nav-adv-link" type="button" data-adv-category="portrait">
-      <span class="main-nav-icon"><i class="fa fa-paint-brush"></i></span>
-      <span class="main-nav-copy">
-        <span class="main-nav-title">{{ $t('mainNav.cards.portrait.title') }}</span>
-        <span class="main-nav-desc">{{ $t('mainNav.cards.portrait.desc') }}</span>
-      </span>
-    </button>
-    <button class="main-nav-card main-nav-adv-link" type="button" data-adv-category="enhance">
-      <span class="main-nav-icon"><i class="fa fa-wrench"></i></span>
-      <span class="main-nav-copy">
-        <span class="main-nav-title">{{ $t('mainNav.cards.enhance.title') }}</span>
-        <span class="main-nav-desc">{{ $t('mainNav.cards.enhance.desc') }}</span>
-      </span>
-    </button>
-    <button class="main-nav-card main-nav-adv-link" type="button" data-adv-category="text">
-      <span class="main-nav-icon"><i class="fa fa-eye"></i></span>
-      <span class="main-nav-copy">
-        <span class="main-nav-title">{{ $t('mainNav.cards.text.title') }}</span>
-        <span class="main-nav-desc">{{ $t('mainNav.cards.text.desc') }}</span>
-      </span>
-    </button>
-    <button class="main-nav-card main-nav-adv-link" type="button" data-adv-category="workflow">
-      <span class="main-nav-icon"><i class="fa fa-files-o"></i></span>
-      <span class="main-nav-copy">
-        <span class="main-nav-title">{{ $t('mainNav.cards.workflow.title') }}</span>
-        <span class="main-nav-desc">{{ $t('mainNav.cards.workflow.desc') }}</span>
-      </span>
-    </button>
-    <button id="tab_adv_jump" class="main-nav-card" type="button">
-      <span class="main-nav-icon"><i class="fa fa-magic"></i></span>
-      <span class="main-nav-copy">
-        <span class="main-nav-title">{{ $t('mainNav.cards.advanced.title') }}</span>
-        <span class="main-nav-desc">{{ $t('mainNav.cards.advanced.desc') }}</span>
-      </span>
-    </button>
-  </div>
+      <!-- 选项卡 -->
+      <div class="main-nav-grid mb-8">
+        <button tab="info" class="tab-btn main-nav-card is-active" type="button">
+          <span class="main-nav-icon"><i class="fa fa-info-circle"></i></span>
+          <span class="main-nav-copy">
+            <span class="main-nav-title">{{ $t('mainNav.cards.info.title') }}</span>
+            <span class="main-nav-desc">{{ $t('mainNav.cards.info.desc') }}</span>
+          </span>
+        </button>
+        <button tab="tools" class="tab-btn main-nav-card" type="button">
+          <span class="main-nav-icon"><i class="fa fa-sliders"></i></span>
+          <span class="main-nav-copy">
+            <span class="main-nav-title">{{ $t('mainNav.cards.tools.title') }}</span>
+            <span class="main-nav-desc">{{ $t('mainNav.cards.tools.desc') }}</span>
+          </span>
+        </button>
+        <button tab="image" class="tab-btn main-nav-card" type="button">
+          <span class="main-nav-icon"><i class="fa fa-eraser"></i></span>
+          <span class="main-nav-copy">
+            <span class="main-nav-title">{{ $t('mainNav.cards.image.title') }}</span>
+            <span class="main-nav-desc">{{ $t('mainNav.cards.image.desc') }}</span>
+          </span>
+        </button>
+        <button tab="face" class="tab-btn main-nav-card" type="button">
+          <span class="main-nav-icon"><i class="fa fa-user-circle-o"></i></span>
+          <span class="main-nav-copy">
+            <span class="main-nav-title">{{ $t('mainNav.cards.face.title') }}</span>
+            <span class="main-nav-desc">{{ $t('mainNav.cards.face.desc') }}</span>
+          </span>
+        </button>
+        <button class="main-nav-card main-nav-adv-link" type="button" data-adv-category="portrait">
+          <span class="main-nav-icon"><i class="fa fa-paint-brush"></i></span>
+          <span class="main-nav-copy">
+            <span class="main-nav-title">{{ $t('mainNav.cards.portrait.title') }}</span>
+            <span class="main-nav-desc">{{ $t('mainNav.cards.portrait.desc') }}</span>
+          </span>
+        </button>
+        <button class="main-nav-card main-nav-adv-link" type="button" data-adv-category="enhance">
+          <span class="main-nav-icon"><i class="fa fa-wrench"></i></span>
+          <span class="main-nav-copy">
+            <span class="main-nav-title">{{ $t('mainNav.cards.enhance.title') }}</span>
+            <span class="main-nav-desc">{{ $t('mainNav.cards.enhance.desc') }}</span>
+          </span>
+        </button>
+        <button class="main-nav-card main-nav-adv-link" type="button" data-adv-category="text">
+          <span class="main-nav-icon"><i class="fa fa-eye"></i></span>
+          <span class="main-nav-copy">
+            <span class="main-nav-title">{{ $t('mainNav.cards.text.title') }}</span>
+            <span class="main-nav-desc">{{ $t('mainNav.cards.text.desc') }}</span>
+          </span>
+        </button>
+        <button class="main-nav-card main-nav-adv-link" type="button" data-adv-category="workflow">
+          <span class="main-nav-icon"><i class="fa fa-files-o"></i></span>
+          <span class="main-nav-copy">
+            <span class="main-nav-title">{{ $t('mainNav.cards.workflow.title') }}</span>
+            <span class="main-nav-desc">{{ $t('mainNav.cards.workflow.desc') }}</span>
+          </span>
+        </button>
+        <button id="tab_adv_jump" class="main-nav-card" type="button">
+          <span class="main-nav-icon"><i class="fa fa-magic"></i></span>
+          <span class="main-nav-copy">
+            <span class="main-nav-title">{{ $t('mainNav.cards.advanced.title') }}</span>
+            <span class="main-nav-desc">{{ $t('mainNav.cards.advanced.desc') }}</span>
+          </span>
+        </button>
+      </div>
 
-  <!-- 图片信息 -->
-  <div id="tab_info" class="tab-pane card">
-    <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 shadow-sm max-w-5xl mx-auto">
-      <div class="px-5 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800">
-        <h3 class="text-lg font-semibold"><i class="fa fa-info-circle mr-1 text-primary"></i>{{ $t('info.section.title') }}</h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $t('info.section.subtitle') }}</p>
-        <div class="mt-4 grid gap-3 md:grid-cols-2">
-          <div class="rounded-xl border border-indigo-100 dark:border-indigo-500/20 bg-indigo-50/70 dark:bg-indigo-500/10 p-3">
-            <div class="flex items-center justify-between gap-2 mb-2">
-              <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-200">
-                <i class="fa fa-database mr-1"></i>{{ $t('info.full.title') }}
+      <!-- 图片信息 -->
+      <div id="tab_info" class="tab-pane card">
+        <div
+          class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 shadow-sm max-w-5xl mx-auto"
+        >
+          <div class="px-5 pt-5 pb-3 border-b border-gray-100 dark:border-gray-800">
+            <h3 class="text-lg font-semibold">
+              <i class="fa fa-info-circle mr-1 text-primary"></i>{{ $t('info.section.title') }}
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {{ $t('info.section.subtitle') }}
+            </p>
+            <div class="mt-4 grid gap-3 md:grid-cols-2">
+              <div
+                class="rounded-xl border border-indigo-100 dark:border-indigo-500/20 bg-indigo-50/70 dark:bg-indigo-500/10 p-3"
+              >
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-200">
+                    <i class="fa fa-database mr-1"></i>{{ $t('info.full.title') }}
+                  </p>
+                  <span
+                    class="text-[11px] px-2 py-0.5 rounded-full bg-white/90 dark:bg-gray-900/40 text-indigo-700 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-500/30"
+                    >{{ $t('info.full.badge') }}</span
+                  >
+                </div>
+                <p class="text-xs text-indigo-700/80 dark:text-indigo-100/80 mb-3">
+                  {{ $t('info.full.desc') }}
+                </p>
+                <div class="flex flex-wrap gap-2" id="info_actions_full">
+                  <button
+                    id="btn_info_copy"
+                    class="btn info-btn-full-main text-sm inline-flex items-center justify-center min-w-[138px]"
+                    type="button"
+                  >
+                    <i class="fa fa-copy mr-1"></i>{{ $t('info.full.copy') }}
+                  </button>
+                  <button
+                    id="btn_info_export"
+                    class="btn info-btn-full-sub text-sm inline-flex items-center justify-center min-w-[138px]"
+                    type="button"
+                  >
+                    <i class="fa fa-download mr-1"></i>{{ $t('info.full.export') }}
+                  </button>
+                </div>
+                <div
+                  id="info_export_field_group"
+                  class="mt-3 pt-3 border-t border-indigo-100 dark:border-indigo-500/20 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-indigo-700/90 dark:text-indigo-100/90"
+                >
+                  <span class="font-medium">{{ $t('info.full.exportFields') }}</span>
+                  <label class="inline-flex items-center gap-1.5 cursor-pointer"
+                    ><input id="info_opt_path" type="checkbox" class="accent-indigo-600" />{{
+                      $t('info.full.path')
+                    }}</label
+                  >
+                  <label class="inline-flex items-center gap-1.5 cursor-pointer"
+                    ><input id="info_opt_gps" type="checkbox" class="accent-indigo-600" />GPS</label
+                  >
+                  <label class="inline-flex items-center gap-1.5 cursor-pointer"
+                    ><input
+                      id="info_opt_exif"
+                      type="checkbox"
+                      checked
+                      class="accent-indigo-600"
+                    />EXIF</label
+                  >
+                  <label class="inline-flex items-center gap-1.5 cursor-pointer"
+                    ><input
+                      id="info_opt_hash"
+                      type="checkbox"
+                      checked
+                      class="accent-indigo-600"
+                    />{{ $t('info.full.hash') }}</label
+                  >
+                </div>
+              </div>
+
+              <div
+                class="rounded-xl border border-emerald-100 dark:border-emerald-500/20 bg-emerald-50/70 dark:bg-emerald-500/10 p-3"
+              >
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-200">
+                    <i class="fa fa-shield mr-1"></i>{{ $t('info.safe.title') }}
+                  </p>
+                  <span
+                    class="text-[11px] px-2 py-0.5 rounded-full bg-white/90 dark:bg-gray-900/40 text-emerald-700 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-500/30"
+                    >{{ $t('info.safe.badge') }}</span
+                  >
+                </div>
+                <p class="text-xs text-emerald-700/80 dark:text-emerald-100/80 mb-3">
+                  {{ $t('info.safe.desc') }}
+                </p>
+                <div class="flex flex-wrap gap-2" id="info_actions_safe">
+                  <button
+                    id="btn_info_copy_summary"
+                    class="btn info-btn-safe-main text-sm inline-flex items-center justify-center min-w-[138px]"
+                    type="button"
+                  >
+                    <i class="fa fa-file-text-o mr-1"></i>{{ $t('info.safe.copy') }}
+                  </button>
+                  <button
+                    id="btn_info_export_masked"
+                    class="btn info-btn-safe-sub text-sm inline-flex items-center justify-center min-w-[138px]"
+                    type="button"
+                  >
+                    <i class="fa fa-shield mr-1"></i>{{ $t('info.safe.export') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="p-5">
+            <div id="upload_info_area" class="upload-box mb-4 relative" style="min-height: 180px">
+              <div id="info_upload_prompt" class="flex flex-col items-center justify-center py-4">
+                <i class="fa fa-photo text-3xl text-gray-400 mb-2"></i>
+                <p class="mb-1">{{ $t('info.upload.title') }}</p>
+                <p class="text-xs text-gray-500">{{ $t('info.upload.support') }}</p>
+              </div>
+              <div
+                id="info_preview_wrap"
+                class="hidden relative mx-auto flex items-center justify-center bg-transparent"
+              >
+                <div id="info_preview_stage" class="relative inline-block">
+                  <img
+                    id="info_preview"
+                    class="max-w-full mx-auto rounded-xl border border-gray-200 dark:border-gray-700"
+                    :alt="$t('info.upload.previewAlt')"
+                  />
+                </div>
+              </div>
+              <div id="info_side_controls" class="hidden absolute right-2 z-20 flex flex-col gap-2">
+                <button
+                  id="btn_info_delete"
+                  type="button"
+                  :title="$t('info.upload.deleteTitle')"
+                  class="bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md transition-all"
+                >
+                  <i class="fa fa-times"></i>
+                </button>
+              </div>
+              <input type="file" id="file_info" accept="image/*" class="hidden" />
+            </div>
+            <div id="edit_info_empty" class="text-sm text-gray-500 dark:text-gray-400 leading-6">
+              <p><i class="fa fa-image mr-1 text-primary"></i>{{ $t('info.upload.empty') }}</p>
+            </div>
+
+            <div id="edit_info_content" class="hidden space-y-4 text-sm">
+              <div class="grid md:grid-cols-2 gap-2">
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.fileName') }}</p>
+                  <p id="edit_info_name" class="font-medium break-all">-</p>
+                </div>
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.browserPath') }}</p>
+                  <p id="edit_info_path" class="font-medium break-all">-</p>
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-4 gap-2">
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.ext') }}</p>
+                  <p id="edit_info_ext" class="font-medium">-</p>
+                </div>
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">MIME</p>
+                  <p id="edit_info_type" class="font-medium break-all">-</p>
+                </div>
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.size') }}</p>
+                  <p id="edit_info_size" class="font-medium">-</p>
+                </div>
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.lastModified') }}</p>
+                  <p id="edit_info_last_modified" class="font-medium">-</p>
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-4 gap-2">
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.pixelSize') }}</p>
+                  <p id="edit_info_dim" class="font-medium">-</p>
+                </div>
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.aspectRatio') }}</p>
+                  <p id="edit_info_ratio" class="font-medium">-</p>
+                </div>
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.megapixel') }}</p>
+                  <p id="edit_info_megapixel" class="font-medium">-</p>
+                </div>
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.totalPixels') }}</p>
+                  <p id="edit_info_pixels" class="font-semibold text-primary">-</p>
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-4 gap-2">
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.exifOrientation') }}</p>
+                  <p id="edit_info_orientation" class="font-medium">-</p>
+                </div>
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.currentRotation') }}</p>
+                  <p id="edit_info_rotate" class="font-medium">0deg</p>
+                </div>
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.displaySize') }}</p>
+                  <p id="edit_info_display" class="font-medium">-</p>
+                </div>
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.alphaChannel') }}</p>
+                  <p id="edit_info_alpha" class="font-medium">-</p>
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-2 gap-2">
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.cameraLens') }}</p>
+                  <p id="edit_info_camera" class="font-medium">-</p>
+                </div>
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.shootingParams') }}</p>
+                  <p id="edit_info_exposure" class="font-medium">-</p>
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-2 gap-2">
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.datetimeSoftware') }}</p>
+                  <p id="edit_info_datetime" class="font-medium">-</p>
+                </div>
+                <div
+                  class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  <p class="text-xs text-gray-500">{{ $t('info.fields.gpsInfo') }}</p>
+                  <p id="edit_info_gps" class="font-medium break-all">-</p>
+                </div>
+              </div>
+
+              <div
+                class="rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 px-3 py-2"
+              >
+                <p class="text-xs text-gray-500">{{ $t('info.fields.sha256Fingerprint') }}</p>
+                <p id="edit_info_hash" class="font-mono text-xs break-all text-primary">-</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 图片AI去水印 -->
+      <div id="tab_image" class="tab-pane card hidden">
+        <div id="upload_img_area" class="upload-box">
+          <i class="fa fa-cloud-upload text-3xl text-gray-400 mb-2"></i>
+          <p class="mb-1">{{ $t('watermark.upload.title') }}</p>
+          <p class="text-xs text-gray-500">{{ $t('watermark.upload.support') }}</p>
+          <input type="file" id="file_img" accept="image/*" class="hidden" />
+        </div>
+
+        <div class="mt-6 hidden text-center" id="img_preview_wrap">
+          <div id="img_stage" class="relative inline-block max-w-full leading-none">
+            <img id="img_preview" class="max-h-64 rounded-xl border" />
+            <canvas
+              id="img_canvas"
+              class="absolute inset-0 w-full h-full cursor-crosshair"
+            ></canvas>
+          </div>
+        </div>
+
+        <div id="img_status" class="mt-4 text-center text-sm hidden"></div>
+        <div
+          class="mt-3 hidden h-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"
+        >
+          <div id="img_progress" class="h-full gradient-primary w-0 transition-all"></div>
+        </div>
+
+        <div class="flex justify-center gap-4 mt-6">
+          <button id="btn_img_go" class="btn btn-primary" type="button">
+            <i class="fa fa-magic mr-1"></i>AI去除水印
+          </button>
+          <button id="btn_img_down" class="btn btn-secondary hidden">
+            <i class="fa fa-download mr-1"></i>下载图片
+          </button>
+        </div>
+      </div>
+
+      <!-- 视频去水印功能已移除 -->
+
+      <!-- AI换脸 -->
+      <div id="tab_face" class="tab-pane card hidden">
+        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6">
+          <div>
+            <h3 class="text-xl font-bold">AI 换脸工作台</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              纯前端本地预览，不上传图片。请仅处理本人或已获得授权的内容。
+            </p>
+          </div>
+          <div
+            class="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-200 text-sm"
+          >
+            本地合成 · 即时预览 · 可拖拽微调
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-5">
+          <div class="space-y-4">
+            <div id="upload_face_source_area" class="upload-box">
+              <i class="fa fa-user-circle-o text-3xl text-gray-400 mb-2"></i>
+              <p class="mb-1">上传源人脸</p>
+              <p class="text-xs text-gray-500">建议使用正脸清晰照片</p>
+              <input type="file" id="file_face_source" accept="image/*" class="hidden" />
+            </div>
+
+            <div
+              class="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700"
+            >
+              <p class="text-sm font-medium mb-3">源脸预览</p>
+              <img id="face_source_preview" class="hidden max-h-56 rounded-xl border mx-auto" />
+              <p id="face_source_empty" class="text-sm text-gray-500 text-center py-8">
+                上传后会自动生成换脸素材
               </p>
-              <span class="text-[11px] px-2 py-0.5 rounded-full bg-white/90 dark:bg-gray-900/40 text-indigo-700 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-500/30">{{ $t('info.full.badge') }}</span>
-            </div>
-            <p class="text-xs text-indigo-700/80 dark:text-indigo-100/80 mb-3">{{ $t('info.full.desc') }}</p>
-            <div class="flex flex-wrap gap-2" id="info_actions_full">
-              <button id="btn_info_copy" class="btn info-btn-full-main text-sm inline-flex items-center justify-center min-w-[138px]" type="button">
-                <i class="fa fa-copy mr-1"></i>{{ $t('info.full.copy') }}
-              </button>
-              <button id="btn_info_export" class="btn info-btn-full-sub text-sm inline-flex items-center justify-center min-w-[138px]" type="button">
-                <i class="fa fa-download mr-1"></i>{{ $t('info.full.export') }}
-              </button>
-            </div>
-            <div id="info_export_field_group" class="mt-3 pt-3 border-t border-indigo-100 dark:border-indigo-500/20 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-indigo-700/90 dark:text-indigo-100/90">
-              <span class="font-medium">{{ $t('info.full.exportFields') }}</span>
-              <label class="inline-flex items-center gap-1.5 cursor-pointer"><input id="info_opt_path" type="checkbox" class="accent-indigo-600"/>{{ $t('info.full.path') }}</label>
-              <label class="inline-flex items-center gap-1.5 cursor-pointer"><input id="info_opt_gps" type="checkbox" class="accent-indigo-600"/>GPS</label>
-              <label class="inline-flex items-center gap-1.5 cursor-pointer"><input id="info_opt_exif" type="checkbox" checked class="accent-indigo-600"/>EXIF</label>
-              <label class="inline-flex items-center gap-1.5 cursor-pointer"><input id="info_opt_hash" type="checkbox" checked class="accent-indigo-600"/>{{ $t('info.full.hash') }}</label>
             </div>
           </div>
 
-          <div class="rounded-xl border border-emerald-100 dark:border-emerald-500/20 bg-emerald-50/70 dark:bg-emerald-500/10 p-3">
-            <div class="flex items-center justify-between gap-2 mb-2">
-              <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-200">
-                <i class="fa fa-shield mr-1"></i>{{ $t('info.safe.title') }}
+          <div class="space-y-4">
+            <div id="upload_face_target_area" class="upload-box">
+              <i class="fa fa-picture-o text-3xl text-gray-400 mb-2"></i>
+              <p class="mb-1">上传目标图片</p>
+              <p class="text-xs text-gray-500">支持人物海报、自拍、场景图</p>
+              <input type="file" id="file_face_target" accept="image/*" class="hidden" />
+            </div>
+
+            <div
+              class="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700"
+            >
+              <div class="flex items-center justify-between mb-3">
+                <p class="text-sm font-medium">目标画布</p>
+                <span class="text-xs text-gray-500">拖动脸部位置微调</span>
+              </div>
+              <div id="face_stage_wrap" class="hidden text-center">
+                <div
+                  id="face_stage"
+                  class="relative inline-block max-w-full leading-none rounded-2xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700"
+                >
+                  <canvas id="face_canvas" class="block max-w-full cursor-move"></canvas>
+                </div>
+              </div>
+              <p id="face_target_empty" class="text-sm text-gray-500 text-center py-8">
+                上传目标图后在这里预览合成结果
               </p>
-              <span class="text-[11px] px-2 py-0.5 rounded-full bg-white/90 dark:bg-gray-900/40 text-emerald-700 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-500/30">{{ $t('info.safe.badge') }}</span>
-            </div>
-            <p class="text-xs text-emerald-700/80 dark:text-emerald-100/80 mb-3">{{ $t('info.safe.desc') }}</p>
-            <div class="flex flex-wrap gap-2" id="info_actions_safe">
-              <button id="btn_info_copy_summary" class="btn info-btn-safe-main text-sm inline-flex items-center justify-center min-w-[138px]" type="button">
-                <i class="fa fa-file-text-o mr-1"></i>{{ $t('info.safe.copy') }}
-              </button>
-              <button id="btn_info_export_masked" class="btn info-btn-safe-sub text-sm inline-flex items-center justify-center min-w-[138px]" type="button">
-                <i class="fa fa-shield mr-1"></i>{{ $t('info.safe.export') }}
-              </button>
             </div>
           </div>
         </div>
-      </div>
-      <div class="p-5">
-        <div id="upload_info_area" class="upload-box mb-4 relative" style="min-height:180px">
-          <div id="info_upload_prompt" class="flex flex-col items-center justify-center py-4">
-            <i class="fa fa-photo text-3xl text-gray-400 mb-2"></i>
-            <p class="mb-1">{{ $t('info.upload.title') }}</p>
-            <p class="text-xs text-gray-500">{{ $t('info.upload.support') }}</p>
-          </div>
-          <div id="info_preview_wrap" class="hidden relative mx-auto flex items-center justify-center bg-transparent">
-            <div id="info_preview_stage" class="relative inline-block">
-              <img id="info_preview" class="max-w-full mx-auto rounded-xl border border-gray-200 dark:border-gray-700" :alt="$t('info.upload.previewAlt')"/>
+
+        <div class="grid md:grid-cols-3 gap-4 mt-6">
+          <label
+            class="block p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40"
+          >
+            <div class="flex justify-between text-sm mb-2">
+              <span>脸部尺寸</span>
+              <span id="face_scale_text">70%</span>
             </div>
-          </div>
-          <div id="info_side_controls" class="hidden absolute right-2 z-20 flex flex-col gap-2">
-            <button id="btn_info_delete" type="button" :title="$t('info.upload.deleteTitle')"
-              class="bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md transition-all">
-              <i class="fa fa-times"></i>
-            </button>
-          </div>
-          <input type="file" id="file_info" accept="image/*" class="hidden"/>
-        </div>
-        <div id="edit_info_empty" class="text-sm text-gray-500 dark:text-gray-400 leading-6">
-          <p><i class="fa fa-image mr-1 text-primary"></i>{{ $t('info.upload.empty') }}</p>
-        </div>
-
-        <div id="edit_info_content" class="hidden space-y-4 text-sm">
-          <div class="grid md:grid-cols-2 gap-2">
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.fileName') }}</p><p id="edit_info_name" class="font-medium break-all">-</p></div>
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.browserPath') }}</p><p id="edit_info_path" class="font-medium break-all">-</p></div>
-          </div>
-
-          <div class="grid md:grid-cols-4 gap-2">
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.ext') }}</p><p id="edit_info_ext" class="font-medium">-</p></div>
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">MIME</p><p id="edit_info_type" class="font-medium break-all">-</p></div>
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.size') }}</p><p id="edit_info_size" class="font-medium">-</p></div>
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.lastModified') }}</p><p id="edit_info_last_modified" class="font-medium">-</p></div>
-          </div>
-
-          <div class="grid md:grid-cols-4 gap-2">
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.pixelSize') }}</p><p id="edit_info_dim" class="font-medium">-</p></div>
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.aspectRatio') }}</p><p id="edit_info_ratio" class="font-medium">-</p></div>
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.megapixel') }}</p><p id="edit_info_megapixel" class="font-medium">-</p></div>
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.totalPixels') }}</p><p id="edit_info_pixels" class="font-semibold text-primary">-</p></div>
-          </div>
-
-          <div class="grid md:grid-cols-4 gap-2">
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.exifOrientation') }}</p><p id="edit_info_orientation" class="font-medium">-</p></div>
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.currentRotation') }}</p><p id="edit_info_rotate" class="font-medium">0deg</p></div>
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.displaySize') }}</p><p id="edit_info_display" class="font-medium">-</p></div>
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.alphaChannel') }}</p><p id="edit_info_alpha" class="font-medium">-</p></div>
-          </div>
-
-          <div class="grid md:grid-cols-2 gap-2">
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.cameraLens') }}</p><p id="edit_info_camera" class="font-medium">-</p></div>
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.shootingParams') }}</p><p id="edit_info_exposure" class="font-medium">-</p></div>
-          </div>
-
-          <div class="grid md:grid-cols-2 gap-2">
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.datetimeSoftware') }}</p><p id="edit_info_datetime" class="font-medium">-</p></div>
-            <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"><p class="text-xs text-gray-500">{{ $t('info.fields.gpsInfo') }}</p><p id="edit_info_gps" class="font-medium break-all">-</p></div>
-          </div>
-
-          <div class="rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 px-3 py-2">
-            <p class="text-xs text-gray-500">{{ $t('info.fields.sha256Fingerprint') }}</p>
-            <p id="edit_info_hash" class="font-mono text-xs break-all text-primary">-</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 图片AI去水印 -->
-  <div id="tab_image" class="tab-pane card hidden">
-    <div id="upload_img_area" class="upload-box">
-      <i class="fa fa-cloud-upload text-3xl text-gray-400 mb-2"></i>
-      <p class="mb-1">{{ $t('watermark.upload.title') }}</p>
-      <p class="text-xs text-gray-500">{{ $t('watermark.upload.support') }}</p>
-      <input type="file" id="file_img" accept="image/*" class="hidden"/>
-    </div>
-
-    <div class="mt-6 hidden text-center" id="img_preview_wrap">
-      <div id="img_stage" class="relative inline-block max-w-full leading-none">
-        <img id="img_preview" class="max-h-64 rounded-xl border"/>
-        <canvas id="img_canvas" class="absolute inset-0 w-full h-full cursor-crosshair"></canvas>
-      </div>
-    </div>
-
-    <div id="img_status" class="mt-4 text-center text-sm hidden"></div>
-    <div class="mt-3 hidden h-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-      <div id="img_progress" class="h-full gradient-primary w-0 transition-all"></div>
-    </div>
-
-    <div class="flex justify-center gap-4 mt-6">
-      <button id="btn_img_go" class="btn btn-primary" type="button">
-        <i class="fa fa-magic mr-1"></i>AI去除水印
-      </button>
-      <button id="btn_img_down" class="btn btn-secondary hidden">
-        <i class="fa fa-download mr-1"></i>下载图片
-      </button>
-    </div>
-  </div>
-
-  <!-- 视频去水印功能已移除 -->
-
-  <!-- AI换脸 -->
-  <div id="tab_face" class="tab-pane card hidden">
-    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-6">
-      <div>
-        <h3 class="text-xl font-bold">AI 换脸工作台</h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">纯前端本地预览，不上传图片。请仅处理本人或已获得授权的内容。</p>
-      </div>
-      <div class="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-200 text-sm">
-        本地合成 · 即时预览 · 可拖拽微调
-      </div>
-    </div>
-
-    <div class="grid lg:grid-cols-2 gap-5">
-      <div class="space-y-4">
-        <div id="upload_face_source_area" class="upload-box">
-          <i class="fa fa-user-circle-o text-3xl text-gray-400 mb-2"></i>
-          <p class="mb-1">上传源人脸</p>
-          <p class="text-xs text-gray-500">建议使用正脸清晰照片</p>
-          <input type="file" id="file_face_source" accept="image/*" class="hidden"/>
-        </div>
-
-        <div class="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700">
-          <p class="text-sm font-medium mb-3">源脸预览</p>
-          <img id="face_source_preview" class="hidden max-h-56 rounded-xl border mx-auto"/>
-          <p id="face_source_empty" class="text-sm text-gray-500 text-center py-8">上传后会自动生成换脸素材</p>
-        </div>
-      </div>
-
-      <div class="space-y-4">
-        <div id="upload_face_target_area" class="upload-box">
-          <i class="fa fa-picture-o text-3xl text-gray-400 mb-2"></i>
-          <p class="mb-1">上传目标图片</p>
-          <p class="text-xs text-gray-500">支持人物海报、自拍、场景图</p>
-          <input type="file" id="file_face_target" accept="image/*" class="hidden"/>
-        </div>
-
-        <div class="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700">
-          <div class="flex items-center justify-between mb-3">
-            <p class="text-sm font-medium">目标画布</p>
-            <span class="text-xs text-gray-500">拖动脸部位置微调</span>
-          </div>
-          <div id="face_stage_wrap" class="hidden text-center">
-            <div id="face_stage" class="relative inline-block max-w-full leading-none rounded-2xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700">
-              <canvas id="face_canvas" class="block max-w-full cursor-move"></canvas>
+            <input
+              id="face_scale"
+              type="range"
+              min="35"
+              max="120"
+              value="70"
+              class="w-full accent-indigo-600"
+            />
+          </label>
+          <label
+            class="block p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40"
+          >
+            <div class="flex justify-between text-sm mb-2">
+              <span>融合强度</span>
+              <span id="face_blend_text">82%</span>
             </div>
-          </div>
-          <p id="face_target_empty" class="text-sm text-gray-500 text-center py-8">上传目标图后在这里预览合成结果</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid md:grid-cols-3 gap-4 mt-6">
-      <label class="block p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40">
-        <div class="flex justify-between text-sm mb-2">
-          <span>脸部尺寸</span>
-          <span id="face_scale_text">70%</span>
-        </div>
-        <input id="face_scale" type="range" min="35" max="120" value="70" class="w-full accent-indigo-600"/>
-      </label>
-      <label class="block p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40">
-        <div class="flex justify-between text-sm mb-2">
-          <span>融合强度</span>
-          <span id="face_blend_text">82%</span>
-        </div>
-        <input id="face_blend" type="range" min="40" max="100" value="82" class="w-full accent-indigo-600"/>
-      </label>
-      <label class="block p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40">
-        <div class="flex justify-between text-sm mb-2">
-          <span>羽化柔和</span>
-          <span id="face_feather_text">18px</span>
-        </div>
-        <input id="face_feather" type="range" min="8" max="40" value="18" class="w-full accent-indigo-600"/>
-      </label>
-    </div>
-
-    <label class="mt-5 flex items-start gap-3 text-sm text-gray-600 dark:text-gray-300">
-      <input id="face_consent" type="checkbox" class="mt-1 accent-indigo-600"/>
-      <span>我确认已获得图像中人物授权，仅用于合法、合规的本地编辑与预览。</span>
-    </label>
-
-    <div id="face_status" class="mt-4 text-sm hidden"></div>
-
-    <div class="flex flex-wrap justify-center gap-4 mt-6">
-      <button id="btn_face_go" class="btn btn-primary" disabled>
-        <i class="fa fa-user-secret mr-1"></i>开始换脸
-      </button>
-      <button id="btn_face_reset" class="btn btn-secondary" disabled>
-        <i class="fa fa-refresh mr-1"></i>重置位置
-      </button>
-      <button id="btn_face_down" class="btn btn-secondary hidden">
-        <i class="fa fa-download mr-1"></i>下载结果
-      </button>
-    </div>
-  </div>
-
-  <!-- 图片编辑 -->
-  <div id="tab_tools" class="tab-pane card hidden">
-    <div id="tools_basic_workspace">
-      <div id="upload_edit_area" class="upload-box mb-6 relative" style="min-height:180px">
-        <div id="edit_upload_prompt" class="flex flex-col items-center justify-center py-4">
-          <i class="fa fa-image text-3xl text-gray-400 mb-2"></i>
-          <p class="mb-1">点击或拖拽图片上传</p>
-          <p class="text-xs text-gray-500">支持 JPG、PNG、WEBP</p>
-        </div>
-        <div id="edit_preview_wrap" class="hidden relative mx-auto overflow-hidden rounded-xl flex items-center justify-center bg-transparent">
-          <div id="edit_canvas_stage" class="relative">
-            <canvas id="edit_preview" style="display:block;margin:0 auto;border-radius:0.75rem"></canvas>
-            <canvas id="crop_overlay" class="hidden absolute top-0 left-0 cursor-crosshair" style="border-radius:0.75rem;z-index:10"></canvas>
-          </div>
-        </div>
-        <div id="edit_side_controls" class="hidden absolute right-2 z-20 flex flex-col gap-2">
-            <button id="btn_edit_delete" type="button" title="删除图片"
-              class="bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md transition-all">
-              <i class="fa fa-times"></i>
-            </button>
-            <button id="btn_edit_rotate_cw" type="button" title="顺时针旋转"
-              class="bg-white/95 dark:bg-gray-800/95 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:border-primary hover:text-primary transition-all">
-              <i class="fa fa-repeat"></i>
-            </button>
-            <button id="btn_edit_rotate_ccw" type="button" title="逆时针旋转"
-              class="bg-white/95 dark:bg-gray-800/95 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:border-primary hover:text-primary transition-all">
-              <i class="fa fa-undo"></i>
-            </button>
-            <div id="crop_zoom_btns" class="hidden flex flex-col gap-1 mt-1 pt-1 border-t border-gray-200/70 dark:border-gray-700/70">
-              <button id="btn_zoom_in" type="button" title="放大选区"
-                class="bg-white/95 dark:bg-gray-800/95 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:border-primary hover:text-primary transition-all">
-                <i class="fa fa-search-plus"></i>
-              </button>
-              <button id="btn_zoom_out" type="button" title="缩小选区"
-                class="bg-white/95 dark:bg-gray-800/95 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:border-primary hover:text-primary transition-all">
-                <i class="fa fa-search-minus"></i>
-              </button>
-              <button id="btn_zoom_reset" type="button" title="还原视图"
-                class="bg-white/95 dark:bg-gray-800/95 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:border-primary hover:text-primary transition-all">
-                <i class="fa fa-expand"></i>
-              </button>
-              <button id="btn_edit_drag_toggle" type="button" title="启用拖动"
-                class="bg-white/95 dark:bg-gray-800/95 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:border-primary hover:text-primary transition-all focus:outline-none">
-                <i class="fa fa-hand-paper-o"></i>
-              </button>
+            <input
+              id="face_blend"
+              type="range"
+              min="40"
+              max="100"
+              value="82"
+              class="w-full accent-indigo-600"
+            />
+          </label>
+          <label
+            class="block p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40"
+          >
+            <div class="flex justify-between text-sm mb-2">
+              <span>羽化柔和</span>
+              <span id="face_feather_text">18px</span>
             </div>
+            <input
+              id="face_feather"
+              type="range"
+              min="8"
+              max="40"
+              value="18"
+              class="w-full accent-indigo-600"
+            />
+          </label>
         </div>
-        <input type="file" id="file_edit" accept="image/*" class="hidden"/>
-      </div>
-      <div class="flex justify-center gap-3 flex-wrap mb-4">
-        <button class="btn btn-secondary compress"><i class="fa fa-compress mr-1"></i>压缩图片</button>
-        <button class="btn btn-secondary crop"><i class="fa fa-crop mr-1"></i>裁剪图片</button>
+
+        <label class="mt-5 flex items-start gap-3 text-sm text-gray-600 dark:text-gray-300">
+          <input id="face_consent" type="checkbox" class="mt-1 accent-indigo-600" />
+          <span>我确认已获得图像中人物授权，仅用于合法、合规的本地编辑与预览。</span>
+        </label>
+
+        <div id="face_status" class="mt-4 text-sm hidden"></div>
+
+        <div class="flex flex-wrap justify-center gap-4 mt-6">
+          <button id="btn_face_go" class="btn btn-primary" disabled>
+            <i class="fa fa-user-secret mr-1"></i>开始换脸
+          </button>
+          <button id="btn_face_reset" class="btn btn-secondary" disabled>
+            <i class="fa fa-refresh mr-1"></i>重置位置
+          </button>
+          <button id="btn_face_down" class="btn btn-secondary hidden">
+            <i class="fa fa-download mr-1"></i>下载结果
+          </button>
+        </div>
       </div>
 
-      <!-- 裁剪控制面板 -->
-      <div id="crop_panel" class="hidden mt-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-500/10 overflow-visible">
-        <!-- 图形选择工具栏 -->
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-          <p class="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium">裁剪图形</p>
-          <div class="flex gap-2 flex-wrap">
-            <button class="crop-shape-btn active px-3 py-1 rounded-lg text-xs font-medium transition-all border-2 border-primary bg-primary text-white" data-shape="rect">
-              <i class="fa fa-square-o mr-1"></i>矩形
-            </button>
-            <button class="crop-shape-btn px-3 py-1 rounded-lg text-xs font-medium transition-all border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary" data-shape="circle">
-              <i class="fa fa-circle-o mr-1"></i>圆形
-            </button>
-            <button class="crop-shape-btn px-3 py-1 rounded-lg text-xs font-medium transition-all border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary" data-shape="star">
-              <i class="fa fa-star-o mr-1"></i>星形
-            </button>
-            <button class="crop-shape-btn px-3 py-1 rounded-lg text-xs font-medium transition-all border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary" data-shape="heart">
-              <i class="fa fa-heart-o mr-1"></i>心形
-            </button>
-            <button class="crop-shape-btn px-3 py-1 rounded-lg text-xs font-medium transition-all border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary" data-shape="pentagon">
-              <i class="fa fa-stop-circle mr-1"></i>五边形
-            </button>
-          </div>
-        </div>
-        <!-- 操作提示 -->
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-blue-100 dark:bg-blue-500/20">
-          <p class="text-sm text-blue-600 dark:text-blue-300"><i class="fa fa-info-circle mr-1"></i><span id="crop_hint">在图片上拖拽选择矩形裁剪区域</span></p>
-          <div id="crop_ratio_group" class="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-blue-200/80 dark:border-blue-400/30 bg-white/80 dark:bg-gray-900/55 px-3 py-2">
-            <label for="crop_aspect_ratio" class="text-xs font-semibold tracking-wide text-blue-700 dark:text-blue-200">固定比例</label>
-            <div class="crop-aspect-wrap relative">
-              <select id="crop_aspect_ratio" class="crop-aspect-native" aria-hidden="true" tabindex="-1">
-                <option value="free">自由比例</option>
-                <option value="1:1">1:1 正方形</option>
-                <option value="4:3">4:3 横向</option>
-                <option value="3:4">3:4 竖向</option>
-                <option value="16:9">16:9 宽屏</option>
-                <option value="9:16">9:16 竖屏</option>
-              </select>
-              <button id="crop_aspect_trigger" type="button" class="crop-aspect-trigger" aria-haspopup="listbox" aria-expanded="false">
-                <span id="crop_aspect_trigger_icon" class="crop-aspect-icon is-free" aria-hidden="true"></span>
-                <span id="crop_aspect_trigger_text">自由比例</span>
-                <i class="fa fa-angle-down crop-aspect-caret" aria-hidden="true"></i>
+      <!-- 图片编辑 -->
+      <div id="tab_tools" class="tab-pane card hidden">
+        <div id="tools_basic_workspace">
+          <div id="upload_edit_area" class="upload-box mb-6 relative" style="min-height: 180px">
+            <div id="edit_upload_prompt" class="flex flex-col items-center justify-center py-4">
+              <i class="fa fa-image text-3xl text-gray-400 mb-2"></i>
+              <p class="mb-1">点击或拖拽图片上传</p>
+              <p class="text-xs text-gray-500">支持 JPG、PNG、WEBP</p>
+            </div>
+            <div
+              id="edit_preview_wrap"
+              class="hidden relative mx-auto overflow-hidden rounded-xl flex items-center justify-center bg-transparent"
+            >
+              <div id="edit_canvas_stage" class="relative">
+                <canvas
+                  id="edit_preview"
+                  style="display: block; margin: 0 auto; border-radius: 0.75rem"
+                ></canvas>
+                <canvas
+                  id="crop_overlay"
+                  class="hidden absolute top-0 left-0 cursor-crosshair"
+                  style="border-radius: 0.75rem; z-index: 10"
+                ></canvas>
+              </div>
+            </div>
+            <div id="edit_side_controls" class="hidden absolute right-2 z-20 flex flex-col gap-2">
+              <button
+                id="btn_edit_delete"
+                type="button"
+                title="删除图片"
+                class="bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md transition-all"
+              >
+                <i class="fa fa-times"></i>
               </button>
-              <div id="crop_aspect_menu" class="crop-aspect-menu hidden" role="listbox" aria-label="固定比例选项">
-                <button type="button" class="crop-aspect-option" data-value="free" role="option" aria-selected="true">
-                  <span class="crop-aspect-icon is-free" aria-hidden="true"></span>
-                  <span class="crop-aspect-option-text">自由比例</span>
-                  <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+              <button
+                id="btn_edit_rotate_cw"
+                type="button"
+                title="顺时针旋转"
+                class="bg-white/95 dark:bg-gray-800/95 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:border-primary hover:text-primary transition-all"
+              >
+                <i class="fa fa-repeat"></i>
+              </button>
+              <button
+                id="btn_edit_rotate_ccw"
+                type="button"
+                title="逆时针旋转"
+                class="bg-white/95 dark:bg-gray-800/95 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:border-primary hover:text-primary transition-all"
+              >
+                <i class="fa fa-undo"></i>
+              </button>
+              <div
+                id="crop_zoom_btns"
+                class="hidden flex flex-col gap-1 mt-1 pt-1 border-t border-gray-200/70 dark:border-gray-700/70"
+              >
+                <button
+                  id="btn_zoom_in"
+                  type="button"
+                  title="放大选区"
+                  class="bg-white/95 dark:bg-gray-800/95 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:border-primary hover:text-primary transition-all"
+                >
+                  <i class="fa fa-search-plus"></i>
                 </button>
-                <button type="button" class="crop-aspect-option" data-value="1:1" role="option" aria-selected="false">
-                  <span class="crop-aspect-icon is-11" aria-hidden="true"></span>
-                  <span class="crop-aspect-option-text">1:1 正方形</span>
-                  <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                <button
+                  id="btn_zoom_out"
+                  type="button"
+                  title="缩小选区"
+                  class="bg-white/95 dark:bg-gray-800/95 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:border-primary hover:text-primary transition-all"
+                >
+                  <i class="fa fa-search-minus"></i>
                 </button>
-                <button type="button" class="crop-aspect-option" data-value="4:3" role="option" aria-selected="false">
-                  <span class="crop-aspect-icon is-43" aria-hidden="true"></span>
-                  <span class="crop-aspect-option-text">4:3 横向</span>
-                  <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                <button
+                  id="btn_zoom_reset"
+                  type="button"
+                  title="还原视图"
+                  class="bg-white/95 dark:bg-gray-800/95 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:border-primary hover:text-primary transition-all"
+                >
+                  <i class="fa fa-expand"></i>
                 </button>
-                <button type="button" class="crop-aspect-option" data-value="3:4" role="option" aria-selected="false">
-                  <span class="crop-aspect-icon is-34" aria-hidden="true"></span>
-                  <span class="crop-aspect-option-text">3:4 竖向</span>
-                  <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
-                </button>
-                <button type="button" class="crop-aspect-option" data-value="16:9" role="option" aria-selected="false">
-                  <span class="crop-aspect-icon is-169" aria-hidden="true"></span>
-                  <span class="crop-aspect-option-text">16:9 宽屏</span>
-                  <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
-                </button>
-                <button type="button" class="crop-aspect-option" data-value="9:16" role="option" aria-selected="false">
-                  <span class="crop-aspect-icon is-916" aria-hidden="true"></span>
-                  <span class="crop-aspect-option-text">9:16 竖屏</span>
-                  <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                <button
+                  id="btn_edit_drag_toggle"
+                  type="button"
+                  title="启用拖动"
+                  class="bg-white/95 dark:bg-gray-800/95 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:border-primary hover:text-primary transition-all focus:outline-none"
+                >
+                  <i class="fa fa-hand-paper-o"></i>
                 </button>
               </div>
             </div>
-            <span id="crop_ratio_hint" class="text-xs font-medium text-blue-700/80 dark:text-blue-200/80">当前：自由比例</span>
+            <input type="file" id="file_edit" accept="image/*" class="hidden" />
           </div>
-        </div>
-        <!-- 操作按钮 -->
-        <div class="p-4 flex gap-3 justify-center">
-          <button id="crop_cancel" class="btn btn-secondary text-sm">取消</button>
-          <button id="crop_confirm" class="btn btn-primary text-sm" disabled>确认裁剪</button>
-        </div>
-      </div>
-
-      <!-- 压缩面板 -->
-      <div id="compress_panel" class="hidden mt-2 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 space-y-4">
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm">
-          <i class="fa fa-info-circle text-primary"></i>
-          <span class="text-gray-500">原始信息</span>
-          <span id="compress_origin_info" class="font-medium ml-auto">—</span>
-        </div>
-        <div>
-          <label class="text-sm text-gray-500 mb-2 block">输出格式</label>
-          <div class="flex gap-4">
-            <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="compress_fmt" value="image/jpeg" checked class="accent-indigo-600"/> JPEG</label>
-            <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="compress_fmt" value="image/webp" class="accent-indigo-600"/> WebP</label>
-            <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="compress_fmt" value="image/png" class="accent-indigo-600"/> PNG</label>
+          <div class="flex justify-center gap-3 flex-wrap mb-4">
+            <button class="btn btn-secondary compress">
+              <i class="fa fa-compress mr-1"></i>压缩图片
+            </button>
+            <button class="btn btn-secondary crop"><i class="fa fa-crop mr-1"></i>裁剪图片</button>
           </div>
-        </div>
-        <div>
-          <div class="flex justify-between text-sm mb-2">
-            <label class="text-gray-500">压缩质量</label>
-            <span id="compress_quality_text" class="font-medium">75%</span>
-          </div>
-          <input id="compress_quality" type="range" min="10" max="100" value="75" class="w-full accent-indigo-600"/>
-          <p class="text-xs text-gray-400 mt-1">PNG 为无损格式，质量滑块不影响 PNG 输出大小</p>
-        </div>
-        <div>
-          <label class="text-sm text-gray-500 mb-2 block">缩放分辨率</label>
-          <div class="flex flex-wrap gap-4">
-            <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="compress_scale" value="1" checked class="accent-indigo-600"/> 原尺寸</label>
-            <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="compress_scale" value="1280" class="accent-indigo-600"/> 长边 1280px</label>
-            <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="compress_scale" value="800" class="accent-indigo-600"/> 长边 800px</label>
-          </div>
-        </div>
-        <div class="flex items-center justify-between p-3 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-sm">
-          <span class="text-gray-500 flex items-center gap-1.5"><i class="fa fa-compress text-primary"></i>预估压缩后大小</span>
-          <span id="compress_estimate" class="font-semibold text-primary">计算中…</span>
-        </div>
-        <div class="flex gap-3 justify-end pt-1">
-          <button id="compress_cancel" class="btn btn-secondary">取消</button>
-          <button id="compress_execute" class="btn btn-primary"><i class="fa fa-download mr-1"></i>执行压缩并下载</button>
-        </div>
-      </div>
-    </div>
 
-    <div id="advanced_workspace" class="hidden space-y-5">
-      <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-        <div>
-          <h3 class="text-xl font-bold">高级工作台</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">不再把功能塞进一个下拉框，而是按用户任务分成修图、创作、隐私和批量输出四类。</p>
-        </div>
-        <div class="adv-badge-cluster">
-          <span class="adv-mini-badge">任务分组</span>
-          <span class="adv-mini-badge">本地处理</span>
-          <span class="adv-mini-badge">按场景进入</span>
-        </div>
-      </div>
-
-      <div id="adv_category_nav" class="adv-category-grid">
-        <button class="adv-category-btn is-active" type="button" data-category="portrait">
-          <span class="adv-category-icon"><i class="fa fa-user"></i></span>
-          <span>
-            <span class="adv-category-title">人像与创作</span>
-            <span class="adv-category-desc">抠图、证件照、美化、风格化、表情包</span>
-          </span>
-        </button>
-        <button class="adv-category-btn" type="button" data-category="enhance">
-          <span class="adv-category-icon"><i class="fa fa-wrench"></i></span>
-          <span>
-            <span class="adv-category-title">修复与增强</span>
-            <span class="adv-category-desc">老照片修复、物体移除、扩图、清晰增强、调色</span>
-          </span>
-        </button>
-        <button class="adv-category-btn" type="button" data-category="text">
-          <span class="adv-category-icon"><i class="fa fa-eye"></i></span>
-          <span>
-            <span class="adv-category-title">识别与隐私</span>
-            <span class="adv-category-desc">OCR、翻译、隐私保护与局部遮挡</span>
-          </span>
-        </button>
-        <button class="adv-category-btn" type="button" data-category="workflow">
-          <span class="adv-category-icon"><i class="fa fa-files-o"></i></span>
-          <span>
-            <span class="adv-category-title">批量与输出</span>
-            <span class="adv-category-desc">批处理、拼图海报、图像与 PDF 工作流</span>
-          </span>
-        </button>
-      </div>
-
-      <div class="adv-category-header rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 p-4">
-        <p id="adv_category_title" class="text-base font-semibold">人像与创作</p>
-        <p id="adv_category_desc" class="text-sm text-gray-500 dark:text-gray-400 mt-1">以单张图片为主，面向人像优化和创意结果输出。</p>
-      </div>
-
-      <div id="adv_single_image_workspace" class="space-y-5">
-        <div id="adv_upload_area" class="upload-box mb-5">
-          <i class="fa fa-picture-o text-3xl text-gray-400 mb-2"></i>
-          <p class="mb-1">上传主画布图片</p>
-          <p class="text-xs text-gray-500">当前这一类任务会基于同一张图片持续处理</p>
-          <input type="file" id="file_adv" accept="image/*" class="hidden"/>
-        </div>
-
-        <div id="adv_stage_wrap" class="hidden text-center mb-5">
-          <div id="adv_stage" class="relative inline-block max-w-full leading-none">
-            <canvas id="adv_canvas" class="rounded-xl border max-w-full"></canvas>
-            <canvas id="adv_overlay" class="absolute inset-0 cursor-crosshair"></canvas>
-          </div>
-        </div>
-
-        <div class="grid xl:grid-cols-[1.8fr_1fr] gap-4 mb-5">
-          <div class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">当前任务</p>
-                <p id="adv_feature_summary" class="text-base font-semibold mt-1">智能抠图与换背景</p>
+          <!-- 裁剪控制面板 -->
+          <div
+            id="crop_panel"
+            class="hidden mt-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-500/10 overflow-visible"
+          >
+            <!-- 图形选择工具栏 -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium">裁剪图形</p>
+              <div class="flex gap-2 flex-wrap">
+                <button
+                  class="crop-shape-btn active px-3 py-1 rounded-lg text-xs font-medium transition-all border-2 border-primary bg-primary text-white"
+                  data-shape="rect"
+                >
+                  <i class="fa fa-square-o mr-1"></i>矩形
+                </button>
+                <button
+                  class="crop-shape-btn px-3 py-1 rounded-lg text-xs font-medium transition-all border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary"
+                  data-shape="circle"
+                >
+                  <i class="fa fa-circle-o mr-1"></i>圆形
+                </button>
+                <button
+                  class="crop-shape-btn px-3 py-1 rounded-lg text-xs font-medium transition-all border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary"
+                  data-shape="star"
+                >
+                  <i class="fa fa-star-o mr-1"></i>星形
+                </button>
+                <button
+                  class="crop-shape-btn px-3 py-1 rounded-lg text-xs font-medium transition-all border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary"
+                  data-shape="heart"
+                >
+                  <i class="fa fa-heart-o mr-1"></i>心形
+                </button>
+                <button
+                  class="crop-shape-btn px-3 py-1 rounded-lg text-xs font-medium transition-all border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-primary"
+                  data-shape="pentagon"
+                >
+                  <i class="fa fa-stop-circle mr-1"></i>五边形
+                </button>
               </div>
-              <select id="adv_feature" class="hidden">
-                <option value="cutout">智能抠图与换背景</option>
-                <option value="idphoto">一键证件照</option>
-                <option value="restore">老照片修复</option>
-                <option value="style">漫画/素描/油画风格化</option>
-                <option value="beauty">人像美化</option>
-                <option value="remove">物体移除（画布框选后修补）</option>
-                <option value="outpaint">AI 扩图</option>
-                <option value="upscale">清晰度增强（2x）</option>
-                <option value="meme">表情包工厂</option>
-                <option value="ocr">OCR 识别与翻译</option>
-                <option value="lut">智能调色 LUT</option>
-                <option value="privacy">图片隐私保护</option>
-              </select>
             </div>
-
-            <div id="adv_feature_cards" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
-              <button class="adv-feature-card is-active" type="button" data-category="portrait" data-feature="cutout">
-                <span class="adv-feature-name">智能抠图与换背景</span>
-                <span class="adv-feature-text">快速替换底色或背景，适合商品图和人像抠图。</span>
-              </button>
-              <button class="adv-feature-card" type="button" data-category="portrait" data-feature="idphoto">
-                <span class="adv-feature-name">一键证件照</span>
-                <span class="adv-feature-text">按证件比例输出，并支持切换底色。</span>
-              </button>
-              <button class="adv-feature-card" type="button" data-category="portrait" data-feature="beauty">
-                <span class="adv-feature-name">人像美化</span>
-                <span class="adv-feature-text">轻量磨皮提亮，适合自拍和人物照优化。</span>
-              </button>
-              <button class="adv-feature-card" type="button" data-category="portrait" data-feature="style">
-                <span class="adv-feature-name">风格化</span>
-                <span class="adv-feature-text">漫画、素描、油画三种风格快速转化。</span>
-              </button>
-              <button class="adv-feature-card" type="button" data-category="portrait" data-feature="meme">
-                <span class="adv-feature-name">表情包工厂</span>
-                <span class="adv-feature-text">给图片加上下文案，适合做梗图输出。</span>
-              </button>
-
-              <button class="adv-feature-card hidden" type="button" data-category="enhance" data-feature="restore">
-                <span class="adv-feature-name">老照片修复</span>
-                <span class="adv-feature-text">改善褪色、泛黄和轻微模糊感。</span>
-              </button>
-              <button class="adv-feature-card hidden" type="button" data-category="enhance" data-feature="remove">
-                <span class="adv-feature-name">物体移除</span>
-                <span class="adv-feature-text">框选后自动修补，适合去除画面杂物。</span>
-              </button>
-              <button class="adv-feature-card hidden" type="button" data-category="enhance" data-feature="outpaint">
-                <span class="adv-feature-name">AI 扩图</span>
-                <span class="adv-feature-text">向外扩展画面边缘，适合做封面留白。</span>
-              </button>
-              <button class="adv-feature-card hidden" type="button" data-category="enhance" data-feature="upscale">
-                <span class="adv-feature-name">清晰度增强</span>
-                <span class="adv-feature-text">输出 2 倍尺寸并提升整体锐利感。</span>
-              </button>
-              <button class="adv-feature-card hidden" type="button" data-category="enhance" data-feature="lut">
-                <span class="adv-feature-name">智能调色 LUT</span>
-                <span class="adv-feature-text">胶片、日系、赛博三种氛围色调。</span>
-              </button>
-
-              <button class="adv-feature-card hidden" type="button" data-category="text" data-feature="ocr">
-                <span class="adv-feature-name">OCR 识别与翻译</span>
-                <span class="adv-feature-text">识别图片文字并做简易翻译处理。</span>
-              </button>
-              <button class="adv-feature-card hidden" type="button" data-category="text" data-feature="privacy">
-                <span class="adv-feature-name">图片隐私保护</span>
-                <span class="adv-feature-text">自动或手动马赛克敏感区域。</span>
-              </button>
+            <!-- 操作提示 -->
+            <div
+              class="p-4 border-b border-gray-200 dark:border-gray-700 bg-blue-100 dark:bg-blue-500/20"
+            >
+              <p class="text-sm text-blue-600 dark:text-blue-300">
+                <i class="fa fa-info-circle mr-1"></i
+                ><span id="crop_hint">在图片上拖拽选择矩形裁剪区域</span>
+              </p>
+              <div
+                id="crop_ratio_group"
+                class="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-blue-200/80 dark:border-blue-400/30 bg-white/80 dark:bg-gray-900/55 px-3 py-2"
+              >
+                <label
+                  for="crop_aspect_ratio"
+                  class="text-xs font-semibold tracking-wide text-blue-700 dark:text-blue-200"
+                  >固定比例</label
+                >
+                <div class="crop-aspect-wrap relative">
+                  <select
+                    id="crop_aspect_ratio"
+                    class="crop-aspect-native"
+                    aria-hidden="true"
+                    tabindex="-1"
+                  >
+                    <option value="free">自由比例</option>
+                    <option value="1:1">1:1 正方形</option>
+                    <option value="4:3">4:3 横向</option>
+                    <option value="3:4">3:4 竖向</option>
+                    <option value="16:9">16:9 宽屏</option>
+                    <option value="9:16">9:16 竖屏</option>
+                  </select>
+                  <button
+                    id="crop_aspect_trigger"
+                    type="button"
+                    class="crop-aspect-trigger"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                  >
+                    <span
+                      id="crop_aspect_trigger_icon"
+                      class="crop-aspect-icon is-free"
+                      aria-hidden="true"
+                    ></span>
+                    <span id="crop_aspect_trigger_text">自由比例</span>
+                    <i class="fa fa-angle-down crop-aspect-caret" aria-hidden="true"></i>
+                  </button>
+                  <div
+                    id="crop_aspect_menu"
+                    class="crop-aspect-menu hidden"
+                    role="listbox"
+                    aria-label="固定比例选项"
+                  >
+                    <button
+                      type="button"
+                      class="crop-aspect-option"
+                      data-value="free"
+                      role="option"
+                      aria-selected="true"
+                    >
+                      <span class="crop-aspect-icon is-free" aria-hidden="true"></span>
+                      <span class="crop-aspect-option-text">自由比例</span>
+                      <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                    </button>
+                    <button
+                      type="button"
+                      class="crop-aspect-option"
+                      data-value="1:1"
+                      role="option"
+                      aria-selected="false"
+                    >
+                      <span class="crop-aspect-icon is-11" aria-hidden="true"></span>
+                      <span class="crop-aspect-option-text">1:1 正方形</span>
+                      <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                    </button>
+                    <button
+                      type="button"
+                      class="crop-aspect-option"
+                      data-value="4:3"
+                      role="option"
+                      aria-selected="false"
+                    >
+                      <span class="crop-aspect-icon is-43" aria-hidden="true"></span>
+                      <span class="crop-aspect-option-text">4:3 横向</span>
+                      <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                    </button>
+                    <button
+                      type="button"
+                      class="crop-aspect-option"
+                      data-value="3:4"
+                      role="option"
+                      aria-selected="false"
+                    >
+                      <span class="crop-aspect-icon is-34" aria-hidden="true"></span>
+                      <span class="crop-aspect-option-text">3:4 竖向</span>
+                      <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                    </button>
+                    <button
+                      type="button"
+                      class="crop-aspect-option"
+                      data-value="16:9"
+                      role="option"
+                      aria-selected="false"
+                    >
+                      <span class="crop-aspect-icon is-169" aria-hidden="true"></span>
+                      <span class="crop-aspect-option-text">16:9 宽屏</span>
+                      <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                    </button>
+                    <button
+                      type="button"
+                      class="crop-aspect-option"
+                      data-value="9:16"
+                      role="option"
+                      aria-selected="false"
+                    >
+                      <span class="crop-aspect-icon is-916" aria-hidden="true"></span>
+                      <span class="crop-aspect-option-text">9:16 竖屏</span>
+                      <i class="fa fa-check crop-aspect-check" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                </div>
+                <span
+                  id="crop_ratio_hint"
+                  class="text-xs font-medium text-blue-700/80 dark:text-blue-200/80"
+                  >当前：自由比例</span
+                >
+              </div>
+            </div>
+            <!-- 操作按钮 -->
+            <div class="p-4 flex gap-3 justify-center">
+              <button id="crop_cancel" class="btn btn-secondary text-sm">取消</button>
+              <button id="crop_confirm" class="btn btn-primary text-sm" disabled>确认裁剪</button>
             </div>
           </div>
 
-          <div class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 flex flex-col gap-4">
+          <!-- 压缩面板 -->
+          <div
+            id="compress_panel"
+            class="hidden mt-2 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 space-y-4"
+          >
+            <div
+              class="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm"
+            >
+              <i class="fa fa-info-circle text-primary"></i>
+              <span class="text-gray-500">原始信息</span>
+              <span id="compress_origin_info" class="font-medium ml-auto">—</span>
+            </div>
             <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">任务说明</p>
-              <p id="adv_feature_desc" class="text-sm leading-6 mt-2">快速替换底色或背景，适合商品图和人像抠图。</p>
+              <label class="text-sm text-gray-500 mb-2 block">输出格式</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-1.5 text-sm cursor-pointer"
+                  ><input
+                    type="radio"
+                    name="compress_fmt"
+                    value="image/jpeg"
+                    checked
+                    class="accent-indigo-600"
+                  />
+                  JPEG</label
+                >
+                <label class="flex items-center gap-1.5 text-sm cursor-pointer"
+                  ><input
+                    type="radio"
+                    name="compress_fmt"
+                    value="image/webp"
+                    class="accent-indigo-600"
+                  />
+                  WebP</label
+                >
+                <label class="flex items-center gap-1.5 text-sm cursor-pointer"
+                  ><input
+                    type="radio"
+                    name="compress_fmt"
+                    value="image/png"
+                    class="accent-indigo-600"
+                  />
+                  PNG</label
+                >
+              </div>
             </div>
-            <button id="adv_run" class="btn btn-primary w-full"><i class="fa fa-magic mr-1"></i>执行当前任务</button>
-            <div class="text-xs text-gray-500 dark:text-gray-400 leading-5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2">
-              单图类任务会复用上方主画布；切换任务不会自动清空原图，便于连续处理。
+            <div>
+              <div class="flex justify-between text-sm mb-2">
+                <label class="text-gray-500">压缩质量</label>
+                <span id="compress_quality_text" class="font-medium">75%</span>
+              </div>
+              <input
+                id="compress_quality"
+                type="range"
+                min="10"
+                max="100"
+                value="75"
+                class="w-full accent-indigo-600"
+              />
+              <p class="text-xs text-gray-400 mt-1">PNG 为无损格式，质量滑块不影响 PNG 输出大小</p>
+            </div>
+            <div>
+              <label class="text-sm text-gray-500 mb-2 block">缩放分辨率</label>
+              <div class="flex flex-wrap gap-4">
+                <label class="flex items-center gap-1.5 text-sm cursor-pointer"
+                  ><input
+                    type="radio"
+                    name="compress_scale"
+                    value="1"
+                    checked
+                    class="accent-indigo-600"
+                  />
+                  原尺寸</label
+                >
+                <label class="flex items-center gap-1.5 text-sm cursor-pointer"
+                  ><input
+                    type="radio"
+                    name="compress_scale"
+                    value="1280"
+                    class="accent-indigo-600"
+                  />
+                  长边 1280px</label
+                >
+                <label class="flex items-center gap-1.5 text-sm cursor-pointer"
+                  ><input
+                    type="radio"
+                    name="compress_scale"
+                    value="800"
+                    class="accent-indigo-600"
+                  />
+                  长边 800px</label
+                >
+              </div>
+            </div>
+            <div
+              class="flex items-center justify-between p-3 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-sm"
+            >
+              <span class="text-gray-500 flex items-center gap-1.5"
+                ><i class="fa fa-compress text-primary"></i>预估压缩后大小</span
+              >
+              <span id="compress_estimate" class="font-semibold text-primary">计算中…</span>
+            </div>
+            <div class="flex gap-3 justify-end pt-1">
+              <button id="compress_cancel" class="btn btn-secondary">取消</button>
+              <button id="compress_execute" class="btn btn-primary">
+                <i class="fa fa-download mr-1"></i>执行压缩并下载
+              </button>
             </div>
           </div>
         </div>
 
-        <div id="adv_controls" class="space-y-4 mb-5">
-          <div id="adv_panel_empty" class="adv-panel p-4 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 text-sm text-gray-500 dark:text-gray-400">
-            当前任务无需额外参数，上传图片后可直接执行。
+        <div id="advanced_workspace" class="hidden space-y-5">
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div>
+              <h3 class="text-xl font-bold">高级工作台</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                不再把功能塞进一个下拉框，而是按用户任务分成修图、创作、隐私和批量输出四类。
+              </p>
+            </div>
+            <div class="adv-badge-cluster">
+              <span class="adv-mini-badge">任务分组</span>
+              <span class="adv-mini-badge">本地处理</span>
+              <span class="adv-mini-badge">按场景进入</span>
+            </div>
           </div>
 
-          <div class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40" data-panel="cutout">
-            <label class="text-sm text-gray-500">背景色</label>
-            <input type="color" id="adv_bg_color" value="#ffffff" class="mt-1 h-10 w-full rounded-xl border border-gray-300 dark:border-gray-700"/>
+          <div id="adv_category_nav" class="adv-category-grid">
+            <button class="adv-category-btn is-active" type="button" data-category="portrait">
+              <span class="adv-category-icon"><i class="fa fa-user"></i></span>
+              <span>
+                <span class="adv-category-title">人像与创作</span>
+                <span class="adv-category-desc">抠图、证件照、美化、风格化、表情包</span>
+              </span>
+            </button>
+            <button class="adv-category-btn" type="button" data-category="enhance">
+              <span class="adv-category-icon"><i class="fa fa-wrench"></i></span>
+              <span>
+                <span class="adv-category-title">修复与增强</span>
+                <span class="adv-category-desc">老照片修复、物体移除、扩图、清晰增强、调色</span>
+              </span>
+            </button>
+            <button class="adv-category-btn" type="button" data-category="text">
+              <span class="adv-category-icon"><i class="fa fa-eye"></i></span>
+              <span>
+                <span class="adv-category-title">识别与隐私</span>
+                <span class="adv-category-desc">OCR、翻译、隐私保护与局部遮挡</span>
+              </span>
+            </button>
+            <button class="adv-category-btn" type="button" data-category="workflow">
+              <span class="adv-category-icon"><i class="fa fa-files-o"></i></span>
+              <span>
+                <span class="adv-category-title">批量与输出</span>
+                <span class="adv-category-desc">批处理、拼图海报、图像与 PDF 工作流</span>
+              </span>
+            </button>
           </div>
 
-          <div class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40" data-panel="idphoto">
-            <div class="grid md:grid-cols-2 gap-3">
-              <div>
-                <label class="text-sm text-gray-500">比例</label>
-                <select id="adv_id_ratio" class="mt-1 w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900">
-                  <option value="1:1">1:1</option>
-                  <option value="2:3">2:3</option>
-                  <option value="35:45">35:45mm</option>
+          <div
+            class="adv-category-header rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 p-4"
+          >
+            <p id="adv_category_title" class="text-base font-semibold">人像与创作</p>
+            <p id="adv_category_desc" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              以单张图片为主，面向人像优化和创意结果输出。
+            </p>
+          </div>
+
+          <div id="adv_single_image_workspace" class="space-y-5">
+            <div id="adv_upload_area" class="upload-box mb-5">
+              <i class="fa fa-picture-o text-3xl text-gray-400 mb-2"></i>
+              <p class="mb-1">上传主画布图片</p>
+              <p class="text-xs text-gray-500">当前这一类任务会基于同一张图片持续处理</p>
+              <input type="file" id="file_adv" accept="image/*" class="hidden" />
+            </div>
+
+            <div id="adv_stage_wrap" class="hidden text-center mb-5">
+              <div id="adv_stage" class="relative inline-block max-w-full leading-none">
+                <canvas id="adv_canvas" class="rounded-xl border max-w-full"></canvas>
+                <canvas id="adv_overlay" class="absolute inset-0 cursor-crosshair"></canvas>
+              </div>
+            </div>
+
+            <div class="grid xl:grid-cols-[1.8fr_1fr] gap-4 mb-5">
+              <div
+                class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40"
+              >
+                <div
+                  class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3"
+                >
+                  <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">当前任务</p>
+                    <p id="adv_feature_summary" class="text-base font-semibold mt-1">
+                      智能抠图与换背景
+                    </p>
+                  </div>
+                  <select id="adv_feature" class="hidden">
+                    <option value="cutout">智能抠图与换背景</option>
+                    <option value="idphoto">一键证件照</option>
+                    <option value="restore">老照片修复</option>
+                    <option value="style">漫画/素描/油画风格化</option>
+                    <option value="beauty">人像美化</option>
+                    <option value="remove">物体移除（画布框选后修补）</option>
+                    <option value="outpaint">AI 扩图</option>
+                    <option value="upscale">清晰度增强（2x）</option>
+                    <option value="meme">表情包工厂</option>
+                    <option value="ocr">OCR 识别与翻译</option>
+                    <option value="lut">智能调色 LUT</option>
+                    <option value="privacy">图片隐私保护</option>
+                  </select>
+                </div>
+
+                <div id="adv_feature_cards" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                  <button
+                    class="adv-feature-card is-active"
+                    type="button"
+                    data-category="portrait"
+                    data-feature="cutout"
+                  >
+                    <span class="adv-feature-name">智能抠图与换背景</span>
+                    <span class="adv-feature-text">快速替换底色或背景，适合商品图和人像抠图。</span>
+                  </button>
+                  <button
+                    class="adv-feature-card"
+                    type="button"
+                    data-category="portrait"
+                    data-feature="idphoto"
+                  >
+                    <span class="adv-feature-name">一键证件照</span>
+                    <span class="adv-feature-text">按证件比例输出，并支持切换底色。</span>
+                  </button>
+                  <button
+                    class="adv-feature-card"
+                    type="button"
+                    data-category="portrait"
+                    data-feature="beauty"
+                  >
+                    <span class="adv-feature-name">人像美化</span>
+                    <span class="adv-feature-text">轻量磨皮提亮，适合自拍和人物照优化。</span>
+                  </button>
+                  <button
+                    class="adv-feature-card"
+                    type="button"
+                    data-category="portrait"
+                    data-feature="style"
+                  >
+                    <span class="adv-feature-name">风格化</span>
+                    <span class="adv-feature-text">漫画、素描、油画三种风格快速转化。</span>
+                  </button>
+                  <button
+                    class="adv-feature-card"
+                    type="button"
+                    data-category="portrait"
+                    data-feature="meme"
+                  >
+                    <span class="adv-feature-name">表情包工厂</span>
+                    <span class="adv-feature-text">给图片加上下文案，适合做梗图输出。</span>
+                  </button>
+
+                  <button
+                    class="adv-feature-card hidden"
+                    type="button"
+                    data-category="enhance"
+                    data-feature="restore"
+                  >
+                    <span class="adv-feature-name">老照片修复</span>
+                    <span class="adv-feature-text">改善褪色、泛黄和轻微模糊感。</span>
+                  </button>
+                  <button
+                    class="adv-feature-card hidden"
+                    type="button"
+                    data-category="enhance"
+                    data-feature="remove"
+                  >
+                    <span class="adv-feature-name">物体移除</span>
+                    <span class="adv-feature-text">框选后自动修补，适合去除画面杂物。</span>
+                  </button>
+                  <button
+                    class="adv-feature-card hidden"
+                    type="button"
+                    data-category="enhance"
+                    data-feature="outpaint"
+                  >
+                    <span class="adv-feature-name">AI 扩图</span>
+                    <span class="adv-feature-text">向外扩展画面边缘，适合做封面留白。</span>
+                  </button>
+                  <button
+                    class="adv-feature-card hidden"
+                    type="button"
+                    data-category="enhance"
+                    data-feature="upscale"
+                  >
+                    <span class="adv-feature-name">清晰度增强</span>
+                    <span class="adv-feature-text">输出 2 倍尺寸并提升整体锐利感。</span>
+                  </button>
+                  <button
+                    class="adv-feature-card hidden"
+                    type="button"
+                    data-category="enhance"
+                    data-feature="lut"
+                  >
+                    <span class="adv-feature-name">智能调色 LUT</span>
+                    <span class="adv-feature-text">胶片、日系、赛博三种氛围色调。</span>
+                  </button>
+
+                  <button
+                    class="adv-feature-card hidden"
+                    type="button"
+                    data-category="text"
+                    data-feature="ocr"
+                  >
+                    <span class="adv-feature-name">OCR 识别与翻译</span>
+                    <span class="adv-feature-text">识别图片文字并做简易翻译处理。</span>
+                  </button>
+                  <button
+                    class="adv-feature-card hidden"
+                    type="button"
+                    data-category="text"
+                    data-feature="privacy"
+                  >
+                    <span class="adv-feature-name">图片隐私保护</span>
+                    <span class="adv-feature-text">自动或手动马赛克敏感区域。</span>
+                  </button>
+                </div>
+              </div>
+
+              <div
+                class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 flex flex-col gap-4"
+              >
+                <div>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">任务说明</p>
+                  <p id="adv_feature_desc" class="text-sm leading-6 mt-2">
+                    快速替换底色或背景，适合商品图和人像抠图。
+                  </p>
+                </div>
+                <button id="adv_run" class="btn btn-primary w-full">
+                  <i class="fa fa-magic mr-1"></i>执行当前任务
+                </button>
+                <div
+                  class="text-xs text-gray-500 dark:text-gray-400 leading-5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 px-3 py-2"
+                >
+                  单图类任务会复用上方主画布；切换任务不会自动清空原图，便于连续处理。
+                </div>
+              </div>
+            </div>
+
+            <div id="adv_controls" class="space-y-4 mb-5">
+              <div
+                id="adv_panel_empty"
+                class="adv-panel p-4 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 text-sm text-gray-500 dark:text-gray-400"
+              >
+                当前任务无需额外参数，上传图片后可直接执行。
+              </div>
+
+              <div
+                class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40"
+                data-panel="cutout"
+              >
+                <label class="text-sm text-gray-500">背景色</label>
+                <input
+                  type="color"
+                  id="adv_bg_color"
+                  value="#ffffff"
+                  class="mt-1 h-10 w-full rounded-xl border border-gray-300 dark:border-gray-700"
+                />
+              </div>
+
+              <div
+                class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40"
+                data-panel="idphoto"
+              >
+                <div class="grid md:grid-cols-2 gap-3">
+                  <div>
+                    <label class="text-sm text-gray-500">比例</label>
+                    <select
+                      id="adv_id_ratio"
+                      class="mt-1 w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900"
+                    >
+                      <option value="1:1">1:1</option>
+                      <option value="2:3">2:3</option>
+                      <option value="35:45">35:45mm</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="text-sm text-gray-500">底色</label>
+                    <input
+                      type="color"
+                      id="adv_id_bg"
+                      value="#1d4ed8"
+                      class="mt-1 h-10 w-full rounded-xl border border-gray-300 dark:border-gray-700"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40"
+                data-panel="style"
+              >
+                <label class="text-sm text-gray-500">风格</label>
+                <select
+                  id="adv_style_type"
+                  class="mt-1 w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900"
+                >
+                  <option value="cartoon">漫画</option>
+                  <option value="sketch">素描</option>
+                  <option value="oil">油画</option>
                 </select>
               </div>
-              <div>
-                <label class="text-sm text-gray-500">底色</label>
-                <input type="color" id="adv_id_bg" value="#1d4ed8" class="mt-1 h-10 w-full rounded-xl border border-gray-300 dark:border-gray-700"/>
+
+              <div
+                class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40"
+                data-panel="beauty"
+              >
+                <label class="text-sm text-gray-500">美化强度</label>
+                <input
+                  id="adv_beauty_level"
+                  type="range"
+                  min="1"
+                  max="10"
+                  value="5"
+                  class="w-full mt-2"
+                />
+              </div>
+
+              <div
+                class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40"
+                data-panel="meme"
+              >
+                <div class="grid md:grid-cols-2 gap-3">
+                  <input
+                    id="adv_meme_top"
+                    type="text"
+                    placeholder="上方文案"
+                    class="w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900"
+                  />
+                  <input
+                    id="adv_meme_bottom"
+                    type="text"
+                    placeholder="下方文案"
+                    class="w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900"
+                  />
+                </div>
+              </div>
+
+              <div
+                class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40"
+                data-panel="ocr"
+              >
+                <div class="grid md:grid-cols-3 gap-3">
+                  <select
+                    id="adv_ocr_lang"
+                    class="border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900"
+                  >
+                    <option value="chi_sim">中文识别</option>
+                    <option value="eng">英文识别</option>
+                  </select>
+                  <button id="adv_ocr_run" class="btn btn-secondary">识别文字</button>
+                  <button id="adv_ocr_translate" class="btn btn-secondary">简易翻译</button>
+                </div>
+                <textarea
+                  id="adv_ocr_output"
+                  class="mt-3 w-full min-h-28 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900"
+                  placeholder="OCR 输出结果"
+                ></textarea>
+              </div>
+
+              <div
+                class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40"
+                data-panel="lut"
+              >
+                <label class="text-sm text-gray-500">LUT 风格</label>
+                <select
+                  id="adv_lut_type"
+                  class="mt-1 w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900"
+                >
+                  <option value="film">胶片</option>
+                  <option value="japan">日系</option>
+                  <option value="cyber">赛博</option>
+                </select>
+              </div>
+
+              <div
+                class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40"
+                data-panel="privacy"
+              >
+                <div class="grid md:grid-cols-2 gap-3">
+                  <button id="adv_privacy_auto" class="btn btn-secondary">自动检测马赛克</button>
+                  <button id="adv_privacy_brush" class="btn btn-secondary">手动刷抹模式</button>
+                </div>
+              </div>
+
+              <div
+                class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 text-sm text-gray-500"
+                data-panel="remove"
+              >
+                请在画布上框选要移除的区域，然后点击“执行当前任务”。
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 mb-4">
+              <button id="adv_reset" class="btn btn-secondary">恢复上传原图</button>
+              <button id="adv_download" class="btn btn-secondary">下载结果</button>
+            </div>
+          </div>
+
+          <div id="adv_workflow_workspace" class="hidden space-y-5">
+            <div class="grid lg:grid-cols-2 gap-5">
+              <div
+                class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50"
+              >
+                <div class="flex items-center justify-between gap-3 mb-3">
+                  <h4 class="font-bold">批量压缩与批量水印</h4>
+                  <span
+                    class="text-xs px-2 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500"
+                    >多图连续输出</span
+                  >
+                </div>
+                <div id="adv_batch_drop" class="upload-box p-5 mb-3">
+                  <i class="fa fa-files-o text-2xl text-gray-400 mb-2"></i>
+                  <p class="text-sm mb-1">选择或拖拽批量图片</p>
+                  <p class="text-xs text-gray-500">适合批量压缩、统一加水印后逐张下载</p>
+                  <input
+                    id="adv_batch_files"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    class="hidden"
+                  />
+                </div>
+                <input
+                  id="adv_batch_mark"
+                  type="text"
+                  value="IPlay"
+                  class="mt-3 w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900"
+                  placeholder="水印文字"
+                />
+                <label class="text-sm text-gray-500 mt-3 block">压缩质量</label>
+                <input
+                  id="adv_batch_quality"
+                  type="range"
+                  min="0.3"
+                  max="0.95"
+                  step="0.05"
+                  value="0.75"
+                  class="w-full"
+                />
+                <button id="adv_batch_run" class="btn btn-primary mt-3 w-full">
+                  开始批处理并逐张下载
+                </button>
+              </div>
+
+              <div
+                class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50"
+              >
+                <div class="flex items-center justify-between gap-3 mb-3">
+                  <h4 class="font-bold">拼图海报（2x2 / 3x3）</h4>
+                  <span
+                    class="text-xs px-2 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500"
+                    >创意输出</span
+                  >
+                </div>
+                <div id="adv_collage_drop" class="upload-box p-5 mb-3">
+                  <i class="fa fa-th-large text-2xl text-gray-400 mb-2"></i>
+                  <p class="text-sm mb-1">选择或拖拽拼图图片</p>
+                  <p class="text-xs text-gray-500">2-9 张图片适合制作封面和海报</p>
+                  <input
+                    id="adv_collage_files"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    class="hidden"
+                  />
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                  <select
+                    id="adv_collage_grid"
+                    class="border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900"
+                  >
+                    <option value="2">2x2</option>
+                    <option value="3">3x3</option>
+                  </select>
+                  <input
+                    id="adv_collage_title"
+                    type="text"
+                    value="IPlay Collage"
+                    class="border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900"
+                    placeholder="海报标题"
+                  />
+                </div>
+                <div class="flex gap-3 mt-3">
+                  <button id="adv_collage_render" class="btn btn-secondary flex-1">生成</button>
+                  <button id="adv_collage_download" class="btn btn-secondary flex-1">下载</button>
+                </div>
+                <canvas id="adv_collage_canvas" class="mt-3 w-full rounded-xl border"></canvas>
+              </div>
+            </div>
+
+            <div
+              class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50"
+            >
+              <div class="flex items-center justify-between gap-3 mb-3">
+                <h4 class="font-bold">图像与 PDF 工作流</h4>
+                <span
+                  class="text-xs px-2 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500"
+                  >文档转换</span
+                >
+              </div>
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <div id="adv_pdf_images_drop" class="upload-box p-5">
+                    <i class="fa fa-file-image-o text-2xl text-gray-400 mb-2"></i>
+                    <p class="text-sm mb-1">选择或拖拽图片</p>
+                    <p class="text-xs text-gray-500">用于整理成 PDF</p>
+                    <input
+                      id="adv_pdf_images"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      class="hidden"
+                    />
+                  </div>
+                  <button id="adv_to_pdf" class="btn btn-secondary mt-3 w-full">图像转 PDF</button>
+                </div>
+                <div>
+                  <div id="adv_pdf_file_drop" class="upload-box p-5">
+                    <i class="fa fa-file-pdf-o text-2xl text-gray-400 mb-2"></i>
+                    <p class="text-sm mb-1">选择或拖拽 PDF</p>
+                    <p class="text-xs text-gray-500">用于拆分导出图片</p>
+                    <input id="adv_pdf_file" type="file" accept="application/pdf" class="hidden" />
+                  </div>
+                  <button id="adv_pdf_to_img" class="btn btn-secondary mt-3 w-full">
+                    PDF 转图片
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40" data-panel="style">
-            <label class="text-sm text-gray-500">风格</label>
-            <select id="adv_style_type" class="mt-1 w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900">
-              <option value="cartoon">漫画</option>
-              <option value="sketch">素描</option>
-              <option value="oil">油画</option>
-            </select>
-          </div>
-
-          <div class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40" data-panel="beauty">
-            <label class="text-sm text-gray-500">美化强度</label>
-            <input id="adv_beauty_level" type="range" min="1" max="10" value="5" class="w-full mt-2"/>
-          </div>
-
-          <div class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40" data-panel="meme">
-            <div class="grid md:grid-cols-2 gap-3">
-              <input id="adv_meme_top" type="text" placeholder="上方文案" class="w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900"/>
-              <input id="adv_meme_bottom" type="text" placeholder="下方文案" class="w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900"/>
-            </div>
-          </div>
-
-          <div class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40" data-panel="ocr">
-            <div class="grid md:grid-cols-3 gap-3">
-              <select id="adv_ocr_lang" class="border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900">
-                <option value="chi_sim">中文识别</option>
-                <option value="eng">英文识别</option>
-              </select>
-              <button id="adv_ocr_run" class="btn btn-secondary">识别文字</button>
-              <button id="adv_ocr_translate" class="btn btn-secondary">简易翻译</button>
-            </div>
-            <textarea id="adv_ocr_output" class="mt-3 w-full min-h-28 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900" placeholder="OCR 输出结果"></textarea>
-          </div>
-
-          <div class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40" data-panel="lut">
-            <label class="text-sm text-gray-500">LUT 风格</label>
-            <select id="adv_lut_type" class="mt-1 w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900">
-              <option value="film">胶片</option>
-              <option value="japan">日系</option>
-              <option value="cyber">赛博</option>
-            </select>
-          </div>
-
-          <div class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40" data-panel="privacy">
-            <div class="grid md:grid-cols-2 gap-3">
-              <button id="adv_privacy_auto" class="btn btn-secondary">自动检测马赛克</button>
-              <button id="adv_privacy_brush" class="btn btn-secondary">手动刷抹模式</button>
-            </div>
-          </div>
-
-          <div class="adv-panel hidden p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/40 text-sm text-gray-500" data-panel="remove">
-            请在画布上框选要移除的区域，然后点击“执行当前任务”。
-          </div>
-        </div>
-
-        <div class="flex flex-wrap gap-3 mb-4">
-          <button id="adv_reset" class="btn btn-secondary">恢复上传原图</button>
-          <button id="adv_download" class="btn btn-secondary">下载结果</button>
+          <div id="adv_status" class="text-sm text-gray-500">等待选择任务。</div>
         </div>
       </div>
 
-      <div id="adv_workflow_workspace" class="hidden space-y-5">
-        <div class="grid lg:grid-cols-2 gap-5">
-          <div class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-            <div class="flex items-center justify-between gap-3 mb-3">
-              <h4 class="font-bold">批量压缩与批量水印</h4>
-              <span class="text-xs px-2 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500">多图连续输出</span>
-            </div>
-            <div id="adv_batch_drop" class="upload-box p-5 mb-3">
-              <i class="fa fa-files-o text-2xl text-gray-400 mb-2"></i>
-              <p class="text-sm mb-1">选择或拖拽批量图片</p>
-              <p class="text-xs text-gray-500">适合批量压缩、统一加水印后逐张下载</p>
-              <input id="adv_batch_files" type="file" accept="image/*" multiple class="hidden"/>
-            </div>
-            <input id="adv_batch_mark" type="text" value="IPlay" class="mt-3 w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900" placeholder="水印文字"/>
-            <label class="text-sm text-gray-500 mt-3 block">压缩质量</label>
-            <input id="adv_batch_quality" type="range" min="0.3" max="0.95" step="0.05" value="0.75" class="w-full"/>
-            <button id="adv_batch_run" class="btn btn-primary mt-3 w-full">开始批处理并逐张下载</button>
+      <!-- 会员页面 -->
+      <div id="tab_vip" class="tab-pane card hidden text-center">
+        <h3 class="text-xl font-bold mb-6">解锁高级功能</h3>
+        <div class="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          <div class="p-6 border rounded-2xl">
+            <h4 class="font-bold text-lg mb-2">普通用户</h4>
+            <p class="text-sm text-gray-500 mb-3">每日限处理3次</p>
+            <button class="btn btn-secondary w-full">已使用</button>
           </div>
-
-          <div class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-            <div class="flex items-center justify-between gap-3 mb-3">
-              <h4 class="font-bold">拼图海报（2x2 / 3x3）</h4>
-              <span class="text-xs px-2 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500">创意输出</span>
-            </div>
-            <div id="adv_collage_drop" class="upload-box p-5 mb-3">
-              <i class="fa fa-th-large text-2xl text-gray-400 mb-2"></i>
-              <p class="text-sm mb-1">选择或拖拽拼图图片</p>
-              <p class="text-xs text-gray-500">2-9 张图片适合制作封面和海报</p>
-              <input id="adv_collage_files" type="file" accept="image/*" multiple class="hidden"/>
-            </div>
-            <div class="grid grid-cols-2 gap-3 mt-3">
-              <select id="adv_collage_grid" class="border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900">
-                <option value="2">2x2</option>
-                <option value="3">3x3</option>
-              </select>
-              <input id="adv_collage_title" type="text" value="IPlay Collage" class="border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900" placeholder="海报标题"/>
-            </div>
-            <div class="flex gap-3 mt-3">
-              <button id="adv_collage_render" class="btn btn-secondary flex-1">生成</button>
-              <button id="adv_collage_download" class="btn btn-secondary flex-1">下载</button>
-            </div>
-            <canvas id="adv_collage_canvas" class="mt-3 w-full rounded-xl border"></canvas>
+          <div class="p-6 border-2 border-primary rounded-2xl">
+            <h4 class="font-bold text-lg mb-2">终身会员</h4>
+            <p class="text-sm text-primary mb-3">限时特价 ¥39.9</p>
+            <button class="btn btn-primary w-full">立即开通</button>
           </div>
         </div>
-
-        <div class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-          <div class="flex items-center justify-between gap-3 mb-3">
-            <h4 class="font-bold">图像与 PDF 工作流</h4>
-            <span class="text-xs px-2 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500">文档转换</span>
-          </div>
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <div id="adv_pdf_images_drop" class="upload-box p-5">
-                <i class="fa fa-file-image-o text-2xl text-gray-400 mb-2"></i>
-                <p class="text-sm mb-1">选择或拖拽图片</p>
-                <p class="text-xs text-gray-500">用于整理成 PDF</p>
-                <input id="adv_pdf_images" type="file" accept="image/*" multiple class="hidden"/>
-              </div>
-              <button id="adv_to_pdf" class="btn btn-secondary mt-3 w-full">图像转 PDF</button>
-            </div>
-            <div>
-              <div id="adv_pdf_file_drop" class="upload-box p-5">
-                <i class="fa fa-file-pdf-o text-2xl text-gray-400 mb-2"></i>
-                <p class="text-sm mb-1">选择或拖拽 PDF</p>
-                <p class="text-xs text-gray-500">用于拆分导出图片</p>
-                <input id="adv_pdf_file" type="file" accept="application/pdf" class="hidden"/>
-              </div>
-              <button id="adv_pdf_to_img" class="btn btn-secondary mt-3 w-full">PDF 转图片</button>
-            </div>
-          </div>
-        </div>
+        <p class="text-xs text-gray-500 mt-6">支付后自动解锁，支持微信/支付宝</p>
       </div>
+    </main>
 
-      <div id="adv_status" class="text-sm text-gray-500">等待选择任务。</div>
-    </div>
-  </div>
+    <footer class="text-center text-xs text-gray-400 py-8">
+      <p>{{ $t('legalNotice') }}</p>
+    </footer>
 
-  <!-- 会员页面 -->
-  <div id="tab_vip" class="tab-pane card hidden text-center">
-    <h3 class="text-xl font-bold mb-6">解锁高级功能</h3>
-    <div class="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-      <div class="p-6 border rounded-2xl">
-        <h4 class="font-bold text-lg mb-2">普通用户</h4>
-        <p class="text-sm text-gray-500 mb-3">每日限处理3次</p>
-        <button class="btn btn-secondary w-full">已使用</button>
-      </div>
-      <div class="p-6 border-2 border-primary rounded-2xl">
-        <h4 class="font-bold text-lg mb-2">终身会员</h4>
-        <p class="text-sm text-primary mb-3">限时特价 ¥39.9</p>
-        <button class="btn btn-primary w-full">立即开通</button>
-      </div>
-    </div>
-    <p class="text-xs text-gray-500 mt-6">支付后自动解锁，支持微信/支付宝</p>
-  </div>
-</main>
-
-<footer class="text-center text-xs text-gray-400 py-8">
-  <p>{{ $t('legalNotice') }}</p>
-</footer>
-
-<div id="toast_container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+    <div id="toast_container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
   </div>
 </template>

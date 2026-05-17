@@ -73,15 +73,15 @@ IPlay 不是把功能堆进一个下拉框，而是按用户意图拆模块：
 
 > 下面是可直接执行的拍摄脚本模板。你只要替换每块里的动图链接即可。
 
-| 模块 | 演示与拍摄脚本 |
-| --- | --- |
-| 图片信息 | <img src="https://dummyimage.com/720x420/e2e8f0/334155&text=Image+Info+Demo+GIF" alt="Image Info Demo" /><br/>标题：图片信息一键总览<br/>建议时长：12s<br/>步骤：1 上传图片 2 展示 EXIF/GPS/哈希 3 导出 JSON |
-| AI 去水印 | <img src="https://dummyimage.com/720x420/e0e7ff/3730a3&text=Watermark+Removal+Demo+GIF" alt="Watermark Demo" /><br/>标题：框选即处理的去水印体验<br/>建议时长：14s<br/>步骤：1 上传图片 2 框选水印区域 3 执行并下载结果 |
-| 图片编辑 | <img src="https://dummyimage.com/720x420/d1fae5/065f46&text=Editor+Demo+GIF" alt="Editor Demo" /><br/>标题：旋转 裁剪 压缩一条龙<br/>建议时长：15s<br/>步骤：1 上传图片 2 旋转并裁剪 3 压缩导出 |
-| AI 换脸 | <img src="https://dummyimage.com/720x420/fee2e2/991b1b&text=Face+Swap+Demo+GIF" alt="Face Demo" /><br/>标题：本地预览的人像合成<br/>建议时长：16s<br/>步骤：1 上传源脸和目标图 2 调节尺寸融合羽化 3 生成并下载 |
-| OCR / 隐私 | <img src="https://dummyimage.com/720x420/fef3c7/92400e&text=OCR+Privacy+Demo+GIF" alt="OCR Privacy Demo" /><br/>标题：识别文字与隐私保护联动<br/>建议时长：14s<br/>步骤：1 上传图片 2 OCR 识别或翻译 3 自动隐私马赛克 |
-| 批量 / PDF 工作流 | <img src="https://dummyimage.com/720x420/f3e8ff/6b21a8&text=Batch+PDF+Workflow+Demo+GIF" alt="Batch PDF Demo" /><br/>标题：批量输出与文档转换
-<br/>建议时长：18s<br/>步骤：1 批量图片加水印 2 生成拼图海报 3 图像转 PDF 与 PDF 转图片 |
+| 模块                                                                                    | 演示与拍摄脚本                                                                                                                                                                                                          |
+| --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 图片信息                                                                                | <img src="https://dummyimage.com/720x420/e2e8f0/334155&text=Image+Info+Demo+GIF" alt="Image Info Demo" /><br/>标题：图片信息一键总览<br/>建议时长：12s<br/>步骤：1 上传图片 2 展示 EXIF/GPS/哈希 3 导出 JSON            |
+| AI 去水印                                                                               | <img src="https://dummyimage.com/720x420/e0e7ff/3730a3&text=Watermark+Removal+Demo+GIF" alt="Watermark Demo" /><br/>标题：框选即处理的去水印体验<br/>建议时长：14s<br/>步骤：1 上传图片 2 框选水印区域 3 执行并下载结果 |
+| 图片编辑                                                                                | <img src="https://dummyimage.com/720x420/d1fae5/065f46&text=Editor+Demo+GIF" alt="Editor Demo" /><br/>标题：旋转 裁剪 压缩一条龙<br/>建议时长：15s<br/>步骤：1 上传图片 2 旋转并裁剪 3 压缩导出                         |
+| AI 换脸                                                                                 | <img src="https://dummyimage.com/720x420/fee2e2/991b1b&text=Face+Swap+Demo+GIF" alt="Face Demo" /><br/>标题：本地预览的人像合成<br/>建议时长：16s<br/>步骤：1 上传源脸和目标图 2 调节尺寸融合羽化 3 生成并下载          |
+| OCR / 隐私                                                                              | <img src="https://dummyimage.com/720x420/fef3c7/92400e&text=OCR+Privacy+Demo+GIF" alt="OCR Privacy Demo" /><br/>标题：识别文字与隐私保护联动<br/>建议时长：14s<br/>步骤：1 上传图片 2 OCR 识别或翻译 3 自动隐私马赛克   |
+| 批量 / PDF 工作流                                                                       | <img src="https://dummyimage.com/720x420/f3e8ff/6b21a8&text=Batch+PDF+Workflow+Demo+GIF" alt="Batch PDF Demo" /><br/>标题：批量输出与文档转换                                                                           |
+| <br/>建议时长：18s<br/>步骤：1 批量图片加水印 2 生成拼图海报 3 图像转 PDF 与 PDF 转图片 |
 
 录制小建议：
 
@@ -93,13 +93,13 @@ IPlay 不是把功能堆进一个下拉框，而是按用户意图拆模块：
 
 ## 功能矩阵
 
-| 模块 | 典型任务 | 当前能力 |
-| --- | --- | --- |
-| 图片信息 | 元数据查看、摘要分享 | EXIF/GPS/哈希、复制、JSON 导出、脱敏导出 |
-| 图片编辑 | 高频基础编辑 | 旋转、裁剪、压缩、缩放拖拽、撤销/重做 |
-| AI 去水印 | 干扰区域清理 | 上传、框选、处理、下载 |
-| AI 换脸 | 本地人像合成 | 双图上传、融合参数、拖拽微调、导出 |
-| 高级工作台 | 创作与流程任务 | 抠图、修复、OCR、隐私、批处理、拼图、图像/PDF 工作流 |
+| 模块       | 典型任务             | 当前能力                                             |
+| ---------- | -------------------- | ---------------------------------------------------- |
+| 图片信息   | 元数据查看、摘要分享 | EXIF/GPS/哈希、复制、JSON 导出、脱敏导出             |
+| 图片编辑   | 高频基础编辑         | 旋转、裁剪、压缩、缩放拖拽、撤销/重做                |
+| AI 去水印  | 干扰区域清理         | 上传、框选、处理、下载                               |
+| AI 换脸    | 本地人像合成         | 双图上传、融合参数、拖拽微调、导出                   |
+| 高级工作台 | 创作与流程任务       | 抠图、修复、OCR、隐私、批处理、拼图、图像/PDF 工作流 |
 
 ---
 
