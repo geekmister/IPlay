@@ -1,35 +1,22 @@
 {
   "name": "iplay",
-  "version": "1.0.0",
-  "description": "Nuxt SSR 版本的 IPlay 图像工具箱，使用 NuxtUI 和 Tailwind 构建。",
+  "version": "0.0.1",
+  "description": "图玩",
   "private": true,
   "type": "module",
-  "imports": {
-    "#imports": "./.nuxt/imports.mjs",
-    "#build": "./.nuxt/"
-  },
   "scripts": {
-    "dev": "nuxi dev",
-    "build": "nuxi build",
-    "preview": "nuxi preview",
-    "format": "prettier --write \"**/*.{js,ts,vue,json,css,md,html,mjs}\" --ignore-path .prettierignore",
-    "test": "playwright test",
-    "test:e2e": "playwright test",
-    "test:e2e:headed": "playwright test --headed"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "@iconify-json/lucide": "^1.2.108",
-    "@nuxt/ui": "^4.5.0",
-    "@nuxtjs/tailwindcss": "^6.9.0",
-    "@playwright/test": "^1.58.2",
-    "autoprefixer": "^10.4.19",
-    "nuxt": "^4.4.5",
-    "postcss": "^8.4.37",
+    "@vitejs/plugin-vue": "^6.0.7",
     "prettier": "2.8.8",
-    "tailwindcss": "^4.3.0",
-    "typescript": "^5.6.0"
+    "vite": "^8.0.13"
   },
   "dependencies": {
-    "@nuxtjs/i18n": "^10.3.0"
+    "pinia": "^3.0.4",
+    "vue": "^3.5.34",
+    "vue-router": "^5.0.7"
   }
 }
