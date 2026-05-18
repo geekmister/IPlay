@@ -43,7 +43,7 @@
         </div>
       </div>
       <div class="p-5">
-        <div class="upload-box mb-4 relative" style="min-height:180px">
+        <div class="upload-box mb-4 relative" style="min-height:180px" @click="!currentImage && fileInput.click()">
           <div v-if="!currentImage" class="flex flex-col items-center justify-center py-4">
             <i class="fa fa-photo text-3xl text-gray-400 mb-2"></i>
             <p class="mb-1">上传图片用于信息分析</p>
@@ -216,54 +216,6 @@ const deleteImage = () => {
 
 <style scoped>
 .page-container {
-  max-width: 6xl;
-  margin: 0 auto;
   padding: 32px 20px;
-}
-
-.upload-box {
-  border: 2px dashed #e5e7eb;
-  border-radius: 12px;
-  padding: 32px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.upload-box:hover {
-  border-color: #6366f1;
-  background-color: #f0f4ff;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.btn-primary {
-  background-color: #6366f1;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #4f46e5;
-}
-
-.btn-secondary {
-  background-color: #e5e7eb;
-  color: #1f2937;
-}
-
-.btn-secondary:hover {
-  background-color: #d1d5db;
-}
-
-.text-primary {
-  color: #6366f1;
 }
 </style>

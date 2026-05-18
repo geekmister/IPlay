@@ -3,7 +3,7 @@
     <h1 class="text-2xl font-bold mb-6">AI 去水印</h1>
     <p class="text-gray-600 mb-4">去除水印与画面中的干扰元素</p>
 
-    <div class="upload-box mb-6" v-if="!uploadedImage">
+    <div class="upload-box mb-6" v-if="!uploadedImage" @click="fileInput.click()">
       <i class="fa fa-cloud-upload text-3xl text-gray-400 mb-2"></i>
       <p class="mb-1">点击或拖拽图片上传</p>
       <p class="text-xs text-gray-500">支持JPG、PNG、WEBP</p>
@@ -80,64 +80,6 @@ const downloadResult = () => {
 
 <style scoped>
 .page-container {
-  max-width: 6xl;
-  margin: 0 auto;
   padding: 32px 20px;
-}
-
-.upload-box {
-  border: 2px dashed #e5e7eb;
-  border-radius: 12px;
-  padding: 32px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.upload-box:hover {
-  border-color: #6366f1;
-  background-color: #f0f4ff;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.btn-primary {
-  background-color: #6366f1;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #4f46e5;
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: #e5e7eb;
-  color: #1f2937;
-}
-
-.btn-secondary:hover {
-  background-color: #d1d5db;
-}
-
-.btn-danger {
-  background-color: #ef4444;
-  color: white;
-}
-
-.btn-danger:hover {
-  background-color: #dc2626;
 }
 </style>

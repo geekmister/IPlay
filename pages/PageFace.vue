@@ -7,7 +7,7 @@
       <!-- 源人脸 -->
       <div class="space-y-4">
         <h3 class="font-semibold">源人脸</h3>
-        <div class="upload-box" v-if="!sourceFace">
+        <div class="upload-box" v-if="!sourceFace" @click="sourceInput.click()">
           <i class="fa fa-user-circle-o text-3xl text-gray-400 mb-2"></i>
           <p class="mb-1">上传源人脸</p>
           <p class="text-xs text-gray-500">建议使用正脸清晰照片</p>
@@ -22,7 +22,7 @@
       <!-- 目标图片 -->
       <div class="space-y-4">
         <h3 class="font-semibold">目标图片</h3>
-        <div class="upload-box" v-if="!targetImage">
+        <div class="upload-box" v-if="!targetImage" @click="targetInput.click()">
           <i class="fa fa-picture-o text-3xl text-gray-400 mb-2"></i>
           <p class="mb-1">上传目标图片</p>
           <p class="text-xs text-gray-500">支持人物海报、自拍、场景图</p>
@@ -155,55 +155,6 @@ const downloadResult = () => {
 
 <style scoped>
 .page-container {
-  max-width: 6xl;
-  margin: 0 auto;
   padding: 32px 20px;
-}
-
-.upload-box {
-  border: 2px dashed #e5e7eb;
-  border-radius: 12px;
-  padding: 32px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.upload-box:hover {
-  border-color: #6366f1;
-  background-color: #f0f4ff;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.btn-primary {
-  background-color: #6366f1;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #4f46e5;
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: #e5e7eb;
-  color: #1f2937;
-}
-
-.btn-secondary:hover {
-  background-color: #d1d5db;
 }
 </style>

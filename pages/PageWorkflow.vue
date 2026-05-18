@@ -9,8 +9,7 @@
         <h3 class="font-bold mb-4 flex items-center gap-2">
           <i class="fa fa-files-o"></i>批量压缩与水印
         </h3>
-        <div class="upload-box mb-4">
-          <i class="fa fa-files-o text-2xl text-gray-400 mb-2"></i>
+        <div class="upload-box mb-4" @click="batchInput.click()">
           <p class="text-sm mb-1">选择或拖拽批量图片</p>
           <p class="text-xs text-gray-500">适合批量压缩、统一加水印后逐张下载</p>
           <input type="file" accept="image/*" multiple @change="handleBatchUpload" class="hidden" ref="batchInput"/>
@@ -28,8 +27,7 @@
         <h3 class="font-bold mb-4 flex items-center gap-2">
           <i class="fa fa-th-large"></i>拼图海报
         </h3>
-        <div class="upload-box mb-4">
-          <i class="fa fa-th-large text-2xl text-gray-400 mb-2"></i>
+        <div class="upload-box mb-4" @click="collageInput.click()">
           <p class="text-sm mb-1">选择或拖拽拼图图片</p>
           <p class="text-xs text-gray-500">2-9 张图片适合制作封面和海报</p>
           <input type="file" accept="image/*" multiple @change="handleCollageUpload" class="hidden" ref="collageInput"/>
@@ -58,8 +56,7 @@
         <h3 class="font-bold mb-4">
           <i class="fa fa-file-image-o mr-1"></i>图像转 PDF
         </h3>
-        <div class="upload-box mb-4">
-          <i class="fa fa-file-image-o text-2xl text-gray-400 mb-2"></i>
+        <div class="upload-box mb-4" @click="imagesToPdfInput.click()">
           <p class="text-sm mb-1">选择或拖拽图片</p>
           <p class="text-xs text-gray-500">用于整理成 PDF</p>
           <input type="file" accept="image/*" multiple @change="handleImagesToConvert" class="hidden" ref="imagesToPdfInput"/>
@@ -73,8 +70,7 @@
         <h3 class="font-bold mb-4">
           <i class="fa fa-file-pdf-o mr-1"></i>PDF 转图像
         </h3>
-        <div class="upload-box mb-4">
-          <i class="fa fa-file-pdf-o text-2xl text-gray-400 mb-2"></i>
+        <div class="upload-box mb-4" @click="pdfToImageInput.click()">
           <p class="text-sm mb-1">选择或拖拽 PDF</p>
           <p class="text-xs text-gray-500">用于拆分导出图片</p>
           <input type="file" accept="application/pdf" @change="handlePdfToConvert" class="hidden" ref="pdfToImageInput"/>
@@ -145,50 +141,6 @@ const convertPdfToImages = () => {
 
 <style scoped>
 .page-container {
-  max-width: 6xl;
-  margin: 0 auto;
   padding: 32px 20px;
-}
-
-.upload-box {
-  border: 2px dashed #e5e7eb;
-  border-radius: 12px;
-  padding: 24px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.upload-box:hover {
-  border-color: #6366f1;
-  background-color: #f0f4ff;
-}
-
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.btn-primary {
-  background-color: #6366f1;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #4f46e5;
-}
-
-.btn-secondary {
-  background-color: #e5e7eb;
-  color: #1f2937;
-}
-
-.btn-secondary:hover {
-  background-color: #d1d5db;
 }
 </style>
