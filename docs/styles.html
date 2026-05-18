@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPlay 视觉样式标注稿</title>
+  <style>
+    :root {
+      --bg: #e7eefc;
+      --surface: #ffffff;
+      --surface-strong: #f8fafc;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #dbe2ed;
+      --primary: #6366f1;
+      --primary-light: #eef2ff;
+      --primary-dark: #4f46e5;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: radial-gradient(circle at top left, rgba(99,102,241,.14), transparent 32%), linear-gradient(180deg, #f7fbff 0%, #e9eff8 100%); color: var(--text); }
+    .page { max-width: 1240px; margin: 0 auto; padding: 30px 24px 60px; }
+    h1 { margin: 0 0 8px; font-size: 2.4rem; letter-spacing: -0.04em; }
+    h2 { margin: 50px 0 18px; font-size: 1.5rem; color: var(--text); }
+    h3 { margin: 24px 0 12px; font-size: 1.05rem; color: var(--text); }
+    p, li { line-height: 1.8; }
+    li { margin-bottom: 8px; }
+    .hero { background: rgba(255,255,255,0.92); border: 1px solid rgba(219,226,237,0.86); border-radius: 28px; padding: 28px 28px 24px; box-shadow: var(--shadow); margin-bottom: 30px; }
+    .hero-tag { display: inline-flex; align-items: center; gap: 8px; font-size: .82rem; font-weight: 700; padding: 8px 12px; border-radius: 999px; background: rgba(99,102,241,0.12); color: var(--primary); margin-bottom: 16px; }
+    .hero p { max-width: 760px; margin: 0.85rem 0 0; color: var(--muted); }
+    .section-panel { background: rgba(255,255,255,0.95); border: 1px solid rgba(219,226,237,0.85); border-radius: 22px; padding: 24px; box-shadow: 0 24px 60px rgba(15,23,42,0.06); }
+    .token-list { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:18px; margin-top:18px; }
+    .token { background:#fff; border:1px solid rgba(219,226,237,0.95); border-radius:18px; overflow:hidden; box-shadow: 0 12px 32px rgba(15,23,42,0.04); }
+    .token-swatch { height: 98px; width:100%; }
+    .token-meta { padding: 14px 14px 18px; }
+    .token-meta strong { display:block; font-size:.96rem; margin-bottom:8px; }
+    .token-meta span { display:block; color: var(--muted); font-size:.95rem; }
+    .badge { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:9999px; border:1px solid #e5e7eb; font-size:.82rem; background:#f8fafc; color:var(--muted); }
+    .badge--primary { color: var(--primary); border-color: rgba(99,102,241,0.24); background: rgba(99,102,241,0.08); }
+    .label-chip { display:inline-flex; gap:6px; align-items:center; padding:6px 12px; border-radius:999px; background:#f8fafc; font-size:.86rem; color:var(--muted); border:1px solid #e5e7eb; }
+    .grid-2, .grid-3, .sample-grid { display:grid; gap:18px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .sample-grid { grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); margin-top:18px; }
+    .panel { background: var(--surface); border:1px solid rgba(219,226,237,0.9); border-radius:22px; padding:22px; }
+    .panel-light { background: var(--surface-strong); }
+    .panel-sm { border-radius:18px; padding:18px; }
+    .panel-compact { padding: 16px; }
+    .code { background:#f8fafc; border:1px solid #e5e7eb; border-radius:14px; padding:14px; overflow-x:auto; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; margin:14px 0; font-size:.92rem; }
+    .row { display:flex; gap:18px; flex-wrap:wrap; margin-top:16px; }
+    .row .block { flex:1 1 320px; min-width:280px; }
+    .visual-card { border-radius:20px; padding:18px; background:var(--primary-light); color:var(--primary-dark); border:1px solid rgba(99,102,241,0.22); }
+    .visual-card p { margin:.75rem 0 0; }
+    .line-item { margin: 12px 0; }
+    .line-item strong { display:inline-block; width: 130px; color: var(--text); }
+    .component-legend { margin-top: 10px; padding: 16px; background:#f8fafc; border-radius:16px; border:1px dashed rgba(219,226,237,0.9); }
+    .component-legend dt { font-weight:700; margin-top:12px; }
+    .component-legend dd { margin-left:0; margin-bottom: 10px; color:var(--muted); }
+    .sample-card { background:#fff; border:1px solid rgba(219,226,237,0.9); border-radius:20px; padding:18px; box-shadow:0 16px 40px rgba(15,23,42,0.05); }
+    .sample-card h4 { margin: 0 0 10px; font-size:1rem; }
+    .sample-box { border-radius:18px; padding:18px; border:1px solid rgba(219,226,237,0.9); background:#f8fafc; }
+    .sample-sidebar { display:flex; flex-direction:column; gap:14px; }
+    .sidebar-logo-box { width: 72px; height: 36px; border-radius: 14px; background: rgba(99,102,241,0.12); display:flex; align-items:center; justify-content:center; color: var(--primary); font-weight:700; }
+    .nav-item { display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:14px; color:#344054; text-decoration:none; background: #fff; border:1px solid transparent; }
+    .nav-item.active { background: #eef2ff; border-color: rgba(99,102,241,0.28); color: var(--primary); }
+    .upload-icon { font-size: 1.5rem; margin-bottom: 10px; }
+    .upload-title { font-weight:600; margin-bottom:6px; }
+    .upload-hint { color: var(--muted); font-size:.95rem; }
+    .upload-box { border: 2px dashed rgba(219,226,237,0.95); border-radius: 18px; padding: 28px; text-align: center; background: #f9fafb; transition: all .18s ease; }
+    .upload-box:hover { border-color: #6366f1; background: #eef2ff; }
+    .sample-buttons { display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; }
+    .btn { border:none; border-radius:16px; padding:12px 18px; font-weight:600; cursor:pointer; transition: all .18s ease; }
+    .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color:#fff; }
+    .btn-secondary { background: #f8fafc; color:#344054; border:1px solid rgba(219,226,237,0.95); }
+    .btn-danger { background: #ef4444; color:#fff; }
+    .feature-btn { width:100%; text-align:left; padding:14px 16px; border-radius:16px; border:1px solid rgba(219,226,237,0.95); background:#fff; color:#111827; transition: all .18s ease; }
+    .feature-btn:hover { background: #f8fafc; }
+    .feature-btn.is-active { border-color: rgba(99,102,241,0.35); background: #eef2ff; color: var(--primary); }
+    .sample-result .result-panel { border-radius:18px; padding:18px; background:#f8fafc; border:1px solid rgba(219,226,237,0.95); }
+    .result-panel__title { font-weight:700; margin-bottom:12px; }
+    .category-btn { display:inline-flex; flex-direction:column; align-items:flex-start; gap:10px; padding:16px; border-radius:18px; border:1px solid rgba(219,226,237,0.9); background:#fff; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+    .category-btn:hover { border-color: rgba(99,102,241,0.35); box-shadow: 0 10px 26px rgba(99,102,241,0.08); }
+    .category-btn.is-active { background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(255,255,255,0.92)); border-color: rgba(99,102,241,0.35); box-shadow: 0 14px 28px rgba(99,102,241,0.12); }
+    .adv-feature-card { border-radius: 18px; border:1px solid rgba(219,226,237,0.9); padding:16px; background:#fff; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+    .adv-feature-card:hover { box-shadow: 0 10px 24px rgba(99,102,241,0.08); }
+    .adv-feature-card.is-active { border-color: rgba(99,102,241,0.35); background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(255,255,255,0.92)); box-shadow: 0 14px 28px rgba(99,102,241,0.12); }
+    .adv-feature-name { font-size: .95rem; font-weight: 700; margin-bottom: 6px; }
+    .adv-feature-text { font-size: .78rem; color: var(--muted); line-height: 1.5; }
+    .demo-form-control { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(219,226,237,0.95); background: #fff; color: #111827; }
+    .demo-form-label { display:block; margin-bottom: 6px; font-size:.95rem; color: #374151; }
+    .demo-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; background:#eef2ff; color:var(--primary); border:1px solid rgba(99,102,241,0.25); font-size:.85rem; }
+    .main-nav-card { border-radius:20px; padding:18px; border:1px solid rgba(219,226,237,0.95); background:#fff; transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease; }
+    .main-nav-card:hover { box-shadow: 0 12px 28px rgba(99,102,241,0.12); transform: translateY(-2px); }
+    .main-nav-card.is-active { background: linear-gradient(135deg, rgba(99,102,241,0.14), rgba(139,92,246,0.12)); border-color: rgba(99,102,241,0.35); }
+    .main-nav-icon { width: 2.45rem; height: 2.45rem; border-radius: 0.85rem; display:flex; align-items:center; justify-content:center; background: rgba(99,102,241,0.1); }
+    .main-nav-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .main-nav-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
+    .result-image { height:110px; border-radius:16px; background: linear-gradient(135deg, rgba(99,102,241,.16), rgba(236,72,153,.14)); display:flex; align-items:center; justify-content:center; color: var(--muted); font-size:.95rem; }
+    .workflow-card { border-radius:18px; padding:18px; background:#fff; border:1px solid rgba(219,226,237,0.95); }
+    .workflow-card__title { margin:0 0 10px; font-weight:700; }
+    .workflow-note { color: var(--muted); font-size:.95rem; }
+    .annotate-panel { margin-top:18px; padding:24px; background: rgba(255,255,255,0.92); border-radius:24px; border:1px solid rgba(219,226,237,0.95); }
+    .annotated-card { position: relative; max-width: 800px; margin: 0 auto; padding: 30px; background:#fff; border-radius:26px; box-shadow:0 24px 60px rgba(15,23,42,0.08); }
+    .annotated-box { position: relative; border:1px dashed rgba(99,102,241,0.35); border-radius:20px; padding:28px; background:#f8fafc; }
+    .annotated-header { font-weight:700; margin-bottom:10px; }
+    .annotated-note { color: var(--muted); font-size:.95rem; }
+    .annotated-label { position:absolute; width: 180px; padding: 10px 12px; background: #fff; border: 1px solid rgba(219,226,237,0.95); border-radius: 14px; font-size:.88rem; color: var(--text); box-shadow:0 12px 32px rgba(15,23,42,0.08); }
+    .label-a { top: 18px; right: -210px; }
+    .label-b { left: -210px; top: 110px; }
+    .label-c { right: -210px; bottom: 18px; }
+    .spec-list { display:grid; gap:16px; margin-top:18px; }
+    .spec-item { background:#fff; border:1px solid rgba(219,226,237,0.95); border-radius:18px; padding:18px; }
+    .spec-item h3 { margin:0 0 10px; }
+    .page-footer { margin-top: 40px; padding: 20px 22px; border-radius: 20px; background: rgba(255,255,255,0.9); border:1px solid rgba(219,226,237,0.95); }
+    .page-footer p { margin:0; color:var(--muted); }
+    @media (max-width: 980px) { .grid-2, .grid-3, .sample-grid { grid-template-columns: 1fr; } .annotated-card { padding: 20px; } .annotated-label { position: static; margin-top:12px; width:auto; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <span class="hero-tag">设计标注稿</span>
+      <h1>IPlay 视觉样式标注稿</h1>
+      <p>结合 `docs/styles.md` 与当前项目页面样式，生成一份更直观的组件样例与标注说明，方便直接对照实现。</p>
+    </section>
+
+    <section class="section-panel">
+      <h2>01 视觉核心 Token</h2>
+      <p>提取当前项目最关键的配色、圆角和文本层次，作为实现样式的第一层标准。</p>
+      <div class="token-list">
+        <div class="token"><div class="token-swatch" style="background:var(--primary);"></div><div class="token-meta"><strong>--color-primary</strong><span>#6366f1</span><span>主动作色</span></div></div>
+        <div class="token"><div class="token-swatch" style="background:var(--primary-dark);"></div><div class="token-meta"><strong>--color-primary-dark</strong><span>#4f46e5</span><span>主色深</span></div></div>
+        <div class="token"><div class="token-swatch" style="background:var(--primary-light);"></div><div class="token-meta"><strong>--color-primary-light</strong><span>#c7d2fe</span><span>主色浅</span></div></div>
+        <div class="token"><div class="token-swatch" style="background:var(--primary-light);"></div><div class="token-meta"><strong>--color-primary-bg</strong><span>#eef2ff</span><span>主色背景</span></div></div>
+        <div class="token"><div class="token-swatch" style="background:#f9fafb;"></div><div class="token-meta"><strong>--color-gray-50</strong><span>#f9fafb</span><span>背景 / 卡片底</span></div></div>
+        <div class="token"><div class="token-swatch" style="background:#e5e7eb;"></div><div class="token-meta"><strong>--color-gray-200</strong><span>#e5e7eb</span><span>边框 / 分割线</span></div></div>
+        <div class="token"><div class="token-swatch" style="background:#6b7280;"></div><div class="token-meta"><strong>--color-gray-500</strong><span>#6b7280</span><span>辅助文字</span></div></div>
+        <div class="token"><div class="token-swatch" style="background:#111827;"></div><div class="token-meta"><strong>--color-gray-900</strong><span>#111827</span><span>主要标题</span></div></div>
+      </div>
+      <div class="row">
+        <div class="block visual-card"><p>圆角标准</p><p><strong>16px</strong> 主卡片、上传框、按钮。</p></div>
+        <div class="block visual-card"><p>细节圆角</p><p><strong>8px</strong> 辅助面板、标签。</p></div>
+        <div class="block visual-card"><p>阴影</p><p><strong>0 18px 60px rgba(15,23,42,.08)</strong> 用于浮层卡片。</p></div>
+      </div>
+      <div class="component-legend">
+        <dl>
+          <dt>page-title</dt>
+          <dd>1.5rem / 700 / #111827</dd>
+          <dt>page-subtitle</dt>
+          <dd>0.875rem / 400 / #6b7280</dd>
+          <dt>section-title</dt>
+          <dd>1rem / 700 / #111827</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section class="section-panel">
+      <h2>02 页面结构与内容区</h2>
+      <p>页面采用经典侧边栏 + 右侧内容区布局，内容区内部使用卡片分块、留白和层级阴影保持清晰。</p>
+      <div class="panel panel-light">
+        <div class="component-legend">
+          <dt>`.iplay-root`</dt>
+          <dd>水平 flex 布局，撑满 100vh。</dd>
+          <dt>`.sidebar`</dt>
+          <dd>宽度 220px，白底，右侧 1px 灰边。</dd>
+          <dt>`.page-container`</dt>
+          <dd>内边距 28px 24px；保证内容区视觉舒展。</dd>
+        </div>
+      </div>
+      <div class="panel panel-light" style="margin-top:18px;">
+        <h3>布局样例</h3>
+        <div class="sample-grid">
+          <div class="sample-card">
+            <h4>导航示例</h4>
+            <div class="sample-sidebar">
+              <div class="sidebar-logo-box">Logo</div>
+              <a class="nav-item active"><span>●</span> 信息</a>
+              <a class="nav-item"><span>●</span> 工具</a>
+              <a class="nav-item"><span>●</span> 高级</a>
+            </div>
+          </div>
+          <div class="sample-card">
+            <h4>内容面板</h4>
+            <div class="sample-box">
+              <p class="label-chip">Page Container</p>
+              <p style="margin-top: 14px;">外层保留一致间距，内部模块上下 24px；避免页面拥挤。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-panel">
+      <h2>03 组件样例</h2>
+      <p>以下组件均来自当前项目页面样式，已按真实结构整理为实现参考。</p>
+      <div class="sample-grid">
+        <article class="sample-card">
+          <h4>上传框</h4>
+          <div class="sample-box" style="text-align:center; padding:28px;">
+            <div class="upload-icon">📤</div>
+            <div class="upload-title">点击或拖拽上传</div>
+            <div class="upload-hint">支持 JPG / PNG / WEBP</div>
+          </div>
+          <div class="component-legend">
+            <dt>.upload-box</dt>
+            <dd>2px dashed #d1d5db，border-radius 18px，padding 32px。</dd>
+            <dt>hover</dt>
+            <dd>border-color #6366f1，background #eef2ff。</dd>
+          </div>
+        </article>
+        <article class="sample-card">
+          <h4>按钮组</h4>
+          <div class="sample-buttons">
+            <button class="btn btn-primary">主按钮</button>
+            <button class="btn btn-secondary">次按钮</button>
+            <button class="btn btn-danger">危险按钮</button>
+          </div>
+          <div class="component-legend">
+            <dt>.btn</dt>
+            <dd>圆角 16px，padding 12px 18px，字体 600。</dd>
+            <dt>.btn-primary</dt>
+            <dd>渐变主色，白色文字。</dd>
+            <dt>.btn-secondary</dt>
+            <dd>灰底 + 灰边。</dd>
+          </div>
+        </article>
+        <article class="sample-card">
+          <h4>功能列表</h4>
+          <div class="feature-btn is-active">选中状态</div>
+          <div class="feature-btn" style="margin-top:10px;">未选状态</div>
+          <div class="component-legend">
+            <dt>.feature-btn</dt>
+            <dd>白底、灰边、左对齐文字。</dd>
+            <dt>.is-active</dt>
+            <dd>主色背景、主色边框、强调文字。</dd>
+          </div>
+        </article>
+        <article class="sample-card">
+          <h4>结果面板</h4>
+          <div class="sample-result">
+            <div class="result-panel">
+              <div class="result-panel__title">处理结果</div>
+              <div class="result-image">图片预览</div>
+            </div>
+          </div>
+          <div class="component-legend">
+            <dt>.result-panel</dt>
+            <dd>浅灰背景、圆角 18px、padding 18px。</dd>
+          </div>
+        </article>
+        <article class="sample-card">
+          <h4>工作卡片</h4>
+          <div class="workflow-card">
+            <div class="workflow-card__title">批量压缩</div>
+            <div class="workflow-note">支持多张图片一次处理。</div>
+          </div>
+          <div class="component-legend">
+            <dt>.workflow-card</dt>
+            <dd>白卡片、边框 1px、圆角 18px、padding 18px。</dd>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-panel">
+      <h2>04 main.css 样式样例</h2>
+      <p>下面是 `main.css` 样式类的可视化效果示例，直接展示真实交互组件风格。</p>
+      <div class="sample-grid">
+        <article class="sample-card">
+          <h4>按钮示例</h4>
+          <div class="sample-buttons">
+            <button class="btn btn-primary">主按钮</button>
+            <button class="btn btn-secondary">次按钮</button>
+            <button class="btn btn-danger">危险按钮</button>
+            <button class="btn btn-vip">VIP 按钮</button>
+          </div>
+          <div class="component-legend">
+            <dt>样例说明</dt>
+            <dd>主按钮用于核心操作，次按钮用于辅助操作，危险按钮用于删除类行为。</dd>
+          </div>
+        </article>
+        <article class="sample-card">
+          <h4>上传框示例</h4>
+          <div class="upload-box">
+            <div class="upload-icon">📤</div>
+            <div class="upload-title">点击或拖拽上传</div>
+            <div class="upload-hint">支持 JPG / PNG / WEBP</div>
+          </div>
+          <div class="component-legend">
+            <dt>样例说明</dt>
+            <dd>上传框展示核心边框、圆角、提示文案与图标布局。</dd>
+          </div>
+        </article>
+        <article class="sample-card">
+          <h4>功能按钮示例</h4>
+          <div>
+            <button class="feature-btn is-active">当前选择</button>
+            <button class="feature-btn" style="margin-top:10px;">未选项</button>
+          </div>
+          <div class="component-legend">
+            <dt>样例说明</dt>
+            <dd>功能按钮展示默认态和激活态的差异。</dd>
+          </div>
+        </article>
+        <article class="sample-card">
+          <h4>面板与卡片示例</h4>
+          <div class="sample-result">
+            <div class="result-panel">
+              <div class="result-panel__title">处理结果</div>
+              <div class="result-image">图片预览</div>
+            </div>
+          </div>
+          <div class="component-legend">
+            <dt>样例说明</dt>
+            <dd>结果面板展示圆角、背景和标题层次。</dd>
+          </div>
+        </article>
+      </div>
+      <div class="sample-grid" style="margin-top: 18px;">
+        <article class="sample-card">
+          <h4>表单样例</h4>
+          <label class="demo-form-label" for="demo-input">输入框</label>
+          <input id="demo-input" class="demo-form-control" placeholder="请输入示例内容" />
+          <div style="margin-top: 10px;"><span class="demo-badge">示例标签</span></div>
+        </article>
+        <article class="sample-card">
+          <h4>导航卡片</h4>
+          <div class="main-nav-card">
+            <div class="main-nav-icon">🔍</div>
+            <div class="main-nav-title">主导航</div>
+            <div class="main-nav-desc">侧边导航卡片风格展示</div>
+          </div>
+        </article>
+        <article class="sample-card">
+          <h4>分类按钮</h4>
+          <button class="category-btn">分类项</button>
+          <button class="category-btn is-active" style="margin-top:10px;">选中分类</button>
+          <div class="component-legend">
+            <dt>样例说明</dt>
+            <dd>分类按钮展示 hover/激活样式。</dd>
+          </div>
+        </article>
+        <article class="sample-card">
+          <h4>高级功能卡</h4>
+          <div class="adv-feature-card">
+            <div class="adv-feature-name">高级特性</div>
+            <div class="adv-feature-text">hover / 激活态展示</div>
+          </div>
+          <div class="component-legend">
+            <dt>样例说明</dt>
+            <dd>高级玩法卡片示例，展示卡片阴影和渐变激活态。</dd>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-panel">
+      <h2>05 main.css 样式说明</h2>
+      <p>下面列出 `assets/css/main.css` 中最重要的样式类，并给出真实使用示例与说明，保证每个核心类都有配套参考。</p>
+      <div class="component-legend">
+        <dt>.btn</dt>
+        <dd>基础按钮类，提供统一圆角、内边距和 hover 动画。用于所有页面内的操作按钮。</dd>
+        <dt>.btn-primary</dt>
+        <dd>主操作按钮，如“执行”、“开始生成”、“下载结果”。</dd>
+        <dt>.btn-secondary</dt>
+        <dd>次级按钮，适用于“重置”、“删除”、“导出”之类辅助操作。</dd>
+        <dt>.btn-danger</dt>
+        <dd>危险动作按钮，用于“删除”、“清空”等高风险操作。</dd>
+        <dt>.btn-vip</dt>
+        <dd>VIP 风格按钮，适用于“高级玩法”页面的重点入口。</dd>
+        <dt>.upload-box</dt>
+        <dd>上传区域样式，带虚线边框、圆角和中心提示。用于图片上传模块。</dd>
+        <dt>.upload-box--filled</dt>
+        <dd>已上传后状态，去掉 hover 强调，表示已填充内容。</dd>
+        <dt>.image-preview</dt>
+        <dd>图片预览容器，内部图片居中展示。用于上传后预览区。</dd>
+        <dt>.workspace</dt>
+        <dd>上传后工作区外层容器，提供垂直间距，连接各模块。</dd>
+        <dt>.feature-panel</dt>
+        <dd>两列功能区域布局，左侧为功能列表，右侧为功能详情。</dd>
+        <dt>.feature-btn</dt>
+        <dd>功能选择按钮，默认灰边，激活态主色背景。用于人像/增强/隐私页面。</dd>
+        <dt>.feature-detail</dt>
+        <dd>功能详情面板，显示当前选中功能的说明与执行按钮。</dd>
+        <dt>.result-panel</dt>
+        <dd>结果展示区域，浅灰背景、圆角，显示处理后图片或文本结果。</dd>
+        <dt>.action-bar</dt>
+        <dd>底部操作栏，放置“恢复原图”、“删除”、“下载”等按钮。</dd>
+        <dt>.form-control</dt>
+        <dd>输入框、选择框、文本域统一样式，用于所有表单字段。</dd>
+        <dt>.form-label</dt>
+        <dd>表单标签样式，用于标题和字段说明。</dd>
+        <dt>.badge</dt>
+        <dd>小标签，用于标记“可选”、“VIP”等状态。</dd>
+        <dt>.grid-2 / .grid-3 / .grid-4</dt>
+        <dd>响应式网格布局，用于功能卡片、示例面板、列表排列。</dd>
+        <dt>.workflow-grid</dt>
+        <dd>批量与输出页面四卡片布局。</dd>
+        <dt>.workflow-card</dt>
+        <dd>工作项卡片，含图标、标题、说明和操作表单。</dd>
+        <dt>.category-grid</dt>
+        <dd>高级玩法分类按钮的网格布局。</dd>
+        <dt>.category-btn</dt>
+        <dd>分类选择按钮，默认白底，激活后主色边框与浅色背景。</dd>
+        <dt>.card</dt>
+        <dd>通用卡片样式，用于信息面板、说明区域、配置卡片。</dd>
+        <dt>.page-title</dt>
+        <dd>页面主标题，使用 1.5rem / 700，颜色 #111827。</dd>
+        <dt>.page-subtitle</dt>
+        <dd>页面副标题，使用 0.875rem / 400，颜色 #6b7280。</dd>
+        <dt>.section-title</dt>
+        <dd>区块标题，使用 1rem / 700，用于模块小标题。</dd>
+        <dt>.sidebar</dt>
+        <dd>侧边栏容器，固定宽度 220px，用于导航项和 logo 区。</dd>
+        <dt>.page-container</dt>
+        <dd>页面内容容器，统一内边距 28px 24px。</dd>
+        <dt>.main-nav-card</dt>
+        <dd>侧边功能卡片，默认白底，hover 时放大、加阴影，激活态为渐变底。</dd>
+        <dt>.main-nav-icon</dt>
+        <dd>侧边功能图标容器，圆角背景与 hover 效果。</dd>
+        <dt>.adv-category-btn</dt>
+        <dd>高级玩法分类按钮，hover 后边框加深，激活态有光泽渐变。</dd>
+        <dt>.adv-feature-card</dt>
+        <dd>高级玩法功能卡片，hover 变换阴影、激活态背景渐变。</dd>
+        <dt>.adv-mini-badge</dt>
+        <dd>小徽章标签，用于右侧功能说明和状态标识。</dd>
+        <dt>.info-btn-full-main / .info-btn-safe-main</dt>
+        <dd>信息页面的主操作按钮和安全按钮，分别用于“复制”、“导出”等操作。</dd>
+      </div>
+    </section>
+
+    <section class="section-panel">
+      <h2>05 模拟标注效果</h2>
+      <p>使用“组件 + 标签 + 说明”的方式，模拟真实标注稿的展示模式。</p>
+      <div class="annotate-panel">
+        <div class="annotated-card">
+          <div class="annotated-box">
+            <div class="annotated-header">上传框（`.upload-box`）</div>
+            <div class="annotated-note">模拟标注稿中会写出边框、圆角、背景、hover、文字层次。</div>
+          </div>
+          <div class="annotated-label label-a">Padding 32px</div>
+          <div class="annotated-label label-b">2px dashed border</div>
+          <div class="annotated-label label-c">Radius 18px</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-panel">
+      <h2>06 详细规范</h2>
+      <div class="spec-list">
+        <div class="spec-item">
+          <h3>间距体系</h3>
+          <p>核心间距：8 / 16 / 24 / 32 / 40。页面内部间距优先采用 24px 和 32px。</p>
+        </div>
+        <div class="spec-item">
+          <h3>颜色与层次</h3>
+          <p>主色用于重点按钮、激活态和交互强调；灰色用于文本、分割线和背景层次。</p>
+        </div>
+        <div class="spec-item">
+          <h3>交互状态</h3>
+          <p>按钮 hover 使用轻微透明度变化；禁用态为 50% 透明度。</p>
+        </div>
+      </div>
+      <div class="code"><pre>&lt;div class="upload-box"&gt;
+  &lt;i class="fa fa-cloud-upload upload-icon"&gt;&lt;/i&gt;
+  &lt;p class="upload-title"&gt;点击或拖拽上传&lt;/p&gt;
+  &lt;p class="upload-hint"&gt;支持 JPG / PNG / WEBP&lt;/p&gt;
+&lt;/div&gt;</pre></div>
+    </section>
+
+    <footer class="page-footer">
+      <p>如需，我可以继续基于每个页面（Info / Tools / Portrait / Advanced / Workflow）生成真实结构的“页面级标注稿”。</p>
+    </footer>
+  </div>
+</body>
+</html>
