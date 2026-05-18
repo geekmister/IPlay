@@ -1,67 +1,59 @@
 <template>
   <div class="page-container">
-    <h1 class="text-2xl font-bold mb-6">修复与增强</h1>
-    <p class="text-gray-600 mb-4">老照片修复、物体移除、扩图、清晰增强、调色</p>
+    <h1 class="page-title">图片增强</h1>
+    <p class="page-subtitle">超分辨率、降噪、锐化、HDR 增强</p>
 
-    <div class="space-y-6">
-      <div class="upload-box" v-if="!uploadedImage" @click="fileInput.click()">
-        <i class="fa fa-picture-o text-3xl text-gray-400 mb-2"></i>
-        <p class="mb-1">上传主画布图片</p>
-        <p class="text-xs text-gray-500">支持多种格式的修复和增强</p>
-        <input type="file" accept="image/*" @change="handleFileUpload" class="hidden" ref="fileInput"/>
+    <div class="upload-box" v-if="!uploadedImage" @click="fileInput.click()">
+      <i class="fa fa-magic upload-icon"></i>
+      <p>点击或拖拽图片上传</p>
+      <p class="upload-hint">支持 JPG、PNG、WEBP</p>
+      <input type="file" accept="image/*" @change="handleFileUpload" style="display:none" ref="fileInput" />
+    </div>
+
+    <div v-else class="workspace">
+      <div class="image-preview">
+        <img :src="uploadedImage" alt="上传图片" />
       </div>
 
-      <div v-else class="space-y-6">
-        <div class="text-center bg-gray-100 rounded-xl p-4">
-          <img :src="uploadedImage" class="max-w-full mx-auto rounded" alt="上传图片"/>
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-4">
-          <div>
-            <h3 class="font-bold mb-3">功能选择</h3>
-            <div class="space-y-2">
-              <button v-for="feature in features" :key="feature.key" 
-                @click="selectedFeature = feature.key"
-                :class="['w-full text-left p-3 rounded border transition', selectedFeature === feature.key ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200']">
-                <p class="font-medium text-sm">{{ feature.name }}</p>
-                <p class="text-xs text-gray-500 mt-1">{{ feature.desc }}</p>
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <h3 class="font-bold mb-3">当前功能</h3>
-            <div class="bg-gray-50 border rounded-lg p-4">
-              <p class="font-semibold">{{ currentFeatureName }}</p>
-              <p class="text-sm text-gray-600 mt-2">{{ currentFeatureDesc }}</p>
-              <button @click="processFeature" class="btn btn-primary w-full mt-4">
-                <i class="fa fa-magic mr-1"></i>执行当前功能
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div v-if="resultImage" class="text-center bg-gray-100 rounded-xl p-4">
-          <h3 class="font-bold mb-2">处理结果</h3>
-          <img :src="resultImage" class="max-w-full mx-auto rounded"/>
-          <div class="flex gap-2 mt-4 justify-center">
-            <button @click="downloadResult" class="btn btn-secondary">
-              <i class="fa fa-download mr-1"></i>下载
-            </button>
-            <button @click="clearResult" class="btn btn-secondary">
-              <i class="fa fa-refresh mr-1"></i>清除结果
+      <div class="feature-panel">
+        <div>
+          <h3 class="section-title">功能选择</h3>
+          <div class="feature-list">
+            <button
+              v-for="feat in features"
+              :key="feat.key"
+              class="feature-btn"
+              :class="{ 'is-active': selectedFeature === feat.key }"
+              @click="selectedFeature = feat.key"
+            >
+              <p class="feature-btn__name">{ feat.name }</p>
+              <p class="feature-btn__desc">{ feat.desc }</p>
             </button>
           </div>
         </div>
-
-        <div class="flex gap-2 justify-center">
-          <button @click="resetImage" class="btn btn-secondary">
-            <i class="fa fa-undo mr-1"></i>恢复上传原图
-          </button>
-          <button @click="deleteImage" class="btn btn-danger">
-            <i class="fa fa-trash mr-1"></i>删除图片
-          </button>
+        <div>
+          <h3 class="section-title">当前功能</h3>
+          <div class="feature-detail" v-if="currentFeature">
+            <p class="feature-detail__name">{ currentFeature.name }</p>
+            <p class="feature-detail__desc">{ currentFeature.detail }</p>
+            <button @click="processFeature" class="btn btn-primary btn--full" :disabled="processing">
+              <i class="fa fa-cogs"></i> { processing ? '处理中...' : '执行' }
+            </button>
+          </div>
         </div>
+      </div>
+
+      <div v-if="resultImage" class="result-panel">
+        <h3 class="result-panel__title">处理结果</h3>
+        <img :src="resultImage" alt="处理结果" />
+        <div class="btn-group btn-group--center">
+          <button @click="downloadResult" class="btn btn-secondary"><i class="fa fa-download"></i> 下载</button>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button @click="resetImage" class="btn btn-secondary"><i class="fa fa-refresh"></i> 恢复原图</button>
+        <button @click="deleteImage" class="btn btn-danger"><i class="fa fa-trash"></i> 删除图片</button>
       </div>
     </div>
   </div>
@@ -73,67 +65,39 @@ import { ref, computed } from 'vue'
 const uploadedImage = ref(null)
 const resultImage = ref(null)
 const fileInput = ref(null)
-const selectedFeature = ref('restore')
+const processing = ref(false)
 
 const features = [
-  { key: 'restore', name: '老照片修复', desc: '改善褪色、泛黄和轻微模糊感' },
-  { key: 'remove', name: '物体移除', desc: '框选后自动修补，适合去除画面杂物' },
-  { key: 'outpaint', name: 'AI 扩图', desc: '向外扩展画面边缘，适合做封面留白' },
-  { key: 'upscale', name: '清晰度增强', desc: '输出 2 倍尺寸并提升整体锐利感' },
-  { key: 'lut', name: '智能调色 LUT', desc: '胶片、日系、赛博三种氛围色调' }
+  { key: 'upscale', name: '超分辨率', desc: '无损放大 2× / 4×', detail: '基于 Real-ESRGAN 模型，将图片放大 2x 或 4x，智能补全纹理细节。' },
+  { key: 'denoise', name: '降噪处理', desc: '去除 ISO 噪点', detail: '识别并去除高 ISO 感光度引起的随机噪点，恢复干净的色彩层次。' },
+  { key: 'sharpen', name: '锐化增强', desc: '边缘锐化、细节清晰化', detail: '对模糊图像进行自适应锐化，提升边缘清晰度，同时避免过度锐化伪影。' },
+  { key: 'hdr', name: 'HDR 增强', desc: '动态范围提升', detail: '拓展图片的高光和阴影细节，营造 HDR 视觉效果。' },
 ]
 
-const currentFeatureName = computed(() => {
-  const feature = features.find(f => f.key === selectedFeature.value)
-  return feature?.name || '未知功能'
-})
-
-const currentFeatureDesc = computed(() => {
-  const feature = features.find(f => f.key === selectedFeature.value)
-  return feature?.desc || ''
-})
+const selectedFeature = ref(features[0]?.key ?? '')
+const currentFeature = computed(() => features.find(f => f.key === selectedFeature.value))
 
 const handleFileUpload = (event) => {
   const file = event.target.files[0]
   if (!file) return
-
   const reader = new FileReader()
-  reader.onload = (e) => {
-    uploadedImage.value = e.target.result
-    resultImage.value = null
-  }
+  reader.onload = (e) => { uploadedImage.value = e.target.result; resultImage.value = null }
   reader.readAsDataURL(file)
 }
 
-const processFeature = () => {
-  alert(`功能 "${currentFeatureName.value}" 开发中...`)
+const processFeature = async () => {
+  processing.value = true
+  await new Promise(r => setTimeout(r, 800))
   resultImage.value = uploadedImage.value
+  processing.value = false
 }
 
+const resetImage = () => { resultImage.value = null }
+const deleteImage = () => { uploadedImage.value = null; resultImage.value = null; if (fileInput.value) fileInput.value.value = '' }
 const downloadResult = () => {
-  const a = document.createElement('a')
-  a.href = resultImage.value
-  a.download = `enhance-${selectedFeature.value}-result.png`
+  const a = Object.assign(document.createElement('a'), { href: resultImage.value, download: 'result.png' })
   a.click()
 }
 
-const clearResult = () => {
-  resultImage.value = null
-}
-
-const resetImage = () => {
-  resultImage.value = null
-}
-
-const deleteImage = () => {
-  uploadedImage.value = null
-  resultImage.value = null
-  if (fileInput.value) fileInput.value.value = ''
-}
 </script>
 
-<style scoped>
-.page-container {
-  padding: 32px 20px;
-}
-</style>

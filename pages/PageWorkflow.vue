@@ -1,83 +1,116 @@
 <template>
   <div class="page-container">
-    <h1 class="text-2xl font-bold mb-6">批量与输出</h1>
-    <p class="text-gray-600 mb-4">批处理、拼图海报、图像与 PDF 工作流</p>
+    <h1 class="page-title">批量与输出</h1>
+    <p class="page-subtitle">批量压缩 / 水印 / 拼图 / PDF 转换</p>
 
-    <div class="grid lg:grid-cols-2 gap-6">
-      <!-- 批量压缩与水印 -->
-      <div class="border rounded-lg p-6">
-        <h3 class="font-bold mb-4 flex items-center gap-2">
-          <i class="fa fa-files-o"></i>批量压缩与水印
-        </h3>
-        <div class="upload-box mb-4" @click="batchInput.click()">
-          <p class="text-sm mb-1">选择或拖拽批量图片</p>
-          <p class="text-xs text-gray-500">适合批量压缩、统一加水印后逐张下载</p>
-          <input type="file" accept="image/*" multiple @change="handleBatchUpload" class="hidden" ref="batchInput"/>
-        </div>
-        <input v-model="batchMark" type="text" value="IPlay" class="w-full border rounded px-3 py-2 mb-3" placeholder="水印文字"/>
-        <label class="text-sm text-gray-600 block mb-3">压缩质量: {{ batchQuality }}</label>
-        <input v-model.number="batchQuality" type="range" min="0.3" max="0.95" step="0.05" class="w-full mb-3"/>
-        <button @click="processBatch" class="btn btn-primary w-full">
-          <i class="fa fa-magic mr-1"></i>开始批处理
-        </button>
-      </div>
+    <div class="workflow-grid">
 
-      <!-- 拼图海报 -->
-      <div class="border rounded-lg p-6">
-        <h3 class="font-bold mb-4 flex items-center gap-2">
-          <i class="fa fa-th-large"></i>拼图海报
+      <!-- 批量压缩 -->
+      <div class="workflow-card">
+        <h3 class="workflow-card__title">
+          <i class="fa fa-compress" style="color:var(--color-primary)"></i>批量压缩
         </h3>
-        <div class="upload-box mb-4" @click="collageInput.click()">
-          <p class="text-sm mb-1">选择或拖拽拼图图片</p>
-          <p class="text-xs text-gray-500">2-9 张图片适合制作封面和海报</p>
-          <input type="file" accept="image/*" multiple @change="handleCollageUpload" class="hidden" ref="collageInput"/>
+        <div class="upload-box" @click="batchCompressInput.click()">
+          <i class="fa fa-folder-open upload-icon"></i>
+          <p>点击选择多张图片</p>
+          <p class="upload-hint">支持 JPG / PNG / WEBP</p>
+          <input type="file" accept="image/*" multiple @change="setBatchCompress" style="display:none" ref="batchCompressInput" />
         </div>
-        <div class="grid grid-cols-2 gap-3 mb-3">
-          <select v-model="collageGrid" class="border rounded px-3 py-2">
-            <option value="2">2x2</option>
-            <option value="3">3x3</option>
-          </select>
-          <input v-model="collageTitle" type="text" value="IPlay Collage" class="border rounded px-3 py-2" placeholder="海报标题"/>
-        </div>
-        <div class="flex gap-3">
-          <button @click="renderCollage" class="btn btn-secondary flex-1">
-            <i class="fa fa-picture-o mr-1"></i>生成
-          </button>
-          <button v-if="collageResult" @click="downloadCollage" class="btn btn-secondary flex-1">
-            <i class="fa fa-download mr-1"></i>下载
+        <p v-if="batchCompressFiles.length" class="workflow-file-count">
+          已选 {{ batchCompressFiles.length }} 张
+        </p>
+        <div class="workflow-form">
+          <div class="form-group">
+            <label class="form-label">压缩质量: {{ compressQuality }}%</label>
+            <input v-model.number="compressQuality" type="range" min="10" max="100" />
+          </div>
+          <button @click="runBatchCompress" class="btn btn-primary btn--full" :disabled="!batchCompressFiles.length">
+            <i class="fa fa-play"></i> 开始压缩
           </button>
         </div>
       </div>
-    </div>
 
-    <!-- 图像与 PDF 工作流 -->
-    <div class="mt-6 grid md:grid-cols-2 gap-6">
-      <div class="border rounded-lg p-6">
-        <h3 class="font-bold mb-4">
-          <i class="fa fa-file-image-o mr-1"></i>图像转 PDF
+      <!-- 批量水印 -->
+      <div class="workflow-card">
+        <h3 class="workflow-card__title">
+          <i class="fa fa-copyright" style="color:var(--color-primary)"></i>批量水印
         </h3>
-        <div class="upload-box mb-4" @click="imagesToPdfInput.click()">
-          <p class="text-sm mb-1">选择或拖拽图片</p>
-          <p class="text-xs text-gray-500">用于整理成 PDF</p>
-          <input type="file" accept="image/*" multiple @change="handleImagesToConvert" class="hidden" ref="imagesToPdfInput"/>
+        <div class="upload-box" @click="batchWatermarkInput.click()">
+          <i class="fa fa-folder-open upload-icon"></i>
+          <p>点击选择多张图片</p>
+          <p class="upload-hint">支持 JPG / PNG / WEBP</p>
+          <input type="file" accept="image/*" multiple @change="setBatchWatermark" style="display:none" ref="batchWatermarkInput" />
         </div>
-        <button @click="convertImagesToPdf" class="btn btn-primary w-full">
-          <i class="fa fa-download mr-1"></i>转为 PDF
-        </button>
+        <p v-if="batchWatermarkFiles.length" class="workflow-file-count">
+          已选 {{ batchWatermarkFiles.length }} 张
+        </p>
+        <div class="workflow-form">
+          <div class="form-group">
+            <label class="form-label">水印文字</label>
+            <input v-model="watermarkText" class="form-control" placeholder="请输入水印文字" />
+          </div>
+          <button @click="runBatchWatermark" class="btn btn-primary btn--full" :disabled="!batchWatermarkFiles.length || !watermarkText">
+            <i class="fa fa-play"></i> 开始打水印
+          </button>
+        </div>
       </div>
 
-      <div class="border rounded-lg p-6">
-        <h3 class="font-bold mb-4">
-          <i class="fa fa-file-pdf-o mr-1"></i>PDF 转图像
+      <!-- 图片拼图 -->
+      <div class="workflow-card">
+        <h3 class="workflow-card__title">
+          <i class="fa fa-th" style="color:var(--color-primary)"></i>图片拼图
         </h3>
-        <div class="upload-box mb-4" @click="pdfToImageInput.click()">
-          <p class="text-sm mb-1">选择或拖拽 PDF</p>
-          <p class="text-xs text-gray-500">用于拆分导出图片</p>
-          <input type="file" accept="application/pdf" @change="handlePdfToConvert" class="hidden" ref="pdfToImageInput"/>
+        <div class="upload-box" @click="collageInput.click()">
+          <i class="fa fa-folder-open upload-icon"></i>
+          <p>点击选择多张图片</p>
+          <p class="upload-hint">最少 2 张，最多 9 张</p>
+          <input type="file" accept="image/*" multiple @change="setCollage" style="display:none" ref="collageInput" />
         </div>
-        <button @click="convertPdfToImages" class="btn btn-primary w-full">
-          <i class="fa fa-download mr-1"></i>转为图片
-        </button>
+        <p v-if="collageFiles.length" class="workflow-file-count">
+          已选 {{ collageFiles.length }} 张
+        </p>
+        <div class="workflow-form">
+          <div class="form-group">
+            <label class="form-label">排列方式</label>
+            <select v-model="collageLayout" class="form-control">
+              <option value="grid">网格</option>
+              <option value="horizontal">横向</option>
+              <option value="vertical">纵向</option>
+            </select>
+          </div>
+          <button @click="runCollage" class="btn btn-primary btn--full" :disabled="collageFiles.length < 2">
+            <i class="fa fa-play"></i> 生成拼图
+          </button>
+        </div>
+      </div>
+
+      <!-- 图片转 PDF -->
+      <div class="workflow-card">
+        <h3 class="workflow-card__title">
+          <i class="fa fa-file-pdf-o" style="color:var(--color-primary)"></i>图片 → PDF
+        </h3>
+        <div class="upload-box" @click="pdfInput.click()">
+          <i class="fa fa-folder-open upload-icon"></i>
+          <p>点击选择多张图片</p>
+          <p class="upload-hint">按选择顺序合并为 PDF</p>
+          <input type="file" accept="image/*" multiple @change="setPdfImages" style="display:none" ref="pdfInput" />
+        </div>
+        <p v-if="pdfImages.length" class="workflow-file-count">
+          已选 {{ pdfImages.length }} 张
+        </p>
+        <div class="workflow-form">
+          <div class="form-group">
+            <label class="form-label">页面尺寸</label>
+            <select v-model="pdfPageSize" class="form-control">
+              <option value="A4">A4</option>
+              <option value="A3">A3</option>
+              <option value="fit">适应图片</option>
+            </select>
+          </div>
+          <button @click="runImagesToPdf" class="btn btn-primary btn--full" :disabled="!pdfImages.length">
+            <i class="fa fa-play"></i> 生成 PDF
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -86,61 +119,33 @@
 <script setup>
 import { ref } from 'vue'
 
-const batchInput = ref(null)
+const batchCompressInput = ref(null)
+const batchCompressFiles = ref([])
+const compressQuality = ref(75)
+
+const batchWatermarkInput = ref(null)
+const batchWatermarkFiles = ref([])
+const watermarkText = ref('')
+
 const collageInput = ref(null)
-const imagesToPdfInput = ref(null)
-const pdfToImageInput = ref(null)
+const collageFiles = ref([])
+const collageLayout = ref('grid')
 
-const batchMark = ref('IPlay')
-const batchQuality = ref(0.75)
-const collageGrid = ref('2')
-const collageTitle = ref('IPlay Collage')
-const collageResult = ref(null)
+const pdfInput = ref(null)
+const pdfImages = ref([])
+const pdfPageSize = ref('A4')
 
-const handleBatchUpload = (event) => {
-  const files = Array.from(event.target.files)
-  console.log(`选择了 ${files.length} 张图片进行批处理`)
-}
+const setBatchCompress = (e) => { batchCompressFiles.value = Array.from(e.target.files) }
+const setBatchWatermark = (e) => { batchWatermarkFiles.value = Array.from(e.target.files) }
+const setCollage = (e) => { collageFiles.value = Array.from(e.target.files) }
+const setPdfImages = (e) => { pdfImages.value = Array.from(e.target.files) }
 
-const processBatch = () => {
-  alert('批处理功能开发中...')
-}
-
-const handleCollageUpload = (event) => {
-  const files = Array.from(event.target.files)
-  console.log(`选择了 ${files.length} 张图片用于拼图`)
-}
-
-const renderCollage = () => {
-  alert('拼图生成功能开发中...')
-  collageResult.value = true
-}
-
-const downloadCollage = () => {
-  alert('拼图下载功能开发中...')
-}
-
-const handleImagesToConvert = (event) => {
-  const files = Array.from(event.target.files)
-  console.log(`选择了 ${files.length} 张图片用于转 PDF`)
-}
-
-const convertImagesToPdf = () => {
-  alert('图像转 PDF 功能开发中...')
-}
-
-const handlePdfToConvert = (event) => {
-  const file = event.target.files[0]
-  console.log(`选择了 PDF 文件：${file?.name}`)
-}
-
-const convertPdfToImages = () => {
-  alert('PDF 转图像功能开发中...')
-}
+const runBatchCompress = () => alert('批量压缩功能开发中...')
+const runBatchWatermark = () => alert('批量水印功能开发中...')
+const runCollage = () => alert('拼图功能开发中...')
+const runImagesToPdf = () => alert('图片转PDF功能开发中...')
 </script>
 
 <style scoped>
-.page-container {
-  padding: 32px 20px;
-}
+.workflow-file-count { font-size: var(--font-sm); color: var(--color-primary); margin: 8px 0; }
 </style>
