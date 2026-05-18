@@ -6,15 +6,15 @@
     </div>
     <nav class="sidebar-menu">
       <ul>
-        <li><a href="#">图片信息</a></li>
-        <li><a href="#">图片编辑</a></li>
-        <li><a href="#">AI 去水印</a></li>
-        <li><a href="#">AI 换脸</a></li>
-        <li><a href="#">人像与创作</a></li>
-        <li><a href="#">修复与增强</a></li>
-        <li><a href="#">识别与隐私</a></li>
-        <li><a href="#">批量与输出</a></li>
-        <li><a href="#">高级玩法</a></li>
+        <li><RouterLink to="/info">图片信息</RouterLink></li>
+        <li><RouterLink to="/tools">图片编辑</RouterLink></li>
+        <li><RouterLink to="/image">AI 去水印</RouterLink></li>
+        <li><RouterLink to="/face">AI 换脸</RouterLink></li>
+        <li><RouterLink to="/portrait">人像与创作</RouterLink></li>
+        <li><RouterLink to="/enhance">修复与增强</RouterLink></li>
+        <li><RouterLink to="/privacy">识别与隐私</RouterLink></li>
+        <li><RouterLink to="/workflow">批量与输出</RouterLink></li>
+        <li><RouterLink to="/advanced">高级玩法</RouterLink></li>
       </ul>
     </nav>
     <footer class="sidebar-footer">
@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-// 纯 JS，无依赖
+import { RouterLink } from 'vue-router';
 </script>
 
 <style scoped>
@@ -75,6 +75,12 @@
 .sidebar-menu a:hover {
   background: #f3f4f6;
   border-left: 4px solid #4f46e5;
+}
+.sidebar-menu a.router-link-active {
+  background: #f3f4f6;
+  border-left: 4px solid #6366f1;
+  color: #6366f1;
+  font-weight: 500;
 }
 .sidebar-footer {
   padding: 16px;
