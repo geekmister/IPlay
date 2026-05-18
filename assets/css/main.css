@@ -1,3 +1,14 @@
+@import "tailwindcss";
+@source "../pages/**/*.vue";
+@source "../components/**/*.vue";
+@source "../app.vue";
+@source "../public/js/app.js";
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: #6366f1;
+}
+
 /* ── Global reset to match original ── */
 html {
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
@@ -31,14 +42,14 @@ html.dark body {
 }
 
 /* Hide elements during SSR → client hydration to avoid visual mismatch
-   Elements marked with `data-cloak` will be hidden until client JS removes the attribute */
-[data-cloak] {
+   Elements marked with `v-cloak` or `data-cloak` will be hidden until client JS removes the attribute */
+[v-cloak], [data-cloak] {
   opacity: 0;
   pointer-events: none;
   user-select: none;
 }
 
-[data-cloak].no-hide {
+[v-cloak].no-hide, [data-cloak].no-hide {
   opacity: 1;
   pointer-events: auto;
   user-select: auto;

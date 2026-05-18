@@ -1,9 +1,10 @@
 import { defineNuxtConfig } from 'nuxt/config';
+import { resolve } from 'node:path';
 
 export default defineNuxtConfig({
   ssr: true,
-  ignore: ['IPlay-backup/**'],
-  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/i18n'],
+  ignore: ['IPlay-backup/**', 'IPlay-backup'],
+  modules: ['@nuxtjs/i18n', '@nuxt/ui'],
   i18n: {
     defaultLocale: 'zh',
     strategy: 'prefix_except_default',
@@ -25,6 +26,25 @@ export default defineNuxtConfig({
     vueI18n: './i18n.config.ts',
   },
   css: ['@/assets/css/main.css'],
+  vite: {
+    resolve: {
+      alias: {
+        '#imports': resolve(process.cwd(), '.nuxt/imports.mjs'),
+      },
+    },
+    ssr: {
+      noExternal: ['@nuxt/ui', '@nuxt/ui/composables', '@vueuse/core'],
+    },
+    optimizeDeps: {
+      include: [
+        '@nuxt/ui',
+        '@nuxt/ui/composables',
+        '@vue/devtools-core',
+        '@vue/devtools-kit',
+        '@vueuse/core',
+      ],
+    },
+  },
   app: {
     head: {
       htmlAttrs: {

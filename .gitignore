@@ -83,8 +83,6 @@ out
 dist
 .output
 
-# Project backups (kept outside repo)
-IPlay-backup/
 
 # Gatsby files
 .cache/
@@ -147,3 +145,4 @@ dist
 build
 test-results/
 playwright-report/
+.DS_Store

@@ -36,7 +36,7 @@ watch(locale, (nextLocale) => {
   <div class="min-h-screen">
     <!-- 导航 -->
     <nav
-      data-cloak
+      v-cloak
       class="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-sm px-4 py-3"
     >
       <div class="max-w-6xl mx-auto flex justify-between items-center">
@@ -46,7 +46,7 @@ watch(locale, (nextLocale) => {
         <div class="flex items-center gap-2">
           <a
             id="nav_content_center"
-            data-cloak
+            v-cloak
             href="javascript:void(0)"
             class="btn btn-secondary text-sm inline-flex items-center"
           >
@@ -71,7 +71,7 @@ watch(locale, (nextLocale) => {
       </div>
     </nav>
 
-    <main data-cloak class="max-w-6xl mx-auto px-4 py-10">
+    <main v-cloak class="max-w-6xl mx-auto px-4 py-10">
       <!-- 标题 -->
       <div class="text-center mb-10">
         <h1 class="text-[clamp(1.7rem,4vw,2.8rem)] font-bold mb-3">{{ $t('title') }}</h1>

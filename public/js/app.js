@@ -154,10 +154,13 @@ function syncContentCenterLinkTheme() {
 }
 
 // 主题切换
-document.getElementById('toggleTheme').onclick = () => {
-  document.documentElement.classList.toggle('dark');
-  syncContentCenterLinkTheme();
-};
+const toggleThemeEl = document.getElementById('toggleTheme');
+if (toggleThemeEl) {
+  toggleThemeEl.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    syncContentCenterLinkTheme();
+  });
+}
 syncContentCenterLinkTheme();
 
 const MESSAGE_TRANSLATIONS = {
@@ -470,22 +473,26 @@ function showMainPane(tabKey, activeButton, options = {}) {
 
 // 选项卡切换
 document.querySelectorAll('.tab-btn').forEach((b) => {
-  b.onclick = () => {
+  if (!b) return;
+  b.addEventListener('click', () => {
     const tabKey = b.getAttribute('tab');
     console.log(`[Tab Click] tab-btn clicked: ${tabKey}`);
     showMainPane(tabKey, b, { toolsMode: 'basic' });
-  };
+  });
 });
 
-document.getElementById('tab_adv_jump').onclick = () => {
-  const target = document.getElementById('advanced_workspace');
-  showMainPane('tools', document.getElementById('tab_adv_jump'), { toolsMode: 'advanced' });
-  if (target) {
-    setTimeout(() => {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 80);
-  }
-};
+const tabAdvJumpEl = document.getElementById('tab_adv_jump');
+if (tabAdvJumpEl) {
+  tabAdvJumpEl.addEventListener('click', () => {
+    const target = document.getElementById('advanced_workspace');
+    showMainPane('tools', tabAdvJumpEl, { toolsMode: 'advanced' });
+    if (target) {
+      setTimeout(() => {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+    }
+  });
+}
 
 function openAdvancedCategory(categoryKey, activeButton) {
   const target = document.getElementById('advanced_workspace');
@@ -4534,21 +4541,24 @@ advPdfToImg.onclick = async () => {
   );
 };
 
-// 清理 data-cloak：在 DOM 准备好后移除以允许客户端脚本修改已 SSR 渲染的节点
+// 清理 cloak 属性：在 DOM 准备好后移除以允许客户端脚本修改已 SSR 渲染的节点
 if (typeof document !== 'undefined') {
+  const cloakSelector = '[data-cloak],[v-cloak]';
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       try {
-        document.querySelectorAll('[data-cloak]').forEach((el) => el.removeAttribute('data-cloak'));
+        document.querySelectorAll(cloakSelector).forEach((el) => el.removeAttribute('data-cloak'));
+        document.querySelectorAll(cloakSelector).forEach((el) => el.removeAttribute('v-cloak'));
       } catch (e) {
-        console.warn('Failed to clear data-cloak:', e);
+        console.warn('Failed to clear cloak attributes:', e);
       }
     });
   } else {
     try {
-      document.querySelectorAll('[data-cloak]').forEach((el) => el.removeAttribute('data-cloak'));
+      document.querySelectorAll(cloakSelector).forEach((el) => el.removeAttribute('data-cloak'));
+      document.querySelectorAll(cloakSelector).forEach((el) => el.removeAttribute('v-cloak'));
     } catch (e) {
-      console.warn('Failed to clear data-cloak:', e);
+      console.warn('Failed to clear cloak attributes:', e);
     }
   }
 }
