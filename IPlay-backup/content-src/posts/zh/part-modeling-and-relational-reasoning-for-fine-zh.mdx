@@ -1,0 +1,57 @@
+---
+title: 细粒度图像识别中的部件建模与关系推理方法
+description: 围绕细粒度识别展开，讨论方法设计、评估指标与工程可用性。
+date: 2026-03-31
+lang: zh-CN
+category: 图像论文
+tags:
+  - 图像
+  - 论文
+  - 细粒度识别
+seo_keywords: 细粒度识别, 图像论文, 方法评估, 工程落地
+readTime: 6
+---
+
+# 细粒度图像识别中的部件建模与关系推理方法
+
+> 个人观点：细粒度识别对标注依赖强，弱标注方案值得重点投入。
+
+## 研究问题
+
+本文聚焦 细粒度识别 的核心问题：如何在保证效果的同时，提升可解释性、稳定性与部署可行性。
+
+## 方法框架（我的理解）
+
+1. 以任务约束定义模型边界，而不是先堆复杂结构。
+2. 把主观体验指标和客观指标同时纳入评估。
+3. 在训练阶段引入失败样本回放，降低边缘场景风险。
+
+## 评估建议
+
+- 指标不只看单点峰值，还要看波动和最差分位表现。
+- 建议增加跨数据源验证，避免只在单一数据集过拟合。
+- 报告推理时延和显存开销，方便工程团队决策。
+
+## 代表论文与链接
+
+- [FedAvg (2017)](https://arxiv.org/abs/1602.05629)
+- [InstructPix2Pix (2022)](https://arxiv.org/abs/2211.09800)
+- [MIRNet (2020)](https://arxiv.org/abs/2003.06792)
+
+## 业务落地观察
+
+细粒度识别对标注依赖强，弱标注方案值得重点投入。 在真实项目中，建议把“异常样本回放 + 指标看板 + 回滚预案”作为最小上线闭环。
+
+<div className="paper-media-grid">
+  <img src="https://dummyimage.com/1200x675/e0e7ff/1e293b&text=Visual+Overview" alt="visual overview" />
+  <video controls loop muted playsInline poster="https://dummyimage.com/1200x675/c7d2fe/111827&text=Demo+Video">
+    <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
+  </video>
+</div>
+
+<div className="pulse-line"><span></span></div>
+
+<details>
+  <summary>交互问答</summary>
+  <p>你更看重精度、速度还是可解释性？先写下你的排序，再回看文中观点。</p>
+</details>

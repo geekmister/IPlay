@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IPlay 内容中心</title>
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"/>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --line: #e2e8f0;
+    --text: #0f172a;
+    --muted: #475569;
+    --brand: #4f46e5;
+    --brand-soft: #eef2ff;
+    --brand-strong: #4338ca;
+    --topbar-bg: rgba(255, 255, 255, 0.72);
+    --crumb-bg: #ffffff;
+    --crumb-border: #cbd5e1;
+    --hero-bg: linear-gradient(135deg, #ffffff 0%, #f8fbff 42%, #eef2ff 100%);
+    --hero-border: #dbe3ff;
+  }
+  html.dark {
+    --bg: #0f172a;
+    --surface: #111827;
+    --line: #334155;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --brand: #a5b4fc;
+    --brand-soft: rgba(79, 70, 229, 0.22);
+    --brand-strong: #c7d2fe;
+    --topbar-bg: rgba(15, 23, 42, 0.75);
+    --crumb-bg: #1e293b;
+    --crumb-border: #475569;
+    --hero-bg: linear-gradient(135deg, #111827 0%, #172554 48%, #1e1b4b 100%);
+    --hero-border: #334155;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Source Han Sans SC", "Noto Sans SC", "PingFang SC", sans-serif;
+    background:
+      radial-gradient(900px 500px at -10% -10%, rgba(99, 102, 241, 0.20), transparent 60%),
+      radial-gradient(700px 420px at 110% 0%, rgba(14, 165, 233, 0.18), transparent 62%),
+      var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .page {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 34px 18px 72px;
+  }
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--topbar-bg);
+    backdrop-filter: blur(8px);
+  }
+  .topbar-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: var(--brand-strong);
+  }
+  .crumb {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--crumb-border);
+    background: var(--crumb-bg);
+  }
+  .theme-btn {
+    border: 1px solid var(--crumb-border);
+    background: var(--crumb-bg);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .hero {
+    background: var(--hero-bg);
+    border: 1px solid var(--hero-border);
+    border-radius: 22px;
+    padding: 24px;
+    box-shadow: 0 18px 42px rgba(79, 70, 229, 0.10);
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    right: -80px;
+    top: -80px;
+    width: 240px;
+    height: 240px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.28), transparent 68%);
+    pointer-events: none;
+  }
+  .hero h1 {
+    margin: 0;
+    font-size: clamp(1.5rem, 2.8vw, 2.05rem);
+  }
+  .hero p {
+    margin: 10px 0 0;
+    color: var(--muted);
+  }
+  .lang-switch {
+    margin-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid var(--crumb-border);
+    background: var(--crumb-bg);
+  }
+  .lang-switch-btn {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .lang-switch-btn.is-active {
+    background: #4f46e5;
+    color: #fff;
+  }
+  .list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 14px;
+  }
+  @media (min-width: 860px) {
+    .list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .list li {
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .list li:hover {
+    transform: translateY(-2px);
+    border-color: #c7d2fe;
+    box-shadow: 0 16px 34px rgba(79, 70, 229, 0.12);
+  }
+  .post-card {
+    position: relative;
+    overflow: hidden;
+  }
+  .post-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: linear-gradient(180deg, #6366f1, #0ea5e9);
+    opacity: .72;
+  }
+  .post-card.is-featured {
+    grid-column: 1 / -1;
+    background:
+      linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(14, 165, 233, 0.08)),
+      var(--surface);
+    border-color: #c7d2fe;
+  }
+  .post-card.is-featured .post-link {
+    padding: 20px 20px 22px 22px;
+  }
+  .post-card.is-featured .post-title {
+    font-size: 1.18rem;
+  }
+  .post-link {
+    display: block;
+    padding: 18px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .post-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .cat {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(79, 70, 229, 0.12);
+    color: var(--brand-strong);
+    font-size: .78rem;
+    font-weight: 700;
+    border: 1px solid rgba(79, 70, 229, 0.18);
+  }
+  .post-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    font-size: 1.05rem;
+  }
+  .post-title::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #6366f1, #0ea5e9);
+    flex: 0 0 auto;
+  }
+  .post-desc {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: .95rem;
+  }
+  .meta {
+    color: var(--muted);
+    font-size: .8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+    padding: 0;
+  }
+  .tags {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--crumb-border);
+    background: var(--crumb-bg);
+    border-radius: 999px;
+    padding: 3px 9px;
+    color: var(--muted);
+    font-size: .78rem;
+  }
+  .empty {
+    border: 1px dashed var(--crumb-border);
+    border-radius: 14px;
+    background: var(--topbar-bg);
+    color: var(--muted);
+    padding: 16px;
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <section class="topbar">
+      <span class="brand">IPlay · 内容中心</span>
+      <span class="topbar-actions">
+        <a class="crumb" href="../index.html">返回工具首页</a>
+        <button id="themeToggle" class="theme-btn" type="button">切换主题</button>
+      </span>
+    </section>
+    <section class="hero">
+      <h1>内容中心（MDX）</h1>
+      <p>与当前工具站风格统一的内容层，支持教程、案例和 FAQ 的持续发布。文章卡片显示分类、阅读时长与标签信息，便于检索和运营。</p>
+      <div class="lang-switch">
+        <button class="lang-switch-btn" data-lang-switch="zh" type="button">中文</button>
+        <button class="lang-switch-btn" data-lang-switch="en" type="button">English</button>
+      </div>
+    </section>
+    <ul class="list"><li class="post-card is-featured" data-lang="zh"><a class="post-link" href="./visual-semantic-alignment-for-cross-modal-retrie-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">跨模态图文检索中的视觉语义对齐机制研究</p><p class="post-desc">围绕图文检索展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./transformer-cnn-fusion-for-medical-image-segment-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">医学影像分割中 Transformer 与 CNN 融合方法研究</p><p class="post-desc">围绕医学分割展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./stable-training-strategies-for-gan-based-face-re-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">生成对抗网络在人脸修复中的稳定训练策略</p><p class="post-desc">围绕GAN 修复展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./spatiotemporal-modeling-for-remote-sensing-chang-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">遥感图像变化检测的时空特征建模方法</p><p class="post-desc">围绕遥感变化检测展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./single-image-denoising-with-frequency-domain-pri-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">结合频域先验的单图像去噪方法研究</p><p class="post-desc">围绕频域去噪展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./robust-image-classification-for-open-set-recogni-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">开集识别场景下的图像分类鲁棒性研究</p><p class="post-desc">围绕开集识别展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./real-time-image-segmentation-architectures-for-m-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">面向移动端的实时图像分割网络架构设计</p><p class="post-desc">围绕移动端分割展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./pseudo-label-quality-improvement-in-weakly-super-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">弱监督语义分割中伪标签质量提升策略研究</p><p class="post-desc">围绕弱监督分割展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./part-modeling-and-relational-reasoning-for-fine-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">细粒度图像识别中的部件建模与关系推理方法</p><p class="post-desc">围绕细粒度识别展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./neural-radiance-fields-for-3d-reconstruction-and-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">三维重建中的神经辐射场方法及改进方向</p><p class="post-desc">围绕NeRF 重建展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./multimodal-fusion-and-reasoning-in-visual-questi-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">视觉问答任务中的多模态融合与推理方法</p><p class="post-desc">围绕视觉问答展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./multi-scale-attention-for-image-super-resolution-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">多尺度注意力机制在图像超分辨率中的应用</p><p class="post-desc">围绕图像超分展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./multi-object-tracking-for-video-surveillance-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">面向视频监控的多目标跟踪算法研究与改进</p><p class="post-desc">围绕多目标跟踪展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./low-light-image-enhancement-network-design-and-e-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">面向低光场景的图像增强网络设计与性能评估</p><p class="post-desc">围绕低光增强展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./local-feature-aggregation-and-re-ranking-for-ima-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">图像检索中的局部特征聚合与重排序方法研究</p><p class="post-desc">围绕图像检索展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./lightweight-object-detection-optimization-on-edg-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">轻量化目标检测模型在边缘设备上的部署优化</p><p class="post-desc">围绕边缘检测展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./knowledge-distillation-for-image-classification-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">基于知识蒸馏的图像分类模型压缩方法研究</p><p class="post-desc">围绕模型压缩展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./joint-learning-framework-for-dehazing-and-derain-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">面向复杂天气的图像去雾与去雨联合学习框架</p><p class="post-desc">围绕复杂天气恢复展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./interpretability-of-visual-attention-in-image-ca-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">图像描述生成中视觉注意力机制的可解释性分析</p><p class="post-desc">围绕图像描述展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./impact-of-data-augmentation-on-classification-ge-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">数据增广策略对图像分类泛化能力的影响研究</p><p class="post-desc">围绕数据增广展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./image-inpainting-with-diffusion-priors-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">基于扩散先验的图像修复与缺失区域补全研究</p><p class="post-desc">围绕图像补全展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./high-fidelity-image-generation-and-controllable-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">基于扩散模型的高保真图像生成与可控编辑研究</p><p class="post-desc">围绕扩散模型展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./few-shot-learning-for-industrial-defect-detectio-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">面向工业缺陷检测的小样本学习模型研究</p><p class="post-desc">围绕工业质检展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./federated-learning-for-privacy-preserving-image-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">面向隐私保护的联邦学习图像识别方法研究</p><p class="post-desc">围绕联邦学习视觉展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./effectiveness-of-self-supervised-learning-in-rem-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">自监督学习在遥感图像分类中的有效性分析</p><p class="post-desc">围绕自监督遥感展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./contrastive-learning-methods-for-visual-represen-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">基于对比学习的图像表征学习方法与应用</p><p class="post-desc">围绕对比学习展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./content-preservation-and-style-consistency-in-st-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">图像风格迁移中的内容保持与风格一致性优化</p><p class="post-desc">围绕风格迁移展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./co-optimization-of-segmentation-and-depth-via-mu-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">多任务学习在图像分割与深度估计中的协同优化</p><p class="post-desc">围绕多任务学习展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./boundary-refinement-in-visual-saliency-detection-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">视觉显著性检测中的边界细化方法研究</p><p class="post-desc">围绕显著性检测展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card" data-lang="zh"><a class="post-link" href="./adversarial-attacks-and-defenses-in-vision-model-zh.html?lang=zh"><div class="post-head"><span class="cat">图像论文</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">对抗样本攻击与图像模型防御方法综述</p><p class="post-desc">围绕对抗鲁棒性展开，讨论方法设计、评估指标与工程可用性。</p><div class="tags"><span class="tag">#图像</span><span class="tag">#论文</span></div></a></li><li class="post-card is-featured" data-lang="en"><a class="post-link" href="./visual-semantic-alignment-for-cross-modal-retrie-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Visual-Semantic Alignment for Cross-Modal Retrieval</p><p class="post-desc">A study on cross-modal retrieval, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./transformer-cnn-fusion-for-medical-image-segment-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Transformer-CNN Fusion for Medical Image Segmentation</p><p class="post-desc">A study on medical segmentation, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./stable-training-strategies-for-gan-based-face-re-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Stable Training Strategies for GAN-based Face Restoration</p><p class="post-desc">A study on GAN face restoration, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./spatiotemporal-modeling-for-remote-sensing-chang-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Spatiotemporal Modeling for Remote Sensing Change Detection</p><p class="post-desc">A study on remote sensing change detection, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./single-image-denoising-with-frequency-domain-pri-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Single-Image Denoising with Frequency-Domain Priors</p><p class="post-desc">A study on frequency-aware denoising, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./robust-image-classification-for-open-set-recogni-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Robust Image Classification for Open-Set Recognition</p><p class="post-desc">A study on open-set recognition, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./real-time-image-segmentation-architectures-for-m-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Real-Time Image Segmentation Architectures for Mobile</p><p class="post-desc">A study on mobile segmentation, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./pseudo-label-quality-improvement-in-weakly-super-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Pseudo-Label Quality Improvement in Weakly Supervised Segmentation</p><p class="post-desc">A study on weakly supervised segmentation, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./part-modeling-and-relational-reasoning-for-fine-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Part Modeling and Relational Reasoning for Fine-Grained Recognition</p><p class="post-desc">A study on fine-grained recognition, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./neural-radiance-fields-for-3d-reconstruction-and-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Neural Radiance Fields for 3D Reconstruction and Improvements</p><p class="post-desc">A study on NeRF reconstruction, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./multimodal-fusion-and-reasoning-in-visual-questi-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Multimodal Fusion and Reasoning in Visual Question Answering</p><p class="post-desc">A study on visual question answering, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./multi-scale-attention-for-image-super-resolution-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Multi-Scale Attention for Image Super-Resolution</p><p class="post-desc">A study on super-resolution, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./multi-object-tracking-for-video-surveillance-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Multi-Object Tracking for Video Surveillance</p><p class="post-desc">A study on multi-object tracking, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./low-light-image-enhancement-network-design-and-e-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Low-Light Image Enhancement Network Design and Evaluation</p><p class="post-desc">A study on low-light enhancement, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./local-feature-aggregation-and-re-ranking-for-ima-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Local Feature Aggregation and Re-ranking for Image Retrieval</p><p class="post-desc">A study on image retrieval, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./lightweight-object-detection-optimization-on-edg-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Lightweight Object Detection Optimization on Edge Devices</p><p class="post-desc">A study on edge detection deployment, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./knowledge-distillation-for-image-classification-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Knowledge Distillation for Image Classification Compression</p><p class="post-desc">A study on model compression, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./joint-learning-framework-for-dehazing-and-derain-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Joint Learning Framework for Dehazing and Deraining</p><p class="post-desc">A study on adverse-weather restoration, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./interpretability-of-visual-attention-in-image-ca-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Interpretability of Visual Attention in Image Captioning</p><p class="post-desc">A study on image captioning, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./impact-of-data-augmentation-on-classification-ge-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Impact of Data Augmentation on Classification Generalization</p><p class="post-desc">A study on data augmentation, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./image-inpainting-with-diffusion-priors-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Image Inpainting with Diffusion Priors</p><p class="post-desc">A study on image inpainting, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./high-fidelity-image-generation-and-controllable-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">High-Fidelity Image Generation and Controllable Editing with Diffusion Models</p><p class="post-desc">A study on diffusion models, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./few-shot-learning-for-industrial-defect-detectio-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Few-Shot Learning for Industrial Defect Detection</p><p class="post-desc">A study on industrial defect detection, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./federated-learning-for-privacy-preserving-image-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Federated Learning for Privacy-Preserving Image Recognition</p><p class="post-desc">A study on federated vision learning, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./effectiveness-of-self-supervised-learning-in-rem-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Effectiveness of Self-Supervised Learning in Remote Sensing Classification</p><p class="post-desc">A study on self-supervised remote sensing, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./contrastive-learning-methods-for-visual-represen-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Contrastive Learning Methods for Visual Representation</p><p class="post-desc">A study on contrastive representation learning, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./content-preservation-and-style-consistency-in-st-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Content Preservation and Style Consistency in Style Transfer</p><p class="post-desc">A study on style transfer, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./co-optimization-of-segmentation-and-depth-via-mu-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Co-Optimization of Segmentation and Depth via Multi-Task Learning</p><p class="post-desc">A study on multi-task learning, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./boundary-refinement-in-visual-saliency-detection-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Boundary Refinement in Visual Saliency Detection</p><p class="post-desc">A study on saliency detection, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li><li class="post-card" data-lang="en"><a class="post-link" href="./adversarial-attacks-and-defenses-in-vision-model-en.html?lang=en"><div class="post-head"><span class="cat">Image Papers</span><span class="meta">2026-03-31 · 6 分钟阅读</span></div><p class="post-title">Adversarial Attacks and Defenses in Vision Models</p><p class="post-desc">A study on adversarial robustness, covering method design, evaluation metrics, and practical usability.</p><div class="tags"><span class="tag">#image</span><span class="tag">#paper</span></div></a></li></ul>
+  </main>
+  <script>
+    (function () {
+      var key = 'iplay_content_theme';
+      var langKey = 'iplay_lang';
+      var root = document.documentElement;
+      var queryTheme = new URLSearchParams(location.search).get('theme');
+      var queryLang = new URLSearchParams(location.search).get('lang');
+      var saved = localStorage.getItem(key);
+      if (queryTheme === 'dark' || queryTheme === 'light') {
+        root.classList.toggle('dark', queryTheme === 'dark');
+        localStorage.setItem(key, queryTheme);
+      } else if (saved === 'dark' || saved === 'light') {
+        root.classList.toggle('dark', saved === 'dark');
+      } else {
+        root.classList.toggle('dark', window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      }
+      var btn = document.getElementById('themeToggle');
+      var langButtons = Array.prototype.slice.call(document.querySelectorAll('[data-lang-switch]'));
+      var cards = Array.prototype.slice.call(document.querySelectorAll('.post-card[data-lang]'));
+
+      function syncCardLinks() {
+        var theme = root.classList.contains('dark') ? 'dark' : 'light';
+        var activeLang = localStorage.getItem(langKey) === 'en' ? 'en' : 'zh';
+        cards.forEach(function (card) {
+          var link = card.querySelector('a.post-link');
+          if (!link) return;
+          var url = new URL(link.getAttribute('href'), location.href);
+          url.searchParams.set('lang', activeLang);
+          url.searchParams.set('theme', theme);
+          link.setAttribute('href', './' + url.pathname.split('/').pop() + '?' + url.searchParams.toString());
+        });
+      }
+
+      function applyLang(lang) {
+        var target = lang === 'en' ? 'en' : 'zh';
+        localStorage.setItem(langKey, target);
+        langButtons.forEach(function (button) {
+          button.classList.toggle('is-active', button.getAttribute('data-lang-switch') === target);
+        });
+        cards.forEach(function (card) {
+          card.style.display = card.getAttribute('data-lang') === target ? '' : 'none';
+        });
+        syncCardLinks();
+      }
+
+      langButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          applyLang(button.getAttribute('data-lang-switch'));
+        });
+      });
+
+      var initialLang = (queryLang === 'en' || queryLang === 'zh') ? queryLang : (localStorage.getItem(langKey) === 'en' ? 'en' : 'zh');
+      applyLang(initialLang);
+
+      if (btn) {
+        btn.addEventListener('click', function () {
+          var nextIsDark = !root.classList.contains('dark');
+          root.classList.toggle('dark', nextIsDark);
+          localStorage.setItem(key, nextIsDark ? 'dark' : 'light');
+          syncCardLinks();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
