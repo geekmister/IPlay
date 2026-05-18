@@ -1,8 +1,10 @@
 @import "tailwindcss";
-@source "../pages/**/*.vue";
-@source "../components/**/*.vue";
-@source "../app.vue";
-@source "../public/js/app.js";
+@source "../../pages/**/*.vue";
+@source "../../components/**/*.vue";
+@source "../../app.vue";
+@source "../../public/js/app.js";
+@source "../../.nuxt/ui/**/*.ts";
+@source "../../node_modules/@nuxt/ui/**/*.ts";
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
