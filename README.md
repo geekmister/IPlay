@@ -218,6 +218,15 @@ GitHub Actions 工作流：.github/workflows/e2e.yml
 
 ---
 
+## 开源清单
+
+此仓库参考了以下开源仓库，感谢各位开源作者付出的知识劳动成果：
+
+|仓库名称|备注|仓库链接|
+|---|---|---|
+|lobehub|主要借鉴了App端的UI交互设计|[lobehub](https://lobehub.com/)|
+
+
 ## 许可证
 
 MIT License，详见 LICENSE。
