@@ -216,6 +216,10 @@ GitHub Actions 工作流：.github/workflows/e2e.yml
 4. 增加「常见问题」折叠区，减少重复 issue
 5. 增加发布日志入口，和 Releases 联动
 
+## 使用到的开源项目
+
+1. [fontawesome](https://fontawesome.com/)
+
 ---
 
 ## 许可证

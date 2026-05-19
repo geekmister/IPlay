@@ -45,6 +45,8 @@
     .grid-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
     .grid-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
     .sample-grid { grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); margin-top:18px; }
+    .sample-nav-grid { display:flex; flex-direction:column; gap:12px; }
+    .sample-nav-grid .main-nav-card { width:100%; }
     .panel { background: var(--surface); border:1px solid rgba(219,226,237,0.9); border-radius:22px; padding:22px; }
     .panel-light { background: var(--surface-strong); }
     .panel-sm { border-radius:18px; padding:18px; }
@@ -328,10 +330,44 @@
         </article>
         <article class="sample-card">
           <h4>导航卡片</h4>
-          <div class="main-nav-card">
-            <div class="main-nav-icon">🔍</div>
-            <div class="main-nav-title">主导航</div>
-            <div class="main-nav-desc">侧边导航卡片风格展示</div>
+          <div class="sample-nav-grid">
+            <button class="main-nav-card is-active" type="button">
+              <span class="main-nav-icon"><i class="fa fa-info-circle"></i></span>
+              <span class="main-nav-copy">
+                <span class="main-nav-title">图片信息</span>
+                <span class="main-nav-desc">查看元数据、指纹与导出信息</span>
+              </span>
+            </button>
+            <button class="main-nav-card" type="button">
+              <span class="main-nav-icon"><i class="fa fa-edit"></i></span>
+              <span class="main-nav-copy">
+                <span class="main-nav-title">图片编辑</span>
+                <span class="main-nav-desc">裁剪、压缩、旋转等基础编辑</span>
+              </span>
+            </button>
+          </div>
+          <div class="component-legend">
+            <dt>HTML 样例</dt>
+            <dd>主要结构是 `.main-nav-card` + `.main-nav-icon` + `.main-nav-copy`。</dd>
+            <dt>.main-nav-card</dt>
+            <dd>白底卡片，20px 圆角，hover 时轻微上浮。</dd>
+            <dt>.main-nav-card.is-active</dt>
+            <dd>激活态使用渐变背景与主色边框。</dd>
+            <dt>.main-nav-icon</dt>
+            <dd>固定尺寸图标容器，圆角、浅色背景、主色图标。</dd>
+            <dt>.main-nav-title</dt>
+            <dd>标题文本，700 权重。</dd>
+            <dt>.main-nav-desc</dt>
+            <dd>辅助说明文本，灰色小号字。</dd>
+          </div>
+          <div class="code">
+&lt;button class="main-nav-card is-active"&gt;
+  &lt;span class="main-nav-icon"&gt;&lt;i class="fa fa-info-circle"&gt;&lt;/i&gt;&lt;/span&gt;
+  &lt;span class="main-nav-copy"&gt;
+    &lt;span class="main-nav-title"&gt;图片信息&lt;/span&gt;
+    &lt;span class="main-nav-desc"&gt;查看元数据、指纹与导出信息&lt;/span&gt;
+  &lt;/span&gt;
+&lt;/button&gt;
           </div>
         </article>
         <article class="sample-card">
