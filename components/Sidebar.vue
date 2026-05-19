@@ -3,7 +3,7 @@
         <!-- Header -->
         <div class="sidebar-header">
             <img src="/favicon.svg" alt="logo" class="sidebar-logo" />
-            <h1 class="sidebar-title">IPlay</h1>
+            <h1 class="sidebar-title">图玩</h1>
             <button type="button" class="sidebar-toggle-btn" @click="toggleCollapse" aria-label="切换侧边栏">
                 <i :class="['fa', isCollapsed ? 'fa-chevron-right' : 'fa-chevron-left']"></i>
             </button>
