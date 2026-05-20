@@ -1,6 +1,5 @@
 <template>
     <div class="page-container">
-
         <!-- upload section -->
         <div class="upload-box" v-if="!uploadedImage" @click="fileInput.click()">
             <i class="fa fa-cloud-upload upload-icon"></i>
@@ -10,7 +9,7 @@
         <div v-else class="workspace">
             <div class="image-preview" ref="previewBox">
                 <div class="preview-transform" :style="previewTransformStyle">
-                    <img :src="uploadedImage" alt="上传图片" />
+                    <img :src="processedImage || uploadedImage" alt="上传图片" />
                     <canvas
                         ref="overlayCanvas"
                         class="overlay-canvas"
@@ -68,6 +67,46 @@
             </div>
         </div>
 
+        <div :class="['execution-logs-panel', { 'is-open': showExecutionLogs }]">
+            <div class="execution-logs-panel__header">
+                <span class="execution-logs-panel__title">执行日志</span>
+                <button type="button" class="icon-button" @click="clearExecutionLogs" title="清空日志">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </div>
+            <div class="execution-logs-panel__content">
+                <div v-if="executionLogs.length === 0" class="execution-logs-empty">
+                    暂无日志
+                </div>
+                <div v-else class="execution-logs-list">
+                    <div v-for="(log, index) in executionLogs" :key="index" :class="['execution-log-item', `log-${log.type}`]">
+                        <span class="log-time">{{ log.time }}</span>
+                        <span class="log-message">{{ log.message }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="config-dialog-mask" v-if="showConfigDialog" @click="closeConfigDialog"></div>
+        <div :class="['config-dialog', { 'is-open': showConfigDialog }]">
+            <div class="config-dialog__header">
+                <div>
+                    <div class="config-dialog__title">COS 配置</div>
+                    <div class="config-dialog__subtitle">用于上传原图和遮罩到 COS</div>
+                </div>
+                <button type="button" class="icon-button" @click="closeConfigDialog">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="config-fields">
+                <label><span>ServiceId</span><input v-model="serviceId" placeholder="服务 ID，例如 x009gmgp8p" /></label>
+                <label><span>Bucket</span><input v-model="cosBucket" placeholder="COS 桶名（例如 bucket-APPID）" /></label>
+                <label><span>Region</span><input v-model="cosRegion" placeholder="COS 存储桶地域，例如 ap-beijing" /></label>
+                <label><span>SecretId</span><input v-model="cosSecretId" placeholder="COS SecretId" /></label>
+                <label><span>SecretKey</span><input v-model="cosSecretKey" placeholder="COS SecretKey" type="password" /></label>
+            </div>
+        </div>
+
         <input
             type="file"
             accept="image/*"
@@ -108,6 +147,16 @@
             <div class="operation-group operation-group--tools">
                 <button
                     type="button"
+                    class="btn tool-btn log-toggle-btn"
+                    :class="{ 'is-active': showExecutionLogs }"
+                    @click="toggleExecutionLogs"
+                    title="展开/收起执行日志"
+                >
+                    <i class="fa fa-list"></i>
+                    {{ showExecutionLogs ? '隐藏' : '显示' }}日志
+                </button>
+                <button
+                    type="button"
                     class="btn tool-btn brush-tool-btn"
                     :class="{ 'is-active': activeTool === 'brush' }"
                     @click="selectMode('brush')"
@@ -145,6 +194,12 @@
                 </button>
             </div>
 
+            <div class="operation-group operation-group--settings">
+                <button type="button" class="btn btn-outline" @click="openConfigDialog('cos')">
+                    <i class="fa fa-cloud"></i>
+                    COS 配置
+                </button>
+            </div>
             <div class="operation-group operation-group--secondary">
                 <button type="button" class="btn btn-outline" @click="fileInput.click()">
                     <i class="fa fa-repeat"></i>
@@ -164,11 +219,40 @@
 
     const uploadedImage = ref(null);
     const processedImage = ref(null);
+    const selectedFile = ref(null);
     const fileInput = ref(null);
     const previewBox = ref(null);
     const overlayCanvas = ref(null);
 
+    const cosBucket = ref('');
+    const cosRegion = ref('');
+    const cosSecretId = ref('');
+    const cosSecretKey = ref('');
+    const serviceId = ref('');
+
+    const showExecutionLogs = ref(false);
+    const executionLogs = ref([]);
+
+    const addLog = (message, type = 'info') => {
+        const now = new Date();
+        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        executionLogs.value.push({ message, type, time: timeStr });
+        if (!showExecutionLogs.value) {
+            showExecutionLogs.value = true;
+        }
+    };
+
+    const clearExecutionLogs = () => {
+        executionLogs.value = [];
+    };
+
+    const toggleExecutionLogs = () => {
+        showExecutionLogs.value = !showExecutionLogs.value;
+    };
+
     const showBrushSidebar = ref(false);
+    const showConfigDialog = ref('');
+    const configLoaded = ref(false);
     const brushSize = ref(28);
     const activeTool = ref('');
     const hasSelection = ref(false);
@@ -215,6 +299,7 @@
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
         if (!file) return;
+        selectedFile.value = file;
         const reader = new FileReader();
         reader.onload = async (e) => {
             uploadedImage.value = e.target.result;
@@ -236,9 +321,45 @@
         resetOperation();
     };
 
-    const processRemoval = () => {
-        alert('水印移除功能开发中...');
-        processedImage.value = uploadedImage.value;
+    const processRemoval = async () => {
+        try {
+            executionLogs.value = [];
+            showExecutionLogs.value = true;
+            addLog('开始处理图像...', 'info');
+            
+            if (!selectedFile.value) {
+                throw new Error('请先选择需要上传的图片');
+            }
+            if (!hasSelection.value && !frameRect.value) {
+                throw new Error('请先使用涂抹或框选标记要去除的区域');
+            }
+            
+            addLog('正在上传原图到 COS...', 'info');
+            const originalUrl = await uploadFileToCos(selectedFile.value, 'original');
+            addLog('原图上传成功', 'success');
+
+            addLog('正在生成遮罩图片...', 'info');
+            const maskBlob = await generateMaskBlob();
+            if (!maskBlob) {
+                throw new Error('未检测到可用遮罩区域');
+            }
+            const maskFile = new File([maskBlob], `mask-${Date.now()}.png`, { type: 'image/png' });
+            addLog('正在上传遮罩图片到 COS...', 'info');
+            const maskUrl = await uploadFileToCos(maskFile, 'mask');
+            addLog('遮罩图片上传成功', 'success');
+
+            if (!serviceId.value) {
+                throw new Error('请先填写 ServiceId');
+            }
+            addLog(`已使用 ServiceId: ${serviceId.value}`, 'info');
+            addLog('正在调用 veImageX 图像修复接口...', 'info');
+            const resultUrl = await callImageErase(originalUrl, maskUrl);
+            processedImage.value = resultUrl;
+            addLog('去水印成功！', 'success');
+        } catch (error) {
+            const errMsg = error.message || '处理失败，请检查配置和网络';
+            addLog(errMsg, 'error');
+        }
     };
 
     const drawStroke = (ctx, path) => {
@@ -255,6 +376,150 @@
         });
         ctx.stroke();
         ctx.restore();
+    };
+
+    const loadConfigFile = async () => {
+        if (configLoaded.value) return;
+        try {
+            const response = await fetch('/config-txt');
+            if (!response.ok) {
+                throw new Error('无法读取 config.txt');
+            }
+            const data = await response.json();
+            if (data.success && data.data) {
+                const config = data.data;
+                serviceId.value = config.ServiceId || serviceId.value;
+                cosBucket.value = config.Bucket || cosBucket.value;
+                cosRegion.value = config.Region || cosRegion.value;
+                cosSecretId.value = config.SecretId || cosSecretId.value;
+                cosSecretKey.value = config.SecretKey || cosSecretKey.value;
+                configLoaded.value = true;
+                addLog('已从 config.txt 自动加载 COS 配置', 'success');
+            } else {
+                throw new Error(data.error || 'config.txt 内容解析失败');
+            }
+        } catch (err) {
+            addLog(`config.txt 加载失败：${err.message || err}`, 'error');
+        }
+    };
+
+    const openConfigDialog = async () => {
+        showConfigDialog.value = 'cos';
+        await loadConfigFile();
+    };
+
+    const closeConfigDialog = () => {
+        showConfigDialog.value = '';
+    };
+
+    const generateMaskBlob = async () => {
+        const imageElement = previewBox.value?.querySelector('img');
+        if (!imageElement) return null;
+        const naturalWidth = imageElement.naturalWidth;
+        const naturalHeight = imageElement.naturalHeight;
+        if (!naturalWidth || !naturalHeight) return null;
+
+        const displayWidth = imageElement.clientWidth;
+        const displayHeight = imageElement.clientHeight;
+        const scaleX = naturalWidth / displayWidth;
+        const scaleY = naturalHeight / displayHeight;
+
+        const maskCanvas = document.createElement('canvas');
+        maskCanvas.width = naturalWidth;
+        maskCanvas.height = naturalHeight;
+        const ctx = maskCanvas.getContext('2d');
+        if (!ctx) return null;
+
+        // veImageX mask 规则：黑色表示保留，非黑色表示待修复
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, naturalWidth, naturalHeight);
+        ctx.strokeStyle = '#ffffff';
+        ctx.fillStyle = '#ffffff';
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        if (brushPaths.value.length || currentStroke.value.length > 1) {
+            const nextPaths = [...brushPaths.value];
+            if (currentStroke.value.length > 1) {
+                nextPaths.push({ width: brushSize.value, points: [...currentStroke.value] });
+            }
+            nextPaths.forEach((path) => {
+                if (!path.points || path.points.length < 2) return;
+                ctx.lineWidth = path.width * Math.max(scaleX, scaleY);
+                ctx.beginPath();
+                ctx.moveTo(path.points[0].x * scaleX, path.points[0].y * scaleY);
+                path.points.slice(1).forEach((point) => {
+                    ctx.lineTo(point.x * scaleX, point.y * scaleY);
+                });
+                ctx.stroke();
+                ctx.fill();
+            });
+        } else if (frameRect.value) {
+            const rect = frameRect.value;
+            ctx.fillRect(rect.x * scaleX, rect.y * scaleY, rect.w * scaleX, rect.h * scaleY);
+        } else {
+            return null;
+        }
+
+        return new Promise((resolve) => {
+            maskCanvas.toBlob((blob) => {
+                resolve(blob);
+            }, 'image/png');
+        });
+    };
+
+    const uploadFileToCos = async (file, prefix) => {
+        if (!cosBucket.value || !cosRegion.value || !cosSecretId.value || !cosSecretKey.value) {
+            throw new Error('请先填写完整 COS 配置');
+        }
+        const COS = (await import('cos-js-sdk-v5')).default;
+        const cos = new COS({ SecretId: cosSecretId.value, SecretKey: cosSecretKey.value });
+        const key = `${prefix}/${Date.now()}-${file.name}`;
+        return new Promise((resolve, reject) => {
+            cos.putObject(
+                {
+                    Bucket: cosBucket.value,
+                    Region: cosRegion.value,
+                    Key: key,
+                    Body: file,
+                },
+                (err, data) => {
+                    if (err) {
+                        reject(new Error(`COS 上传失败：${err.message || JSON.stringify(err)}`));
+                        return;
+                    }
+                    resolve(`https://${cosBucket.value}.cos.${cosRegion.value}.myqcloud.com/${encodeURIComponent(key)}`);
+                }
+            );
+        });
+    };
+
+    const callImageErase = async (imageUrl, maskUrl) => {
+        const body = {
+            ServiceId: serviceId.value,
+            StoreUri: imageUrl,
+            Model: 'eraser_model_imagex_0.1.0',
+            MaskUri: maskUrl,
+        };
+        const response = await fetch('/veimagex', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(`veImageX 请求失败：${response.status} ${text}`);
+        }
+        const result = await response.json();
+        if (result.Result?.ResUri) {
+            const host = result.ResponseMetadata?.Region === 'ap-southeast-1'
+                ? 'https://imagex.ap-southeast-1.volcengineapi.com'
+                : 'https://imagex.volcengineapi.com';
+            return `${host}/${result.Result.ResUri}`;
+        }
+        throw new Error(`veImageX 返回格式异常：${JSON.stringify(result)}`);
     };
 
     const drawFrame = (ctx, rect) => {
@@ -803,10 +1068,10 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: rgba(255, 255, 255, 0.98);
+        background: rgba(255, 255, 255, 0.96);
         border: 1px solid rgba(226, 232, 240, 0.95);
-        border-radius: 16px;
-        padding: 6px 10px;
+        border-radius: 18px;
+        padding: 8px 10px;
         box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
         z-index: 20;
     }
@@ -816,8 +1081,8 @@
         border: none;
         background: transparent;
         color: var(--color-gray-900);
-        width: 32px;
-        height: 32px;
+        min-width: 34px;
+        height: 34px;
         border-radius: 12px;
         display: inline-flex;
         align-items: center;
@@ -832,13 +1097,13 @@
     }
 
     .view-reset {
-        min-width: 60px;
-        padding: 0 8px;
+        min-width: 64px;
+        padding: 0 10px;
         font-size: 0.9rem;
         font-weight: 600;
         background: var(--color-primary-bg);
         color: var(--color-primary-dark);
-        border: none;
+        border: 1px solid rgba(99, 102, 241, 0.25);
     }
 
     .view-btn:hover,
@@ -1062,6 +1327,143 @@
         line-height: 1.5;
     }
 
+    .config-panel {
+        display: grid;
+        gap: 16px;
+        margin-top: 18px;
+        padding: 14px 0;
+    }
+
+    .config-dialog-mask {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.32);
+        z-index: 18;
+    }
+
+    .config-dialog {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(0.95);
+        width: min(560px, calc(100% - 40px));
+        max-height: 80vh;
+        overflow-y: auto;
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 30px 80px rgba(15, 23, 42, 0.18);
+        padding: 22px;
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+        z-index: 19;
+    }
+
+    .config-dialog.is-open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    .config-dialog__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .config-dialog__title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--color-gray-900);
+    }
+
+    .config-dialog__subtitle {
+        font-size: 0.9rem;
+        color: var(--color-gray-600);
+        margin-top: 4px;
+    }
+
+    .config-card {
+        display: grid;
+        gap: 12px;
+        padding: 18px 20px;
+        border-radius: 20px;
+        background: #f8fafc;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+    }
+
+    .config-card__title {
+        font-weight: 700;
+        color: var(--color-gray-900);
+        font-size: 1rem;
+    }
+
+    .config-fields {
+        display: grid;
+        gap: 10px;
+    }
+
+    .config-fields label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 0.92rem;
+        color: var(--color-gray-700);
+    }
+
+    .config-fields input {
+        height: 38px;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        border-radius: 12px;
+        padding: 0 12px;
+        background: #fff;
+        color: var(--color-gray-900);
+    }
+
+    .process-status {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        padding: 12px 16px;
+        border-radius: 16px;
+        background: rgba(59, 130, 246, 0.08);
+        color: var(--color-gray-700);
+        border: 1px solid rgba(59, 130, 246, 0.18);
+        margin-top: 14px;
+    }
+
+    .status-error {
+        color: var(--color-red-500);
+    }
+
+    .url-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 12px;
+        width: 100%;
+    }
+
+    .url-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.92rem;
+    }
+
+    .url-item span {
+        color: var(--color-gray-700);
+        font-weight: 600;
+    }
+
+    .url-item a {
+        word-break: break-all;
+        color: var(--color-primary-dark);
+    }
+
     .operation-panel {
         position: absolute;
         left: 20px;
@@ -1073,12 +1475,15 @@
         justify-content: space-between;
         align-items: center;
         gap: 12px;
-        padding: 16px 20px;
-        background: rgba(255, 255, 255, 0.96);
+        padding: 14px 20px;
+        background: rgba(255, 255, 255, 0.98);
         border: 1px solid rgba(226, 232, 240, 0.95);
-        border-radius: 24px;
-        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+        border-radius: 22px;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
         backdrop-filter: blur(10px);
+        max-width: none;
+        margin: 0;
+        pointer-events: auto;
     }
 
     .operation-group {
@@ -1090,7 +1495,7 @@
 
     .operation-group--tools {
         flex: 1 1 auto;
-        min-width: 240px;
+        min-width: 260px;
     }
 
     .operation-group--primary,
@@ -1103,7 +1508,7 @@
     .btn {
         min-width: auto;
         padding: 12px 18px;
-        border-radius: 16px;
+        border-radius: 18px;
         font-weight: 600;
         display: inline-flex;
         align-items: center;
@@ -1119,13 +1524,13 @@
         background: linear-gradient(135deg, #6366f1, #8b5cf6);
         color: #fff;
         border-color: transparent;
-        box-shadow: 0 16px 28px rgba(99, 102, 241, 0.18);
+        box-shadow: 0 14px 28px rgba(99, 102, 241, 0.18);
     }
 
     .btn.btn-secondary {
-        background: var(--color-primary-bg);
+        background: #eff3ff;
         color: var(--color-primary-dark);
-        border-color: rgba(99, 102, 241, 0.24);
+        border-color: transparent;
     }
 
     .btn.btn-danger {
@@ -1135,7 +1540,7 @@
     }
 
     .btn.btn-outline {
-        background: #f8fafc;
+        background: #fff;
         color: var(--color-gray-900);
         border-color: rgba(226, 232, 240, 0.95);
     }
@@ -1155,6 +1560,7 @@
 
     .btn:hover {
         opacity: 0.98;
+        transform: translateY(-1px);
     }
 
     .tool-size-trigger {
@@ -1162,7 +1568,7 @@
         width: 24px;
         height: 24px;
         border-radius: 50%;
-        background: #f8fafc;
+        background: #fff;
         border: 1px solid rgba(226, 232, 240, 0.95);
         color: var(--color-primary);
         align-items: center;
@@ -1173,13 +1579,117 @@
     }
 
     .tool-size-trigger:hover {
-        background: #fff;
+        background: #f8fafc;
     }
 
     .panel-btn:disabled {
         opacity: 0.6;
         cursor: not-allowed;
         box-shadow: none;
+    }
+
+    .execution-logs-panel {
+        position: fixed;
+        right: 20px;
+        bottom: calc(112px + 20px);
+        width: min(420px, calc(100% - 40px));
+        max-height: 0;
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.1);
+        transition: max-height 0.3s ease, opacity 0.3s ease;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 14;
+    }
+
+    .execution-logs-panel.is-open {
+        max-height: 320px;
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .execution-logs-panel__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.06));
+        border-bottom: 1px solid rgba(219, 226, 237, 0.95);
+        flex-shrink: 0;
+    }
+
+    .execution-logs-panel__title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--color-gray-900);
+    }
+
+    .execution-logs-panel__content {
+        padding: 0;
+        max-height: 280px;
+        overflow-y: auto;
+    }
+
+    .execution-logs-empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 80px;
+        color: var(--color-gray-500);
+        font-size: 0.9rem;
+    }
+
+    .execution-logs-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .execution-log-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 16px;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+        font-size: 0.88rem;
+        line-height: 1.5;
+    }
+
+    .execution-log-item:last-child {
+        border-bottom: none;
+    }
+
+    .execution-log-item.log-info {
+        color: var(--color-gray-700);
+        background: rgba(99, 102, 241, 0.04);
+    }
+
+    .execution-log-item.log-success {
+        color: var(--color-green-600);
+        background: rgba(16, 185, 129, 0.04);
+    }
+
+    .execution-log-item.log-error {
+        color: var(--color-red-500);
+        background: rgba(239, 68, 68, 0.04);
+    }
+
+    .log-time {
+        color: var(--color-gray-500);
+        font-weight: 600;
+        flex-shrink: 0;
+        font-size: 0.8rem;
+    }
+
+    .log-message {
+        flex: 1;
+        word-break: break-word;
+    }
+
+    .log-toggle-btn {
+        min-width: 90px;
     }
 
     .page-title,
